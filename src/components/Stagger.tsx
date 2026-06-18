@@ -15,7 +15,7 @@ type StaggerProps = {
  * Container that reveals its <StaggerItem> children strictly in order when
  * scrolled into view — a clean one-by-one cascade in DOM (reading) order.
  */
-export const Stagger = ({ children, className, gap = 0.32, delay = 0 }: StaggerProps) => (
+export const Stagger = ({ children, className, gap = 0.24, delay = 0 }: StaggerProps) => (
   <motion.div
     className={className}
     variants={{

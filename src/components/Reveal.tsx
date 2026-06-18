@@ -12,13 +12,13 @@ type RevealProps = {
 };
 
 /** Fades + lifts a single element into view once, out of a soft blur. */
-const Reveal = ({ children, delay = 0, y = 38, className }: RevealProps) => (
+const Reveal = ({ children, delay = 0, y = 26, className }: RevealProps) => (
   <motion.div
     className={className}
-    initial={{ opacity: 0, y, filter: "blur(8px)" }}
+    initial={{ opacity: 0, y, filter: "blur(6px)" }}
     whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
     viewport={{ once: true, margin: "-70px" }}
-    transition={{ duration: 0.85, delay, ease: EASE_LUX }}
+    transition={{ duration: 1.15, delay, ease: EASE_LUX }}
   >
     {children}
   </motion.div>

@@ -43,7 +43,7 @@ const Architecture = () => (
         </div>
 
         <div className="lg:col-span-8">
-          <ArchitectureLayers />
+          <ArchitectureLayers delay={1.7} />
         </div>
       </div>
     </Section>
@@ -120,7 +120,7 @@ const Architecture = () => (
         </Stagger>
 
         {/* DOX terminal panel — mirrors Home's 03 — ARCHITECTURE / DOX */}
-        <Stagger delay={0.3} className="w-full lg:w-1/2">
+        <Stagger delay={1.7} className="w-full lg:w-1/2">
           <StaggerItem>
             <div className="relative border border-gold/20 bg-obsidian/70 p-8 backdrop-blur-sm gold-grid lg:p-12">
             <h4 className="mb-6 font-serif text-xs uppercase tracking-[0.25em] text-gold">

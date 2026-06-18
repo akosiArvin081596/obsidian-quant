@@ -35,12 +35,12 @@ const LAYERS = [
   },
 ] as const;
 
-const ArchitectureLayers = () => (
+const ArchitectureLayers = ({ delay = 0 }: { delay?: number }) => (
   <motion.ol
     className="relative"
     variants={{
       hidden: {},
-      show: { transition: { staggerChildren: 0.18, delayChildren: 0.05 } },
+      show: { transition: { staggerChildren: 0.18, delayChildren: 0.05 + delay } },
     }}
     initial="hidden"
     whileInView="show"

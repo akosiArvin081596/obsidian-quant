@@ -141,7 +141,7 @@ const Strategy = () => (
         <Stagger
           className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-8"
           gap={0.15}
-          delay={0.25}
+          delay={1.95}
         >
           {STRATEGY.classes.map((c, i) => (
             <StaggerItem key={c.title} className="h-full">

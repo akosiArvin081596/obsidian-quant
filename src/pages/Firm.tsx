@@ -41,7 +41,7 @@ const Firm = () => (
           <Stagger
             className="grid grid-cols-1 gap-px overflow-hidden border border-gold/10 bg-gold/10 sm:grid-cols-2"
             gap={0.15}
-            delay={0.25}
+            delay={1.7}
           >
             {FIRM.philosophy.blocks.map((block, i) => (
               <StaggerItem key={block.title} className="h-full">

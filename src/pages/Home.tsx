@@ -9,7 +9,6 @@ import GoldRule from "../components/GoldRule";
 import AuroraRibbon from "../components/AuroraRibbon";
 import DataChart from "../components/DataChart";
 import StatCounter from "../components/StatCounter";
-import Ticker from "../components/Ticker";
 import ForgedHeadline from "../components/ForgedHeadline";
 import { Stagger, StaggerItem } from "../components/Stagger";
 import { EASE_LUX } from "../lib/motion";
@@ -82,7 +81,21 @@ const Home = () => {
         </motion.div>
       </section>
 
-      <Ticker />
+      {/* Mandate strip — a quiet institutional credential line (no ticker). */}
+      <div className="border-y border-gold/10 bg-midnight/30 px-6 py-4">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-7 gap-y-2 text-center text-[0.6rem] uppercase tracking-[0.26em] text-silver/45">
+          <span>Established {BRAND.established}</span>
+          <span className="h-1 w-1 rotate-45 bg-gold/50" aria-hidden />
+          <span>{BRAND.presence.join(" · ")}</span>
+          <span className="h-1 w-1 rotate-45 bg-gold/50" aria-hidden />
+          <span>Institutional Counterparties Only</span>
+          <span className="h-1 w-1 rotate-45 bg-gold/50" aria-hidden />
+          <span className="flex items-center gap-2 text-gold/80">
+            <span className="live-dot h-1.5 w-1.5 rounded-full bg-graph" />
+            Limited Capacity
+          </span>
+        </div>
+      </div>
 
       {/* ============ 01 — BRAND ESSENCE ============ */}
       <Section className="border-y border-gold/10 bg-midnight">
@@ -105,7 +118,7 @@ const Home = () => {
 
           <Stagger
             className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-7"
-            delay={0.25}
+            delay={1.7}
           >
             {ESSENCE.cards.map((card) => (
               <StaggerItem key={card.title} className="h-full">
@@ -157,7 +170,7 @@ const Home = () => {
             </Stagger>
           </div>
 
-          <Stagger delay={0.25}>
+          <Stagger delay={2.3}>
             <StaggerItem>
               <div className="relative border border-gold/15 bg-midnight/50 p-6 backdrop-blur-sm gold-grid">
                 <div className="mb-4 flex items-center justify-between text-[0.6rem] uppercase tracking-[0.24em] text-silver/45">
@@ -266,7 +279,7 @@ const Home = () => {
             ))}
           </Stagger>
 
-          <Stagger className="w-full lg:w-1/2" delay={0.3}>
+          <Stagger className="w-full lg:w-1/2" delay={2.4}>
             <StaggerItem>
               <div className="relative border border-gold/20 bg-obsidian/70 p-8 backdrop-blur-sm gold-grid lg:p-12">
                 <h4 className="mb-6 font-serif text-xs uppercase tracking-[0.25em] text-gold">

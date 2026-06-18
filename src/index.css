@@ -39,7 +39,15 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
-    overflow-x: hidden;
+    /* Guided scroll v2 — html is the sole scroller; firm snap, but NO
+       scroll-snap-stop (that was what blocked scroll-up before). */
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: 4.5rem;
+  }
+
+  /* Each top-level section is a snap target. */
+  main section {
+    scroll-snap-align: start;
   }
 
   body {
@@ -50,7 +58,6 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    overflow-x: hidden;
   }
 
   ::selection {

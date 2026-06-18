@@ -1,17 +1,14 @@
 import { memo } from "react";
-import { motion } from "framer-motion";
 
 import PageHero from "../components/PageHero";
 import Section from "../components/Section";
 import Eyebrow from "../components/Eyebrow";
-import Reveal from "../components/Reveal";
 import { Stagger, StaggerItem } from "../components/Stagger";
 import Button from "../components/Button";
 import GoldRule from "../components/GoldRule";
 import AuroraRibbon from "../components/AuroraRibbon";
 import HexField from "../components/HexField";
 import StrategyProcess from "../components/StrategyProcess";
-import { EASE_LUX } from "../lib/motion";
 import { STRATEGY, POSITIONING } from "../content/site";
 
 /* On-brand elaboration per capability pillar — institutional, systematic tone.
@@ -35,17 +32,23 @@ const Strategy = () => (
 
     {/* ============ CAPABILITY PILLARS ============ */}
     <Section className="border-y border-gold/10 bg-midnight">
-      <Reveal className="max-w-3xl">
-        <Eyebrow index={POSITIONING.index}>{POSITIONING.eyebrow}</Eyebrow>
-        <h2 className="mt-6 text-display text-4xl text-ghost lg:text-5xl">
-          {POSITIONING.title}
-        </h2>
-        <p className="mt-5 max-w-xl text-sm font-light leading-relaxed text-silver/60">
-          {POSITIONING.body}
-        </p>
-      </Reveal>
+      <Stagger className="max-w-3xl">
+        <StaggerItem>
+          <Eyebrow index={POSITIONING.index}>{POSITIONING.eyebrow}</Eyebrow>
+        </StaggerItem>
+        <StaggerItem>
+          <h2 className="mt-6 text-display text-4xl text-ghost lg:text-5xl">
+            {POSITIONING.title}
+          </h2>
+        </StaggerItem>
+        <StaggerItem>
+          <p className="mt-5 max-w-xl text-sm font-light leading-relaxed text-silver/60">
+            {POSITIONING.body}
+          </p>
+        </StaggerItem>
+      </Stagger>
 
-      <Stagger className="mt-16 space-y-px lg:mt-20" gap={0.18}>
+      <Stagger className="mt-16 space-y-px lg:mt-20" gap={0.18} delay={0.3}>
         {POSITIONING.pillars.map((p) => (
           <StaggerItem key={p.no}>
             <div className="group grid grid-cols-1 items-center gap-8 border-t border-gold/10 bg-obsidian/30 py-12 transition-colors duration-500 hover:bg-obsidian/60 lg:grid-cols-12 lg:gap-12 lg:py-14">
@@ -85,17 +88,25 @@ const Strategy = () => (
 
     {/* ============ PROCESS — SYSTEMATIC PIPELINE ============ */}
     <Section className="hex-bg">
-      <Reveal className="mx-auto max-w-3xl text-center">
-        <Eyebrow centered>The Pipeline</Eyebrow>
-        <h2 className="mt-6 text-display text-4xl text-ghost lg:text-6xl">
-          From structure to execution.
-        </h2>
-        <p className="mt-5 text-sm font-light leading-relaxed text-silver/60">
-          A single directional path runs from research to clearing. No step is
-          discretionary; each is the input to the next.
-        </p>
-        <GoldRule diamond className="mx-auto mt-8 w-28" />
-      </Reveal>
+      <Stagger className="mx-auto max-w-3xl text-center">
+        <StaggerItem>
+          <Eyebrow centered>The Pipeline</Eyebrow>
+        </StaggerItem>
+        <StaggerItem>
+          <h2 className="mt-6 text-display text-4xl text-ghost lg:text-6xl">
+            From structure to execution.
+          </h2>
+        </StaggerItem>
+        <StaggerItem>
+          <p className="mt-5 text-sm font-light leading-relaxed text-silver/60">
+            A single directional path runs from research to clearing. No step is
+            discretionary; each is the input to the next.
+          </p>
+        </StaggerItem>
+        <StaggerItem>
+          <GoldRule diamond className="mx-auto mt-8 w-28" />
+        </StaggerItem>
+      </Stagger>
 
       <div className="mt-20">
         <StrategyProcess />
@@ -105,21 +116,33 @@ const Strategy = () => (
     {/* ============ ASSET CLASSES ============ */}
     <Section className="border-y border-gold/10 bg-midnight">
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
-        <Reveal className="lg:col-span-4">
-          <Eyebrow>Mandate Coverage</Eyebrow>
-          <h2 className="mt-6 text-display text-4xl text-ghost lg:text-5xl">
-            One architecture, four arenas.
-          </h2>
-          <p className="mt-6 max-w-md text-sm font-light leading-relaxed text-silver/70">
-            The same systematic discipline is expressed across uncorrelated
-            return streams — each engineered to the structure of its own market.
-          </p>
-          <div className="mt-10 hidden lg:block">
-            <HexField className="max-w-[14rem] opacity-70" />
-          </div>
-        </Reveal>
+        <Stagger className="lg:col-span-4">
+          <StaggerItem>
+            <Eyebrow>Mandate Coverage</Eyebrow>
+          </StaggerItem>
+          <StaggerItem>
+            <h2 className="mt-6 text-display text-4xl text-ghost lg:text-5xl">
+              One architecture, four arenas.
+            </h2>
+          </StaggerItem>
+          <StaggerItem>
+            <p className="mt-6 max-w-md text-sm font-light leading-relaxed text-silver/70">
+              The same systematic discipline is expressed across uncorrelated
+              return streams — each engineered to the structure of its own market.
+            </p>
+          </StaggerItem>
+          <StaggerItem>
+            <div className="mt-10 hidden lg:block">
+              <HexField className="max-w-[14rem] opacity-70" />
+            </div>
+          </StaggerItem>
+        </Stagger>
 
-        <Stagger className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-8" gap={0.15}>
+        <Stagger
+          className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-8"
+          gap={0.15}
+          delay={0.25}
+        >
           {STRATEGY.classes.map((c, i) => (
             <StaggerItem key={c.title} className="h-full">
               <div className="group relative flex h-full flex-col justify-between overflow-hidden border border-gold/10 bg-obsidian/40 p-8 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-gold/30">
@@ -148,28 +171,30 @@ const Strategy = () => (
     {/* ============ CLOSING CTA ============ */}
     <section className="relative overflow-hidden border-t border-gold/10 bg-midnight px-6 py-28 text-center lg:py-36">
       <AuroraRibbon intensity={0.4} className="opacity-60" />
-      <motion.div
-        className="relative z-10 mx-auto max-w-2xl"
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, ease: EASE_LUX }}
-      >
-        <Eyebrow centered>Strategic Allocation</Eyebrow>
-        <h2 className="mt-6 text-display text-4xl text-ghost lg:text-6xl">
-          Allocate to the architecture, not the noise.
-        </h2>
-        <p className="mx-auto mt-6 max-w-lg text-sm font-light leading-relaxed text-silver/60">
-          The mandate is systematic, the capacity is finite, and access is
-          reserved for institutional counterparties. Begin secure verification
-          to open a briefing with our technical committee.
-        </p>
-        <div className="mt-10">
-          <Button to="/contact" variant="primary">
-            Request Strategic Allocation
-          </Button>
-        </div>
-      </motion.div>
+      <Stagger className="relative z-10 mx-auto max-w-2xl">
+        <StaggerItem>
+          <Eyebrow centered>Strategic Allocation</Eyebrow>
+        </StaggerItem>
+        <StaggerItem>
+          <h2 className="mt-6 text-display text-4xl text-ghost lg:text-6xl">
+            Allocate to the architecture, not the noise.
+          </h2>
+        </StaggerItem>
+        <StaggerItem>
+          <p className="mx-auto mt-6 max-w-lg text-sm font-light leading-relaxed text-silver/60">
+            The mandate is systematic, the capacity is finite, and access is
+            reserved for institutional counterparties. Begin secure verification
+            to open a briefing with our technical committee.
+          </p>
+        </StaggerItem>
+        <StaggerItem>
+          <div className="mt-10">
+            <Button to="/contact" variant="primary">
+              Request Strategic Allocation
+            </Button>
+          </div>
+        </StaggerItem>
+      </Stagger>
     </section>
   </>
 );

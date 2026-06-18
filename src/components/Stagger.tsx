@@ -1,29 +1,30 @@
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
-import { stagger, fadeUp } from "../lib/motion";
+import { fadeUp } from "../lib/motion";
 
 type StaggerProps = {
   children: ReactNode;
   className?: string;
-  /** Override the gap (seconds) between each child's entrance. */
+  /** Seconds between each child's entrance. */
   gap?: number;
+  /** Seconds to wait before the first child (e.g. to start after another column). */
+  delay?: number;
 };
 
 /**
- * Container that reveals its <StaggerItem> children sequentially when scrolled
- * into view — a clean one-by-one cascade rather than a single group fade.
+ * Container that reveals its <StaggerItem> children strictly in order when
+ * scrolled into view — a clean one-by-one cascade in DOM (reading) order.
  */
-export const Stagger = ({ children, className, gap }: StaggerProps) => (
+export const Stagger = ({ children, className, gap = 0.32, delay = 0 }: StaggerProps) => (
   <motion.div
     className={className}
-    variants={
-      gap
-        ? { hidden: {}, show: { transition: { staggerChildren: gap, delayChildren: 0.06 } } }
-        : stagger
-    }
+    variants={{
+      hidden: {},
+      show: { transition: { staggerChildren: gap, delayChildren: 0.05 + delay } },
+    }}
     initial="hidden"
     whileInView="show"
-    viewport={{ once: true, margin: "-80px" }}
+    viewport={{ once: true, margin: "-70px" }}
   >
     {children}
   </motion.div>

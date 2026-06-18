@@ -1,4 +1,4 @@
-import Reveal from "./Reveal";
+import { Stagger, StaggerItem } from "./Stagger";
 import { STRATEGY } from "../content/site";
 
 /**
@@ -16,10 +16,13 @@ const StrategyProcess = () => (
       <div className="mx-auto h-px w-[calc(100%-12.5%)] bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
     </div>
 
-    <ol className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+    <Stagger
+      className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8"
+      gap={0.18}
+    >
       {STRATEGY.process.map((step, i) => (
-        <Reveal key={step.no} delay={i * 0.1}>
-          <li className="group relative flex h-full gap-5 lg:flex-col lg:gap-0">
+        <StaggerItem key={step.no}>
+          <div className="group relative flex h-full gap-5 lg:flex-col lg:gap-0">
             {/* Mobile/tablet: vertical rail down the left of each step */}
             {i < STRATEGY.process.length - 1 && (
               <span
@@ -44,10 +47,10 @@ const StrategyProcess = () => (
                 {step.body}
               </p>
             </div>
-          </li>
-        </Reveal>
+          </div>
+        </StaggerItem>
       ))}
-    </ol>
+    </Stagger>
   </div>
 );
 

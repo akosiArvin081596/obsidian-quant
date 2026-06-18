@@ -41,13 +41,6 @@
     scroll-behavior: smooth;
   }
 
-  /* Each top-level section fills the viewport. No scroll-snap — continuous
-     scrolling is what lets the scroll-driven reveals actually scrub in. */
-  main section {
-    min-height: 100vh;
-    min-height: 100svh;
-  }
-
   body {
     background-color: var(--color-obsidian);
     color: var(--color-silver);
@@ -173,11 +166,6 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
-
-  /* Scroll-driven reveal — fallback for browsers without scroll timelines: visible. */
-  .sd-reveal {
-    opacity: 1;
-  }
 }
 
 /* ============================================================
@@ -214,37 +202,6 @@
 .animate-marquee { animation: marquee 38s linear infinite; }
 .live-dot { animation: pulse-dot 2.4s ease-in-out infinite; }
 
-/* ============================================================
-   Scroll-driven reveal — the scroll position IS the animation.
-   Browsers with scroll timelines (Chromium/Firefox) scrub the
-   reveal as each element rises through the viewport; others show it.
-   ============================================================ */
-@keyframes sd-rise {
-  from { opacity: 0; transform: translateY(46px); filter: blur(8px); }
-  to   { opacity: 1; transform: translateY(0);    filter: blur(0);  }
-}
-
-@supports (animation-timeline: view()) {
-  .sd-reveal {
-    opacity: 0;
-    animation: sd-rise linear both;
-    animation-timeline: view();
-    /* Each item's reveal window is pushed later by its order (--sd-i),
-       so a group reveals left-to-right / top-to-bottom as you scroll. */
-    animation-range: entry calc(3% + var(--sd-i, 0) * 6%)
-      cover calc(34% + var(--sd-i, 0) * 6%);
-  }
-
-  /* Order index for items inside a <Stagger> (DOM order = reading order). */
-  .sd-stagger > *:nth-child(1) { --sd-i: 0; }
-  .sd-stagger > *:nth-child(2) { --sd-i: 1; }
-  .sd-stagger > *:nth-child(3) { --sd-i: 2; }
-  .sd-stagger > *:nth-child(4) { --sd-i: 3; }
-  .sd-stagger > *:nth-child(5) { --sd-i: 4; }
-  .sd-stagger > *:nth-child(6) { --sd-i: 5; }
-  .sd-stagger > *:nth-child(n + 7) { --sd-i: 6; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -253,11 +210,5 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
-  }
-  .sd-reveal {
-    opacity: 1 !important;
-    transform: none !important;
-    filter: none !important;
-    animation: none !important;
   }
 }

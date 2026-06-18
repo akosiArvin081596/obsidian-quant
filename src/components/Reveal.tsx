@@ -1,27 +1,21 @@
-import { motion } from "framer-motion";
 import type { ReactNode } from "react";
-import { EASE_LUX } from "../lib/motion";
+import { cn } from "../lib/cn";
 
 type RevealProps = {
   children: ReactNode;
-  /** Seconds to delay the entrance — useful for sequencing. */
+  /** Accepted for compatibility — the reveal is now scroll-driven. */
   delay?: number;
-  /** Vertical travel distance in px. */
   y?: number;
   className?: string;
 };
 
-/** Fades + lifts a single element into view once, out of a soft blur. */
-const Reveal = ({ children, delay = 0, y = 26, className }: RevealProps) => (
-  <motion.div
-    className={className}
-    initial={{ opacity: 0, y, filter: "blur(6px)" }}
-    whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-    viewport={{ once: true, margin: "-70px" }}
-    transition={{ duration: 1.15, delay, ease: EASE_LUX }}
-  >
-    {children}
-  </motion.div>
+/**
+ * Scroll-driven reveal: the element rises out of a blur tied to its position
+ * as it travels up through the viewport (see `.sd-reveal` in index.css).
+ * The scroll IS the animation — it never plays on its own.
+ */
+const Reveal = ({ children, className }: RevealProps) => (
+  <div className={cn("sd-reveal", className)}>{children}</div>
 );
 
 export default Reveal;

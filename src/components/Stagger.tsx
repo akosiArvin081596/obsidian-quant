@@ -1,33 +1,21 @@
-import { motion } from "framer-motion";
 import type { ReactNode } from "react";
-import { fadeUp } from "../lib/motion";
+import { cn } from "../lib/cn";
 
 type StaggerProps = {
   children: ReactNode;
   className?: string;
-  /** Seconds between each child's entrance. */
+  /** Accepted for compatibility — reveals are now scroll-driven, in DOM order. */
   gap?: number;
-  /** Seconds to wait before the first child (e.g. to start after another column). */
   delay?: number;
 };
 
 /**
- * Container that reveals its <StaggerItem> children strictly in order when
- * scrolled into view — a clean one-by-one cascade in DOM (reading) order.
+ * Layout container for a group of scroll-driven items. It keeps its grid/flex
+ * classes; each <StaggerItem> reveals individually, tied to scroll, as it
+ * rises into view — naturally cascading top-to-bottom by position.
  */
-export const Stagger = ({ children, className, gap = 0.24, delay = 0 }: StaggerProps) => (
-  <motion.div
-    className={className}
-    variants={{
-      hidden: {},
-      show: { transition: { staggerChildren: gap, delayChildren: 0.05 + delay } },
-    }}
-    initial="hidden"
-    whileInView="show"
-    viewport={{ once: true, margin: "-70px" }}
-  >
-    {children}
-  </motion.div>
+export const Stagger = ({ children, className }: StaggerProps) => (
+  <div className={cn("sd-stagger", className)}>{children}</div>
 );
 
 export const StaggerItem = ({
@@ -36,8 +24,4 @@ export const StaggerItem = ({
 }: {
   children: ReactNode;
   className?: string;
-}) => (
-  <motion.div className={className} variants={fadeUp}>
-    {children}
-  </motion.div>
-);
+}) => <div className={cn("sd-reveal", className)}>{children}</div>;

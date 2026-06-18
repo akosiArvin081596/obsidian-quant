@@ -1,0 +1,176 @@
+import { memo } from "react";
+import { motion } from "framer-motion";
+
+import PageHero from "../components/PageHero";
+import Section from "../components/Section";
+import Eyebrow from "../components/Eyebrow";
+import Reveal from "../components/Reveal";
+import Button from "../components/Button";
+import GoldRule from "../components/GoldRule";
+import AuroraRibbon from "../components/AuroraRibbon";
+import HexField from "../components/HexField";
+import StrategyProcess from "../components/StrategyProcess";
+import { EASE_LUX } from "../lib/motion";
+import { STRATEGY, POSITIONING } from "../content/site";
+
+/* On-brand elaboration per capability pillar — institutional, systematic tone.
+   Keyed to POSITIONING.pillars[].no so copy stays anchored to the source. */
+const PILLAR_DETAIL: Record<string, string> = {
+  "01":
+    "Research is treated as an engineering discipline: every hypothesis is falsifiable, every signal carries a provenance, and conviction is earned only through reproducible evidence across regimes.",
+  "02":
+    "Allocation is a control problem, not a forecast. Exposures are continuously rebalanced against live risk vectors so the portfolio inherits the discipline of the model, never the mood of the desk.",
+  "03":
+    "Unstructured inputs — flows, microstructure, alternative telemetry — are normalised into a single decision surface, compressing the distance between observation and capital placement.",
+};
+
+const Strategy = () => (
+  <>
+    <PageHero
+      eyebrow={STRATEGY.hero.eyebrow}
+      title={STRATEGY.hero.title}
+      body={STRATEGY.hero.body}
+    />
+
+    {/* ============ CAPABILITY PILLARS ============ */}
+    <Section className="border-y border-gold/10 bg-midnight">
+      <Reveal className="max-w-3xl">
+        <Eyebrow index={POSITIONING.index}>{POSITIONING.eyebrow}</Eyebrow>
+        <h2 className="mt-6 text-display text-4xl text-ghost lg:text-5xl">
+          {POSITIONING.title}
+        </h2>
+        <p className="mt-5 max-w-xl text-sm font-light leading-relaxed text-silver/60">
+          {POSITIONING.body}
+        </p>
+      </Reveal>
+
+      <div className="mt-16 space-y-px lg:mt-20">
+        {POSITIONING.pillars.map((p, i) => (
+          <Reveal key={p.no} delay={i * 0.08}>
+            <div className="group grid grid-cols-1 items-center gap-8 border-t border-gold/10 bg-obsidian/30 py-12 transition-colors duration-500 hover:bg-obsidian/60 lg:grid-cols-12 lg:gap-12 lg:py-14">
+              {/* Big serif index */}
+              <div className="lg:col-span-2">
+                <div className="font-serif text-6xl leading-none text-gold-gradient lg:text-7xl">
+                  {p.no}
+                </div>
+                <div className="mt-4 flex items-center gap-3 text-[0.6rem] uppercase tracking-[0.24em] text-gold">
+                  <span className="h-px w-6 bg-gold/50" aria-hidden />
+                  {p.tag}
+                </div>
+              </div>
+
+              {/* Title */}
+              <div className="lg:col-span-4">
+                <h3 className="text-display text-3xl text-ghost lg:text-4xl">
+                  {p.title}
+                </h3>
+              </div>
+
+              {/* Body + elaboration */}
+              <div className="lg:col-span-6">
+                <p className="text-sm font-light leading-relaxed text-silver/75">
+                  {p.body}
+                </p>
+                <p className="mt-4 text-xs font-light leading-relaxed text-silver/50">
+                  {PILLAR_DETAIL[p.no]}
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        ))}
+        <div className="border-t border-gold/10" aria-hidden />
+      </div>
+    </Section>
+
+    {/* ============ PROCESS — SYSTEMATIC PIPELINE ============ */}
+    <Section className="hex-bg">
+      <Reveal className="mx-auto max-w-3xl text-center">
+        <Eyebrow centered>The Pipeline</Eyebrow>
+        <h2 className="mt-6 text-display text-4xl text-ghost lg:text-6xl">
+          From structure to execution.
+        </h2>
+        <p className="mt-5 text-sm font-light leading-relaxed text-silver/60">
+          A single directional path runs from research to clearing. No step is
+          discretionary; each is the input to the next.
+        </p>
+        <GoldRule diamond className="mx-auto mt-8 w-28" />
+      </Reveal>
+
+      <div className="mt-20">
+        <StrategyProcess />
+      </div>
+    </Section>
+
+    {/* ============ ASSET CLASSES ============ */}
+    <Section className="border-y border-gold/10 bg-midnight">
+      <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
+        <Reveal className="lg:col-span-4">
+          <Eyebrow>Mandate Coverage</Eyebrow>
+          <h2 className="mt-6 text-display text-4xl text-ghost lg:text-5xl">
+            One architecture, four arenas.
+          </h2>
+          <p className="mt-6 max-w-md text-sm font-light leading-relaxed text-silver/70">
+            The same systematic discipline is expressed across uncorrelated
+            return streams — each engineered to the structure of its own market.
+          </p>
+          <div className="mt-10 hidden lg:block">
+            <HexField className="max-w-[14rem] opacity-70" />
+          </div>
+        </Reveal>
+
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-8">
+          {STRATEGY.classes.map((c, i) => (
+            <Reveal key={c.title} delay={i * 0.08}>
+              <div className="group relative flex h-full flex-col justify-between overflow-hidden border border-gold/10 bg-obsidian/40 p-8 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-gold/30">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="h-2 w-2 rotate-45 bg-gold transition-transform duration-500 group-hover:scale-150" />
+                    <span className="font-mono text-[0.7rem] tracking-[0.2em] text-silver/35">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+                  <h3 className="mt-6 font-serif text-2xl text-ghost">
+                    {c.title}
+                  </h3>
+                  <p className="mt-3 text-xs font-light leading-relaxed text-silver/60">
+                    {c.body}
+                  </p>
+                </div>
+                <div className="mt-8 h-px w-full bg-gradient-to-r from-gold/30 to-transparent transition-all duration-500 group-hover:from-gold/60" />
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </Section>
+
+    {/* ============ CLOSING CTA ============ */}
+    <section className="relative overflow-hidden border-t border-gold/10 bg-midnight px-6 py-28 text-center lg:py-36">
+      <AuroraRibbon intensity={0.4} className="opacity-60" />
+      <motion.div
+        className="relative z-10 mx-auto max-w-2xl"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8, ease: EASE_LUX }}
+      >
+        <Eyebrow centered>Strategic Allocation</Eyebrow>
+        <h2 className="mt-6 text-display text-4xl text-ghost lg:text-6xl">
+          Allocate to the architecture, not the noise.
+        </h2>
+        <p className="mx-auto mt-6 max-w-lg text-sm font-light leading-relaxed text-silver/60">
+          The mandate is systematic, the capacity is finite, and access is
+          reserved for institutional counterparties. Begin secure verification
+          to open a briefing with our technical committee.
+        </p>
+        <div className="mt-10">
+          <Button to="/contact" variant="primary">
+            Request Strategic Allocation
+          </Button>
+        </div>
+      </motion.div>
+    </section>
+  </>
+);
+
+export default memo(Strategy);

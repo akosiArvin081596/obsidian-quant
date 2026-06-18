@@ -1,0 +1,215 @@
+@import "tailwindcss";
+
+/* ============================================================
+   OBSIDIAN QUANT GROUP — Design Tokens
+   Palette + type locked from the brand guidelines.
+   ============================================================ */
+@theme {
+  /* Core palette */
+  --color-obsidian: #0b0d12; /* Primary background  — Pantone Black 6 C */
+  --color-midnight: #111a28; /* Secondary surfaces  — Pantone 533 C    */
+  --color-gold: #b88a4a; /* Primary accent      — Pantone 871 C    */
+  --color-warm-gold: #d4af37; /* Hover / highlight   — Pantone 124 C    */
+  --color-silver: #c9cdd3; /* Body & labels       — Pantone Cool Gray 4 C */
+  --color-ghost: #f5f5f5; /* Headlines           — Pantone 9122 C   */
+
+  /* Data-visualization */
+  --color-graph: #3fb37f; /* Up / positive / active */
+  --color-loss: #b4546a; /* Down / negative        */
+
+  /* Layering shades (derived) */
+  --color-obsidian-soft: #0e1119;
+  --color-midnight-soft: #0f1722;
+  --color-midnight-line: #1d2735;
+  --color-slate: #4a525a;
+
+  /* Type */
+  --font-serif: "Cormorant Garamond", ui-serif, Georgia, "Times New Roman", serif;
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "SFMono-Regular", "JetBrains Mono", "Roboto Mono", ui-monospace, monospace;
+
+  /* Motion */
+  --ease-lux: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-obsidian);
+    color: var(--color-silver);
+    font-family: var(--font-sans);
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--color-gold);
+    color: var(--color-obsidian);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    color: var(--color-ghost);
+    font-weight: 500;
+  }
+
+  /* Premium scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-gold) var(--color-obsidian);
+  }
+  *::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  *::-webkit-scrollbar-track {
+    background: var(--color-obsidian);
+  }
+  *::-webkit-scrollbar-thumb {
+    background: linear-gradient(var(--color-gold), #7a5c30);
+    border-radius: 0;
+    border: 2px solid var(--color-obsidian);
+  }
+
+  /* Visible focus for keyboard users only */
+  :focus-visible {
+    outline: 1px solid var(--color-gold);
+    outline-offset: 3px;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+/* ============================================================
+   Brand motifs — reusable utilities
+   ============================================================ */
+@layer utilities {
+  /* Faint hexagon weave (data-room texture) */
+  .hex-bg {
+    background-color: var(--color-obsidian);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cpath fill='%23111A28' fill-opacity='0.35' fill-rule='evenodd' d='M13.99 9.25l13 7.5v15l-13 7.5-13-7.5v-15l13-7.5zM0 0h28v4.9L13.99 13 0 4.9V0zm0 49h28v-4.9L13.99 36 0 44.1V49z'/%3E%3C/svg%3E");
+  }
+
+  /* Hairline gold grid overlay */
+  .gold-grid {
+    position: relative;
+  }
+  .gold-grid::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(184, 138, 74, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(184, 138, 74, 0.05) 1px, transparent 1px);
+    background-size: 44px 44px;
+    pointer-events: none;
+  }
+
+  /* Thin gold rule with a centred diamond marker */
+  .gold-rule {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(184, 138, 74, 0.5),
+      transparent
+    );
+  }
+
+  /* Letterpress-style serif display */
+  .text-display {
+    font-family: var(--font-serif);
+    letter-spacing: -0.01em;
+    line-height: 1.04;
+  }
+
+  /* Eyebrow / kicker label */
+  .eyebrow {
+    font-size: 0.66rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--color-gold);
+  }
+
+  /* Gold gradient text for accents */
+  .text-gold-gradient {
+    background: linear-gradient(120deg, #e8cd8a 0%, #b88a4a 45%, #8a6b30 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Soft top-vignette to seat fixed header */
+  .header-fade {
+    background: linear-gradient(
+      to bottom,
+      rgba(11, 13, 18, 0.92),
+      rgba(11, 13, 18, 0)
+    );
+  }
+
+  .glass {
+    background: rgba(17, 26, 40, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+/* ============================================================
+   Keyframes
+   ============================================================ */
+@keyframes aurora-drift {
+  0%   { transform: translate3d(-6%, 0, 0) rotate(0deg) scale(1.05); }
+  50%  { transform: translate3d(6%, -4%, 0) rotate(8deg) scale(1.15); }
+  100% { transform: translate3d(-6%, 0, 0) rotate(0deg) scale(1.05); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(63, 179, 127, 0.5); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(63, 179, 127, 0); }
+}
+
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-aurora { animation: aurora-drift 18s var(--ease-lux) infinite; }
+.animate-float { animation: float-soft 7s ease-in-out infinite; }
+.animate-marquee { animation: marquee 38s linear infinite; }
+.live-dot { animation: pulse-dot 2.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

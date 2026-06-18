@@ -1,0 +1,33 @@
+import Eyebrow from "./Eyebrow";
+import Reveal from "./Reveal";
+import AuroraRibbon from "./AuroraRibbon";
+
+type PageHeroProps = {
+  eyebrow: string;
+  index?: string;
+  title: string;
+  body?: string;
+};
+
+/** Standard sub-page header — clears the fixed nav, sets the tone. */
+const PageHero = ({ eyebrow, index, title, body }: PageHeroProps) => (
+  <section className="relative overflow-hidden px-6 pb-20 pt-40 hex-bg gold-grid lg:px-16 lg:pb-24 lg:pt-48">
+    <AuroraRibbon intensity={0.4} className="opacity-50" />
+    <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-obsidian/30 to-obsidian" />
+    <div className="relative z-10 mx-auto max-w-7xl">
+      <Reveal>
+        <Eyebrow index={index}>{eyebrow}</Eyebrow>
+        <h1 className="mt-6 max-w-4xl text-display text-5xl text-ghost lg:text-7xl">
+          {title}
+        </h1>
+        {body && (
+          <p className="mt-6 max-w-2xl text-base font-light leading-relaxed text-silver/65">
+            {body}
+          </p>
+        )}
+      </Reveal>
+    </div>
+  </section>
+);
+
+export default PageHero;

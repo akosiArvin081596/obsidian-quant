@@ -1,0 +1,320 @@
+import { memo } from "react";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+
+import Section from "../components/Section";
+import Eyebrow from "../components/Eyebrow";
+import Reveal from "../components/Reveal";
+import Button from "../components/Button";
+import GoldRule from "../components/GoldRule";
+import AuroraRibbon from "../components/AuroraRibbon";
+import DataChart from "../components/DataChart";
+import StatCounter from "../components/StatCounter";
+import Ticker from "../components/Ticker";
+import { fadeUp, stagger, EASE_LUX } from "../lib/motion";
+import {
+  BRAND,
+  ESSENCE,
+  POSITIONING,
+  ARCHITECTURE,
+  STATS,
+} from "../content/site";
+
+const Home = () => {
+  return (
+    <>
+      {/* ============ HERO ============ */}
+      <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 pt-28 hex-bg gold-grid">
+        <AuroraRibbon intensity={0.85} />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-obsidian/50 via-transparent to-obsidian" />
+
+        <motion.div
+          className="relative z-10 mx-auto max-w-4xl text-center"
+          variants={stagger}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.div variants={fadeUp} className="flex justify-center">
+            <span className="inline-flex items-center gap-2 border border-gold/25 bg-midnight/50 px-4 py-1.5 text-[0.6rem] uppercase tracking-[0.28em] text-gold backdrop-blur-sm">
+              <span className="live-dot h-1.5 w-1.5 rounded-full bg-graph" />
+              {BRAND.badge}
+            </span>
+          </motion.div>
+
+          <motion.h1
+            variants={fadeUp}
+            className="mt-8 text-display text-5xl text-ghost md:text-7xl lg:text-8xl"
+          >
+            Forged in <span className="text-gold-gradient">Precision.</span>
+          </motion.h1>
+
+          <motion.p
+            variants={fadeUp}
+            className="mx-auto mt-6 max-w-2xl font-serif text-xl font-light italic text-silver/80 md:text-2xl"
+          >
+            “{BRAND.slogan}”
+          </motion.p>
+
+          <motion.div variants={fadeUp}>
+            <GoldRule className="mx-auto my-8 w-28" />
+          </motion.div>
+
+          <motion.p
+            variants={fadeUp}
+            className="mx-auto max-w-xl text-sm font-light leading-relaxed tracking-wide text-silver/60"
+          >
+            {BRAND.intro}
+          </motion.p>
+
+          <motion.div
+            variants={fadeUp}
+            className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
+          >
+            <Button to="/strategy" variant="primary">
+              Explore Strategy
+            </Button>
+            <Button to="/contact" variant="ghost">
+              Request Access
+            </Button>
+          </motion.div>
+        </motion.div>
+
+        {/* scroll cue */}
+        <motion.div
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.4, duration: 1 }}
+        >
+          <div className="h-20 w-px bg-gradient-to-b from-gold/50 to-transparent" />
+        </motion.div>
+      </section>
+
+      <Ticker />
+
+      {/* ============ 01 — BRAND ESSENCE ============ */}
+      <Section className="border-y border-gold/10 bg-midnight">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <Reveal>
+              <Eyebrow index={ESSENCE.index}>{ESSENCE.eyebrow}</Eyebrow>
+              <h2 className="mt-6 text-display text-4xl text-ghost lg:text-5xl">
+                {ESSENCE.title}
+              </h2>
+              <p className="mt-6 max-w-md text-sm font-light leading-relaxed text-silver/70">
+                {ESSENCE.body}
+              </p>
+            </Reveal>
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-7">
+            {ESSENCE.cards.map((card, i) => (
+              <Reveal key={card.title} delay={i * 0.08}>
+                <div className="group h-full border border-gold/10 bg-obsidian/40 p-7 backdrop-blur-sm transition-colors duration-500 hover:border-gold/30">
+                  <div className="mb-4 h-1.5 w-1.5 rotate-45 bg-gold transition-transform duration-500 group-hover:scale-150" />
+                  <h3 className="font-serif text-2xl text-ghost">{card.title}</h3>
+                  <p className="mt-3 text-xs leading-relaxed text-silver/60">
+                    {card.body}
+                  </p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* ============ PERFORMANCE BAND ============ */}
+      <Section className="hex-bg" spacing="py-24 lg:py-28">
+        <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-2">
+          <Reveal>
+            <Eyebrow>Track Record</Eyebrow>
+            <h2 className="mt-6 text-display text-4xl text-ghost lg:text-5xl">
+              Systematic alpha, compounded with discipline.
+            </h2>
+            <p className="mt-6 max-w-md text-sm font-light leading-relaxed text-silver/70">
+              Net performance of the flagship systematic mandate against a
+              broad-market benchmark. Figures are illustrative of the model's
+              risk-adjusted objective.
+            </p>
+            <div className="mt-10 grid grid-cols-2 gap-8">
+              {STATS.map((s) => (
+                <StatCounter
+                  key={s.label}
+                  end={s.end}
+                  decimals={"decimals" in s ? s.decimals : 0}
+                  suffix={"suffix" in s ? s.suffix : undefined}
+                  label={s.label}
+                />
+              ))}
+            </div>
+          </Reveal>
+
+          <Reveal delay={0.15}>
+            <div className="relative border border-gold/15 bg-midnight/50 p-6 backdrop-blur-sm gold-grid">
+              <div className="mb-4 flex items-center justify-between text-[0.6rem] uppercase tracking-[0.24em] text-silver/45">
+                <span className="flex items-center gap-2">
+                  <span className="live-dot h-1.5 w-1.5 rounded-full bg-graph" />
+                  Live mandate · net of fees
+                </span>
+                <span className="font-mono text-graph">▲ 19.8%</span>
+              </div>
+              <div className="aspect-[16/8]">
+                <DataChart />
+              </div>
+              <div className="mt-4 flex items-center gap-6 text-[0.6rem] uppercase tracking-[0.2em] text-silver/45">
+                <span className="flex items-center gap-2">
+                  <span className="h-px w-5 bg-graph" /> Obsidian Alpha
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="h-px w-5 bg-gold" /> Benchmark
+                </span>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </Section>
+
+      {/* ============ 02 — POSITIONING ============ */}
+      <Section className="border-y border-gold/10 bg-midnight">
+        <Reveal className="mx-auto max-w-3xl text-center">
+          <Eyebrow index={POSITIONING.index} centered>
+            {POSITIONING.eyebrow}
+          </Eyebrow>
+          <h2 className="mt-6 text-display text-4xl text-ghost lg:text-6xl">
+            {POSITIONING.title}
+          </h2>
+          <p className="mt-5 text-sm font-light tracking-wide text-silver/60">
+            {POSITIONING.body}
+          </p>
+        </Reveal>
+
+        <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
+          {POSITIONING.pillars.map((p, i) => (
+            <Reveal key={p.no} delay={i * 0.1}>
+              <div className="group flex h-full flex-col justify-between border-t-2 border-gold bg-obsidian/50 p-8 transition-colors duration-500 hover:bg-obsidian">
+                <div>
+                  <div className="font-serif text-3xl text-gold">{p.no}</div>
+                  <h4 className="mt-5 text-lg font-medium text-ghost">
+                    {p.title}
+                  </h4>
+                  <p className="mt-3 text-xs font-light leading-relaxed text-silver/60">
+                    {p.body}
+                  </p>
+                </div>
+                <div className="mt-8 flex items-center justify-between border-t border-silver/10 pt-5 text-[0.6rem] uppercase tracking-[0.22em] text-gold">
+                  <span>{p.tag}</span>
+                  <span className="h-1 w-1 bg-gold" />
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </Section>
+
+      {/* ============ 03 — ARCHITECTURE / DOX ============ */}
+      <Section className="hex-bg">
+        <div className="flex flex-col items-center gap-16 lg:flex-row">
+          <Reveal className="w-full lg:w-1/2">
+            <Eyebrow index={ARCHITECTURE.index}>{ARCHITECTURE.eyebrow}</Eyebrow>
+            <h2 className="mt-6 text-display text-4xl leading-tight text-ghost lg:text-5xl">
+              {ARCHITECTURE.title}
+            </h2>
+            <p className="mt-6 text-sm font-light leading-relaxed text-silver/70">
+              {ARCHITECTURE.body}
+            </p>
+            <ul className="mt-8 space-y-4">
+              {ARCHITECTURE.checklist.slice(0, 3).map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <svg
+                    className="mt-0.5 h-5 w-5 flex-shrink-0 text-gold"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.6"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span className="text-xs font-medium text-silver/80">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+
+          {/* DOX terminal panel */}
+          <Reveal delay={0.15} className="w-full lg:w-1/2">
+            <div className="relative border border-gold/20 bg-obsidian/70 p-8 backdrop-blur-sm gold-grid lg:p-12">
+              <h4 className="mb-6 font-serif text-xs uppercase tracking-[0.25em] text-gold">
+                {ARCHITECTURE.dox.title}
+              </h4>
+              <div className="space-y-4 font-mono text-[11px] text-silver/50">
+                {ARCHITECTURE.dox.rows.map((row) => (
+                  <div
+                    key={row.k}
+                    className="flex items-center justify-between border-b border-silver/5 pb-2"
+                  >
+                    <span className="uppercase tracking-wider">{row.k}_</span>
+                    <span
+                      className={
+                        row.tone === "gold"
+                          ? "font-sans text-gold"
+                          : row.tone === "graph"
+                            ? "font-sans text-graph"
+                            : "font-sans text-ghost"
+                      }
+                    >
+                      {row.v}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-8 border-t border-gold/10 pt-6 text-center">
+                <span className="mb-4 block text-[0.6rem] uppercase tracking-[0.3em] text-silver/40">
+                  {ARCHITECTURE.dox.portalLabel}
+                </span>
+                <Link
+                  to="/portal"
+                  className="block w-full border border-silver/20 py-3.5 text-xs font-semibold uppercase tracking-[0.22em] text-ghost transition-colors duration-300 hover:border-gold hover:text-gold"
+                >
+                  {ARCHITECTURE.dox.cta}
+                </Link>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </Section>
+
+      {/* ============ CLOSING CTA ============ */}
+      <section className="relative overflow-hidden border-t border-gold/10 bg-midnight px-6 py-28 text-center lg:py-36">
+        <AuroraRibbon intensity={0.4} className="opacity-60" />
+        <motion.div
+          className="relative z-10 mx-auto max-w-2xl"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: EASE_LUX }}
+        >
+          <Eyebrow centered>Limited Capacity</Eyebrow>
+          <h2 className="mt-6 text-display text-4xl text-ghost lg:text-6xl">
+            Access is by mandate, not by market.
+          </h2>
+          <p className="mx-auto mt-6 max-w-lg text-sm font-light leading-relaxed text-silver/60">
+            Obsidian Quant operates a strict limited-capacity footprint for
+            institutional counterparties. Begin secure verification to schedule a
+            briefing with our technical committee.
+          </p>
+          <div className="mt-10">
+            <Button to="/contact" variant="primary">
+              Request Strategic Allocation
+            </Button>
+          </div>
+        </motion.div>
+      </section>
+    </>
+  );
+};
+
+export default memo(Home);

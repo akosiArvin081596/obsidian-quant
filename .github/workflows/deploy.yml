@@ -23,6 +23,12 @@ jobs:
           printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
-          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new \
-            -o ConnectTimeout=20 -o ServerAliveInterval=15 \
-            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "deploy"
+          for attempt in 1 2 3 4 5; do
+            ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new \
+              -o ConnectTimeout=25 -o ServerAliveInterval=15 -o ServerAliveCountMax=4 \
+              "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "deploy" && exit 0
+            echo "::warning::deploy attempt $attempt failed; retrying in 15s"
+            sleep 15
+          done
+          echo "::error::deploy failed after 5 attempts"
+          exit 1

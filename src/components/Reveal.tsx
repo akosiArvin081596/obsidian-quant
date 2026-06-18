@@ -11,14 +11,14 @@ type RevealProps = {
   className?: string;
 };
 
-/** Fades + lifts its children into view once, on scroll. */
-const Reveal = ({ children, delay = 0, y = 26, className }: RevealProps) => (
+/** Fades + lifts children into view once, resolving out of a soft blur. */
+const Reveal = ({ children, delay = 0, y = 28, className }: RevealProps) => (
   <motion.div
     className={className}
-    initial={{ opacity: 0, y }}
-    whileInView={{ opacity: 1, y: 0 }}
+    initial={{ opacity: 0, y, filter: "blur(8px)" }}
+    whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
     viewport={{ once: true, margin: "-90px" }}
-    transition={{ duration: 0.75, delay, ease: EASE_LUX }}
+    transition={{ duration: 0.8, delay, ease: EASE_LUX }}
   >
     {children}
   </motion.div>

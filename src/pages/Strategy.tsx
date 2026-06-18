@@ -5,6 +5,7 @@ import PageHero from "../components/PageHero";
 import Section from "../components/Section";
 import Eyebrow from "../components/Eyebrow";
 import Reveal from "../components/Reveal";
+import { Stagger, StaggerItem } from "../components/Stagger";
 import Button from "../components/Button";
 import GoldRule from "../components/GoldRule";
 import AuroraRibbon from "../components/AuroraRibbon";
@@ -44,9 +45,9 @@ const Strategy = () => (
         </p>
       </Reveal>
 
-      <div className="mt-16 space-y-px lg:mt-20">
-        {POSITIONING.pillars.map((p, i) => (
-          <Reveal key={p.no} delay={i * 0.08}>
+      <Stagger className="mt-16 space-y-px lg:mt-20" gap={0.18}>
+        {POSITIONING.pillars.map((p) => (
+          <StaggerItem key={p.no}>
             <div className="group grid grid-cols-1 items-center gap-8 border-t border-gold/10 bg-obsidian/30 py-12 transition-colors duration-500 hover:bg-obsidian/60 lg:grid-cols-12 lg:gap-12 lg:py-14">
               {/* Big serif index */}
               <div className="lg:col-span-2">
@@ -76,10 +77,10 @@ const Strategy = () => (
                 </p>
               </div>
             </div>
-          </Reveal>
+          </StaggerItem>
         ))}
         <div className="border-t border-gold/10" aria-hidden />
-      </div>
+      </Stagger>
     </Section>
 
     {/* ============ PROCESS — SYSTEMATIC PIPELINE ============ */}
@@ -118,9 +119,9 @@ const Strategy = () => (
           </div>
         </Reveal>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-8">
+        <Stagger className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-8" gap={0.15}>
           {STRATEGY.classes.map((c, i) => (
-            <Reveal key={c.title} delay={i * 0.08}>
+            <StaggerItem key={c.title} className="h-full">
               <div className="group relative flex h-full flex-col justify-between overflow-hidden border border-gold/10 bg-obsidian/40 p-8 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-gold/30">
                 <div>
                   <div className="flex items-center justify-between">
@@ -138,9 +139,9 @@ const Strategy = () => (
                 </div>
                 <div className="mt-8 h-px w-full bg-gradient-to-r from-gold/30 to-transparent transition-all duration-500 group-hover:from-gold/60" />
               </div>
-            </Reveal>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </div>
     </Section>
 

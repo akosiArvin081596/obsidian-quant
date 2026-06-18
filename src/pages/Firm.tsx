@@ -5,6 +5,7 @@ import PageHero from "../components/PageHero";
 import Section from "../components/Section";
 import Eyebrow from "../components/Eyebrow";
 import Reveal from "../components/Reveal";
+import { Stagger, StaggerItem } from "../components/Stagger";
 import Button from "../components/Button";
 import HexField from "../components/HexField";
 import AuroraRibbon from "../components/AuroraRibbon";
@@ -38,9 +39,12 @@ const Firm = () => (
         </div>
 
         <div className="lg:col-span-7">
-          <div className="grid grid-cols-1 gap-px overflow-hidden border border-gold/10 bg-gold/10 sm:grid-cols-2">
+          <Stagger
+            className="grid grid-cols-1 gap-px overflow-hidden border border-gold/10 bg-gold/10 sm:grid-cols-2"
+            gap={0.15}
+          >
             {FIRM.philosophy.blocks.map((block, i) => (
-              <Reveal key={block.title} delay={i * 0.1}>
+              <StaggerItem key={block.title} className="h-full">
                 <div className="group h-full bg-obsidian/70 p-8 transition-colors duration-500 hover:bg-obsidian lg:p-10">
                   <div className="flex items-baseline gap-3">
                     <span className="font-mono text-[0.66rem] tracking-[0.2em] text-gold/70">
@@ -55,9 +59,9 @@ const Firm = () => (
                     {block.body}
                   </p>
                 </div>
-              </Reveal>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </div>
     </Section>
@@ -71,9 +75,12 @@ const Firm = () => (
         </h2>
       </Reveal>
 
-      <div className="mt-16 grid grid-cols-1 border-t border-gold/15 sm:grid-cols-2">
-        {FIRM.principles.map((p, i) => (
-          <Reveal key={p.no} delay={(i % 2) * 0.1}>
+      <Stagger
+        className="mt-16 grid grid-cols-1 border-t border-gold/15 sm:grid-cols-2"
+        gap={0.15}
+      >
+        {FIRM.principles.map((p) => (
+          <StaggerItem key={p.no} className="h-full">
             <div className="group flex h-full gap-6 border-b border-gold/15 py-10 transition-colors duration-500 sm:gap-8 sm:[&:nth-child(odd)]:pr-10 sm:[&:nth-child(even)]:border-l sm:[&:nth-child(even)]:border-l-gold/15 sm:[&:nth-child(even)]:pl-10">
               <span className="font-serif text-5xl leading-none text-gold/80 transition-colors duration-500 group-hover:text-gold lg:text-6xl">
                 {p.no}
@@ -87,9 +94,9 @@ const Firm = () => (
                 </p>
               </div>
             </div>
-          </Reveal>
+          </StaggerItem>
         ))}
-      </div>
+      </Stagger>
     </Section>
 
     {/* ============ GOVERNANCE ============ */}
@@ -104,9 +111,12 @@ const Firm = () => (
         </p>
       </Reveal>
 
-      <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
+      <Stagger
+        className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3"
+        gap={0.16}
+      >
         {FIRM.governance.pillars.map((pillar, i) => (
-          <Reveal key={pillar.title} delay={i * 0.1}>
+          <StaggerItem key={pillar.title} className="h-full">
             <div className="group flex h-full flex-col justify-between border-t-2 border-gold bg-obsidian/50 p-8 transition-colors duration-500 hover:bg-obsidian">
               <div>
                 <div className="font-mono text-[0.62rem] uppercase tracking-[0.24em] text-gold/70">
@@ -124,9 +134,9 @@ const Firm = () => (
                 <span className="h-1 w-1 bg-gold" />
               </div>
             </div>
-          </Reveal>
+          </StaggerItem>
         ))}
-      </div>
+      </Stagger>
     </Section>
 
     {/* ============ CLOSING CTA ============ */}

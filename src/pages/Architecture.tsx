@@ -6,6 +6,7 @@ import PageHero from "../components/PageHero";
 import Section from "../components/Section";
 import Eyebrow from "../components/Eyebrow";
 import Reveal from "../components/Reveal";
+import { Stagger, StaggerItem } from "../components/Stagger";
 import Button from "../components/Button";
 import AuroraRibbon from "../components/AuroraRibbon";
 import ArchitectureLayers from "../components/ArchitectureLayers";
@@ -53,9 +54,12 @@ const Architecture = () => (
         </h2>
       </Reveal>
 
-      <div className="mt-14 grid grid-cols-1 gap-px overflow-hidden border border-gold/10 bg-gold/10 md:grid-cols-2">
+      <Stagger
+        className="mt-14 grid grid-cols-1 gap-px overflow-hidden border border-gold/10 bg-gold/10 md:grid-cols-2"
+        gap={0.15}
+      >
         {ARCHITECTURE.checklist.map((item, i) => (
-          <Reveal key={item} delay={(i % 2) * 0.1}>
+          <StaggerItem key={item} className="h-full">
             <div className="group flex h-full items-start gap-5 bg-obsidian/70 p-8 transition-colors duration-500 hover:bg-obsidian lg:p-10">
               <svg
                 className="mt-0.5 h-6 w-6 flex-shrink-0 text-gold transition-transform duration-500 group-hover:scale-110"
@@ -80,9 +84,9 @@ const Architecture = () => (
                 </p>
               </div>
             </div>
-          </Reveal>
+          </StaggerItem>
         ))}
-      </div>
+      </Stagger>
     </Section>
 
     {/* ============ DOX TERMINAL PANEL ============ */}

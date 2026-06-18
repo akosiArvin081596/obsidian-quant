@@ -5,6 +5,7 @@ import PageHero from "../components/PageHero";
 import Section from "../components/Section";
 import Eyebrow from "../components/Eyebrow";
 import Reveal from "../components/Reveal";
+import { Stagger, StaggerItem } from "../components/Stagger";
 import Button from "../components/Button";
 import AuroraRibbon from "../components/AuroraRibbon";
 import InsightCard from "../components/InsightCard";
@@ -36,18 +37,18 @@ const Insights = () => {
           </span>
         </Reveal>
 
-        <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <Stagger className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3" gap={0.15}>
           {/* Featured — spans two columns where space allows */}
-          <Reveal className="md:col-span-2">
+          <StaggerItem className="md:col-span-2">
             <InsightCard article={featured} featured />
-          </Reveal>
+          </StaggerItem>
 
-          {rest.map((article, i) => (
-            <Reveal key={article.title} delay={i * 0.06}>
+          {rest.map((article) => (
+            <StaggerItem key={article.title}>
               <InsightCard article={article} />
-            </Reveal>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </Section>
 
       {/* ============ RESTRICTED DISTRIBUTION + CTA ============ */}

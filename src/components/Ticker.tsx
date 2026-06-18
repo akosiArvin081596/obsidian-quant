@@ -31,6 +31,12 @@ const Ticker = ({
         "relative flex overflow-hidden border-y border-gold/10 bg-midnight/40 py-3",
         className,
       )}
+      style={{
+        WebkitMaskImage:
+          "linear-gradient(to right, transparent, #000 6%, #000 94%, transparent)",
+        maskImage:
+          "linear-gradient(to right, transparent, #000 6%, #000 94%, transparent)",
+      }}
     >
       <div className="animate-marquee flex shrink-0 items-center gap-10 whitespace-nowrap pr-10">
         {row.map((m, i) => (

@@ -11,6 +11,7 @@ import AuroraRibbon from "../components/AuroraRibbon";
 import DataChart from "../components/DataChart";
 import StatCounter from "../components/StatCounter";
 import Ticker from "../components/Ticker";
+import { Stagger, StaggerItem } from "../components/Stagger";
 import { fadeUp, stagger, EASE_LUX } from "../lib/motion";
 import {
   BRAND,
@@ -107,9 +108,9 @@ const Home = () => {
             </Reveal>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-7">
-            {ESSENCE.cards.map((card, i) => (
-              <Reveal key={card.title} delay={i * 0.08}>
+          <Stagger className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-7">
+            {ESSENCE.cards.map((card) => (
+              <StaggerItem key={card.title} className="h-full">
                 <div className="group h-full border border-gold/10 bg-obsidian/40 p-7 backdrop-blur-sm transition-colors duration-500 hover:border-gold/30">
                   <div className="mb-4 h-1.5 w-1.5 rotate-45 bg-gold transition-transform duration-500 group-hover:scale-150" />
                   <h3 className="font-serif text-2xl text-ghost">{card.title}</h3>
@@ -117,9 +118,9 @@ const Home = () => {
                     {card.body}
                   </p>
                 </div>
-              </Reveal>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </Section>
 
@@ -188,9 +189,9 @@ const Home = () => {
           </p>
         </Reveal>
 
-        <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
-          {POSITIONING.pillars.map((p, i) => (
-            <Reveal key={p.no} delay={i * 0.1}>
+        <Stagger gap={0.16} className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
+          {POSITIONING.pillars.map((p) => (
+            <StaggerItem key={p.no} className="h-full">
               <div className="group flex h-full flex-col justify-between border-t-2 border-gold bg-obsidian/50 p-8 transition-colors duration-500 hover:bg-obsidian">
                 <div>
                   <div className="font-serif text-3xl text-gold">{p.no}</div>
@@ -206,9 +207,9 @@ const Home = () => {
                   <span className="h-1 w-1 bg-gold" />
                 </div>
               </div>
-            </Reveal>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </Section>
 
       {/* ============ 03 — ARCHITECTURE / DOX ============ */}

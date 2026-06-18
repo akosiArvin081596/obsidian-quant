@@ -39,22 +39,13 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
-    /* Gentle settle on sections; the reveals themselves are scroll-driven. */
-    scroll-snap-type: y proximity;
-    scroll-padding-top: 4.5rem;
   }
 
-  /* Each top-level section fills the viewport (no peek) and is a snap target. */
+  /* Each top-level section fills the viewport. No scroll-snap — continuous
+     scrolling is what lets the scroll-driven reveals actually scrub in. */
   main section {
     min-height: 100vh;
     min-height: 100svh;
-    scroll-snap-align: start;
-  }
-
-  /* The footer is the final snap point (aligned to the bottom) so the page
-     bottom is reachable instead of snapping back up. */
-  footer {
-    scroll-snap-align: end;
   }
 
   body {

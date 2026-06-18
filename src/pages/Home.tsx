@@ -12,7 +12,8 @@ import DataChart from "../components/DataChart";
 import StatCounter from "../components/StatCounter";
 import Ticker from "../components/Ticker";
 import { Stagger, StaggerItem } from "../components/Stagger";
-import { fadeUp, stagger, EASE_LUX } from "../lib/motion";
+import ForgedHeadline from "../components/ForgedHeadline";
+import { EASE_LUX } from "../lib/motion";
 import {
   BRAND,
   ESSENCE,
@@ -22,6 +23,8 @@ import {
 } from "../content/site";
 
 const Home = () => {
+  // Hero entrance begins as the forge curtain lifts; all hero timings hang off this.
+  const HERO_T = 2.4;
   return (
     <>
       {/* ============ HERO ============ */}
@@ -29,47 +32,52 @@ const Home = () => {
         <AuroraRibbon intensity={0.85} />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-obsidian/50 via-transparent to-obsidian" />
 
-        <motion.div
-          className="relative z-10 mx-auto max-w-4xl text-center"
-          variants={stagger}
-          initial="hidden"
-          animate="show"
-        >
-          <motion.div variants={fadeUp} className="flex justify-center">
+        <div className="relative z-10 mx-auto max-w-4xl text-center">
+          <motion.div
+            className="flex justify-center"
+            initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ delay: HERO_T, duration: 1, ease: EASE_LUX }}
+          >
             <span className="inline-flex items-center gap-2 border border-gold/25 bg-midnight/50 px-4 py-1.5 text-[0.6rem] uppercase tracking-[0.28em] text-gold backdrop-blur-sm">
               <span className="live-dot h-1.5 w-1.5 rounded-full bg-graph" />
               {BRAND.badge}
             </span>
           </motion.div>
 
-          <motion.h1
-            variants={fadeUp}
-            className="mt-8 text-display text-5xl text-ghost md:text-7xl lg:text-8xl"
-          >
-            Forged in <span className="text-gold-gradient">Precision.</span>
-          </motion.h1>
+          <ForgedHeadline className="mt-8" delay={HERO_T + 0.3} />
 
           <motion.p
-            variants={fadeUp}
             className="mx-auto mt-6 max-w-2xl font-serif text-xl font-light italic text-silver/80 md:text-2xl"
+            initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ delay: HERO_T + 1.5, duration: 1, ease: EASE_LUX }}
           >
             “{BRAND.slogan}”
           </motion.p>
 
-          <motion.div variants={fadeUp}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: HERO_T + 1.7, duration: 1 }}
+          >
             <GoldRule className="mx-auto my-8 w-28" />
           </motion.div>
 
           <motion.p
-            variants={fadeUp}
             className="mx-auto max-w-xl text-sm font-light leading-relaxed tracking-wide text-silver/60"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: HERO_T + 1.9, duration: 1, ease: EASE_LUX }}
           >
             {BRAND.intro}
           </motion.p>
 
           <motion.div
-            variants={fadeUp}
             className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: HERO_T + 2.1, duration: 1, ease: EASE_LUX }}
           >
             <Button to="/strategy" variant="primary">
               Explore Strategy
@@ -78,14 +86,14 @@ const Home = () => {
               Request Access
             </Button>
           </motion.div>
-        </motion.div>
+        </div>
 
         {/* scroll cue */}
         <motion.div
           className="absolute bottom-8 left-1/2 -translate-x-1/2"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.4, duration: 1 }}
+          transition={{ delay: HERO_T + 2.6, duration: 1.2 }}
         >
           <div className="h-20 w-px bg-gradient-to-b from-gold/50 to-transparent" />
         </motion.div>

@@ -21,7 +21,7 @@ const ALPHA_PTS: Array<[number, number]> = [
 ];
 
 const GRID_Y = [70, 130, 190, 250];
-const DRAW = 2.2; // seconds for the alpha line to draw before the comet runs
+const DRAW = 3.2; // seconds for the alpha line to draw before the comet runs
 
 /**
  * Animated multi-series performance chart — the brand "data grid overlay".
@@ -80,7 +80,7 @@ const DataChart = ({ className, detailed = true }: DataChartProps) => {
           initial={{ pathLength: reduce ? 1 : 0 }}
           whileInView={{ pathLength: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 2, ease: EASE_LUX }}
+          transition={{ duration: 2.8, ease: EASE_LUX }}
         />
       )}
 
@@ -95,7 +95,7 @@ const DataChart = ({ className, detailed = true }: DataChartProps) => {
           initial={{ pathLength: reduce ? 1 : 0 }}
           whileInView={{ pathLength: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 2.2, ease: EASE_LUX }}
+          transition={{ duration: 3.2, ease: EASE_LUX }}
         />
       )}
 
@@ -106,7 +106,7 @@ const DataChart = ({ className, detailed = true }: DataChartProps) => {
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
-        transition={{ duration: 1.2, delay: reduce ? 0 : 1, ease: "easeOut" }}
+        transition={{ duration: 1.6, delay: reduce ? 0 : 1.6, ease: "easeOut" }}
       />
 
       {/* soft bloom under the alpha line */}
@@ -148,15 +148,15 @@ const DataChart = ({ className, detailed = true }: DataChartProps) => {
           initial={{ scale: reduce ? 1 : 0, opacity: reduce ? 1 : 0 }}
           whileInView={{ scale: 1, opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.4, delay: reduce ? 0 : 0.5 + i * 0.18, ease: EASE_LUX }}
+          transition={{ duration: 0.5, delay: reduce ? 0 : 0.8 + i * 0.26, ease: EASE_LUX }}
         />
       ))}
 
       {/* live endpoint — the current value, pulsing */}
       {!reduce && (
         <circle cx={680} cy={70} r="4" fill="#9af3c6" filter={`url(#glow-${id})`}>
-          <animate attributeName="r" values="4;7.5;4" dur="2.4s" begin={`${DRAW}s`} repeatCount="indefinite" />
-          <animate attributeName="opacity" values="1;0.45;1" dur="2.4s" begin={`${DRAW}s`} repeatCount="indefinite" />
+          <animate attributeName="r" values="4;7.5;4" dur="3.0s" begin={`${DRAW}s`} repeatCount="indefinite" />
+          <animate attributeName="opacity" values="1;0.45;1" dur="3.0s" begin={`${DRAW}s`} repeatCount="indefinite" />
         </circle>
       )}
 
@@ -164,16 +164,16 @@ const DataChart = ({ className, detailed = true }: DataChartProps) => {
       {!reduce && (
         <>
           <circle r="4.6" fill="#aef7d0" filter={`url(#glow-${id})`}>
-            <animateMotion dur="3.4s" begin={`${DRAW}s`} repeatCount="indefinite" calcMode="linear">
+            <animateMotion dur="4.4s" begin={`${DRAW}s`} repeatCount="indefinite" calcMode="linear">
               <mpath href={`#${alphaId}`} />
             </animateMotion>
-            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.12;0.86;1" dur="3.4s" begin={`${DRAW}s`} repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.12;0.86;1" dur="4.4s" begin={`${DRAW}s`} repeatCount="indefinite" />
           </circle>
           <circle r="2.6" fill="#7af0b4">
-            <animateMotion dur="3.4s" begin={`${DRAW + 0.14}s`} repeatCount="indefinite" calcMode="linear">
+            <animateMotion dur="4.4s" begin={`${DRAW + 0.14}s`} repeatCount="indefinite" calcMode="linear">
               <mpath href={`#${alphaId}`} />
             </animateMotion>
-            <animate attributeName="opacity" values="0;0.4;0.4;0" keyTimes="0;0.12;0.86;1" dur="3.4s" begin={`${DRAW + 0.14}s`} repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0;0.4;0.4;0" keyTimes="0;0.12;0.86;1" dur="4.4s" begin={`${DRAW + 0.14}s`} repeatCount="indefinite" />
           </circle>
         </>
       )}

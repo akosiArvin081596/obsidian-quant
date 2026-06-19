@@ -60,12 +60,6 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-4">
-          <Link
-            to="/portal"
-            className="hidden text-[0.7rem] font-medium uppercase tracking-[0.2em] text-silver/70 transition-colors hover:text-gold md:inline"
-          >
-            DOX Portal
-          </Link>
           <Button to="/contact" variant="outline" className="hidden sm:inline-flex">
             Request Access
           </Button>
@@ -113,7 +107,7 @@ const Header = () => {
               animate="show"
               variants={{ show: { transition: { staggerChildren: 0.07 } } }}
             >
-              {[...NAV, { to: "/portal", label: "DOX Portal" }].map((item) => (
+              {NAV.map((item) => (
                 <motion.div
                   key={item.to}
                   variants={{

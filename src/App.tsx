@@ -3,6 +3,9 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import RootLayout from "./layouts/RootLayout";
 import PortalLayout from "./layouts/PortalLayout";
+import InvestorLayout from "./layouts/InvestorLayout";
+import GatewayLayout from "./layouts/GatewayLayout";
+import MemberLayout from "./layouts/MemberLayout";
 
 import Home from "./pages/Home";
 import Firm from "./pages/Firm";
@@ -13,6 +16,11 @@ import Contact from "./pages/Contact";
 import Portal from "./pages/Portal";
 import Access from "./pages/Access";
 import NotFound from "./pages/NotFound";
+
+import InvestorLogin from "./pages/investor/Login";
+import InvestorDashboard from "./pages/investor/Dashboard";
+import InvestorPortfolio from "./pages/investor/Portfolio";
+import InvestorAccount from "./pages/investor/Account";
 
 const router = createBrowserRouter([
   {
@@ -32,6 +40,28 @@ const router = createBrowserRouter([
     children: [
       { path: "/portal", element: <Portal /> },
       { path: "/access", element: <Access /> },
+    ],
+  },
+  {
+    // Investor experience (mockup): sign-in gateway → guarded member area.
+    path: "/investor",
+    element: <InvestorLayout />,
+    children: [
+      {
+        element: <GatewayLayout />,
+        children: [
+          { index: true, element: <InvestorLogin /> },
+          { path: "login", element: <InvestorLogin /> },
+        ],
+      },
+      {
+        element: <MemberLayout />,
+        children: [
+          { path: "dashboard", element: <InvestorDashboard /> },
+          { path: "portfolio", element: <InvestorPortfolio /> },
+          { path: "account", element: <InvestorAccount /> },
+        ],
+      },
     ],
   },
 ]);

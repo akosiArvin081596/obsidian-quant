@@ -54,27 +54,11 @@ const Login = () => {
           <h1 className="mt-4 font-serif text-3xl text-ghost">Investor Sign-In</h1>
           <p className="mx-auto mt-3 max-w-xs text-xs font-light leading-relaxed text-silver/55">
             Authenticate with your member credentials to enter the private
-            investor area. Sessions are cryptographically bound and monitored.
+            investor area.
           </p>
         </div>
 
-        {/* system readout */}
-        <div className="mt-7 space-y-2 border-y border-silver/10 py-4 font-mono text-[10px] uppercase tracking-wider text-silver/45">
-          <div className="flex justify-between">
-            <span>System</span>
-            <span className="text-gold">OBSIDIAN_CORE_V4</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Encryption</span>
-            <span className="text-graph">AES-256 / ACTIVE</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Channel</span>
-            <span className="text-ghost">MEMBER / PRIVATE</span>
-          </div>
-        </div>
-
-        <form className="mt-7 space-y-4" onSubmit={onSubmit}>
+        <form className="mt-7 space-y-4" onSubmit={onSubmit} aria-busy={status === "auth"}>
           <div>
             <label className={labelClass} htmlFor="member-id">
               Member ID

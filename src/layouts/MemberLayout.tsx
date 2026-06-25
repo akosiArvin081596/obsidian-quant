@@ -1,4 +1,4 @@
-import { Link, NavLink, Navigate, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Logo from "../components/Logo";
 import { cn } from "../lib/cn";
@@ -18,6 +18,7 @@ const MEMBER_NAV = [
  */
 const MemberLayout = () => {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { signedIn, memberId, signOut } = useSession();
 
   if (!signedIn) return <Navigate to="/investor/login" replace />;
@@ -102,7 +103,7 @@ const MemberLayout = () => {
       </header>
 
       <motion.main
-        key={typeof window !== "undefined" ? window.location.pathname : "member"}
+        key={pathname}
         className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-6 py-12 lg:px-10 lg:py-16"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}

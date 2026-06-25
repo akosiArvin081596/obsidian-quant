@@ -24,8 +24,12 @@ const read = (): { signedIn: boolean; memberId: string } => {
   try {
     const raw = window.sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return { signedIn: false, memberId: "" };
-    const parsed = JSON.parse(raw) as { memberId?: string };
-    return { signedIn: true, memberId: parsed.memberId ?? "" };
+    const parsed = JSON.parse(raw) as unknown;
+    if (typeof parsed !== "object" || parsed === null) {
+      return { signedIn: false, memberId: "" };
+    }
+    const memberId = (parsed as { memberId?: unknown }).memberId;
+    return { signedIn: true, memberId: typeof memberId === "string" ? memberId : "" };
   } catch {
     return { signedIn: false, memberId: "" };
   }

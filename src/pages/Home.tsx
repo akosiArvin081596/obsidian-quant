@@ -1,6 +1,5 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 
 import Section from "../components/Section";
 import Eyebrow from "../components/Eyebrow";
@@ -79,8 +78,10 @@ const Home = () => {
         </motion.div>
       </section>
 
-      {/* Mandate strip — a quiet institutional credential line (no ticker). */}
-      <div className="border-y border-gold/10 bg-midnight/30 px-6 py-4">
+      {/* Mandate strip — a quiet institutional credential line. */}
+      {/* border-t only: Brand Essence supplies the hairline below, so a single
+          rule renders at this boundary instead of a doubled one. */}
+      <div className="border-t border-gold/10 bg-midnight/30 px-6 py-4">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-7 gap-y-2 text-center text-[0.6rem] uppercase tracking-[0.26em] text-silver/45">
           <span>Established {BRAND.established}</span>
           <span className="h-1 w-1 rotate-45 bg-gold/50" aria-hidden />
@@ -134,7 +135,9 @@ const Home = () => {
       </Section>
 
       {/* ============ 02 — POSITIONING ============ */}
-      <Section className="border-y border-gold/10 bg-midnight">
+      {/* border-b only: Brand Essence supplies the hairline above, so a single
+          rule renders at that boundary instead of a doubled one. */}
+      <Section className="border-b border-gold/10 bg-midnight">
         <Stagger className="mx-auto max-w-3xl text-center">
           <StaggerItem>
             <Eyebrow index={POSITIONING.index} centered>
@@ -178,85 +181,53 @@ const Home = () => {
 
       {/* ============ 03 — ARCHITECTURE ============ */}
       <Section className="hex-bg">
-        <div className="flex flex-col items-center gap-16 lg:flex-row">
-          <Stagger className="w-full lg:w-1/2">
-            <StaggerItem>
-              <Eyebrow index={ARCHITECTURE.index}>{ARCHITECTURE.eyebrow}</Eyebrow>
-            </StaggerItem>
-            <StaggerItem>
-              <h2 className="mt-6 text-display text-4xl leading-tight text-ghost lg:text-5xl">
-                {ARCHITECTURE.title}
-              </h2>
-            </StaggerItem>
-            <StaggerItem>
-              <p className="mt-6 text-sm font-light leading-relaxed text-silver/70">
-                {ARCHITECTURE.body}
-              </p>
-            </StaggerItem>
-            {ARCHITECTURE.checklist.slice(0, 3).map((item) => (
-              <StaggerItem key={item}>
-                <div className="mt-4 flex items-start gap-3">
-                  <svg
-                    className="mt-0.5 h-5 w-5 flex-shrink-0 text-gold"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.6"
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span className="text-xs font-medium text-silver/80">{item}</span>
-                </div>
-              </StaggerItem>
-            ))}
-          </Stagger>
+        <Stagger className="mx-auto max-w-3xl text-center">
+          <StaggerItem>
+            <Eyebrow index={ARCHITECTURE.index} centered>
+              {ARCHITECTURE.eyebrow}
+            </Eyebrow>
+          </StaggerItem>
+          <StaggerItem>
+            <h2 className="mt-6 text-display text-4xl leading-tight text-ghost lg:text-5xl">
+              {ARCHITECTURE.title}
+            </h2>
+          </StaggerItem>
+          <StaggerItem>
+            <p className="mt-6 text-sm font-light leading-relaxed text-silver/70">
+              {ARCHITECTURE.body}
+            </p>
+          </StaggerItem>
+        </Stagger>
 
-          <Stagger className="w-full lg:w-1/2" delay={2.4}>
-            <StaggerItem>
-              <div className="relative border border-gold/20 bg-obsidian/70 p-8 backdrop-blur-sm gold-grid lg:p-12">
-                <h4 className="mb-6 font-serif text-xs uppercase tracking-[0.25em] text-gold">
-                  {ARCHITECTURE.terminal.title}
-                </h4>
-                <div className="space-y-4 font-mono text-[11px] text-silver/50">
-                  {ARCHITECTURE.terminal.rows.map((row) => (
-                    <div
-                      key={row.k}
-                      className="flex items-center justify-between border-b border-silver/5 pb-2"
-                    >
-                      <span className="uppercase tracking-wider">{row.k}_</span>
-                      <span
-                        className={
-                          row.tone === "gold"
-                            ? "font-sans text-gold"
-                            : row.tone === "graph"
-                              ? "font-sans text-graph"
-                              : "font-sans text-ghost"
-                        }
-                      >
-                        {row.v}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-8 border-t border-gold/10 pt-6 text-center">
-                  <span className="mb-4 block text-[0.6rem] uppercase tracking-[0.3em] text-silver/40">
-                    {ARCHITECTURE.terminal.portalLabel}
-                  </span>
-                  <Link
-                    to="/portal"
-                    className="block w-full border border-silver/20 py-3.5 text-xs font-semibold uppercase tracking-[0.22em] text-ghost transition-colors duration-300 hover:border-gold hover:text-gold"
-                  >
-                    {ARCHITECTURE.terminal.cta}
-                  </Link>
-                </div>
+        <Stagger
+          className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2"
+          gap={0.15}
+          delay={0.3}
+        >
+          {ARCHITECTURE.checklist.map((item) => (
+            <StaggerItem key={item} className="h-full">
+              <div className="group flex h-full items-start gap-4 border border-gold/10 bg-obsidian/40 p-7 backdrop-blur-sm transition-colors duration-500 hover:border-gold/30">
+                <svg
+                  className="mt-0.5 h-5 w-5 flex-shrink-0 text-gold"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.6"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span className="text-xs font-medium leading-relaxed text-silver/80">
+                  {item}
+                </span>
               </div>
             </StaggerItem>
-          </Stagger>
-        </div>
+          ))}
+        </Stagger>
       </Section>
 
       {/* ============ CLOSING CTA ============ */}

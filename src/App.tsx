@@ -2,7 +2,6 @@ import { memo } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import RootLayout from "./layouts/RootLayout";
-import PortalLayout from "./layouts/PortalLayout";
 import InvestorLayout from "./layouts/InvestorLayout";
 import GatewayLayout from "./layouts/GatewayLayout";
 import MemberLayout from "./layouts/MemberLayout";
@@ -13,8 +12,6 @@ import Strategy from "./pages/Strategy";
 import Architecture from "./pages/Architecture";
 import Insights from "./pages/Insights";
 import Contact from "./pages/Contact";
-import Portal from "./pages/Portal";
-import Access from "./pages/Access";
 import NotFound from "./pages/NotFound";
 
 import InvestorLogin from "./pages/investor/Login";
@@ -33,13 +30,6 @@ const router = createBrowserRouter([
       { path: "/insights", element: <Insights /> },
       { path: "/contact", element: <Contact /> },
       { path: "*", element: <NotFound /> },
-    ],
-  },
-  {
-    element: <PortalLayout />,
-    children: [
-      { path: "/portal", element: <Portal /> },
-      { path: "/access", element: <Access /> },
     ],
   },
   {

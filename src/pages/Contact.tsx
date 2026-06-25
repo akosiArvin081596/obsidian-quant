@@ -86,13 +86,13 @@ const Contact = () => {
                   </div>
                   <div>
                     <label className={labelClass} htmlFor="mandate">
-                      Indicative Mandate
+                      Counterparty Profile
                     </label>
                     <select id="mandate" className={cn(inputClass, "appearance-none")}>
-                      <option>$25M – $100M</option>
-                      <option>$100M – $500M</option>
-                      <option>$500M – $1B</option>
-                      <option>$1B+</option>
+                      <option>Sovereign Wealth Fund</option>
+                      <option>Family Office</option>
+                      <option>Institutional Allocator</option>
+                      <option>Other Qualified Entity</option>
                     </select>
                   </div>
                   <div>
@@ -151,10 +151,10 @@ const Contact = () => {
               </div>
               <div className="border-l border-gold/30 pl-5">
                 <div className="text-[0.62rem] uppercase tracking-[0.24em] text-silver/45">
-                  Operational System
+                  Established
                 </div>
-                <div className="mt-1 font-mono text-sm text-graph">
-                  OBSIDIAN_CORE_V4 · ACTIVE
+                <div className="mt-1 text-sm text-ghost">
+                  {BRAND.established}
                 </div>
               </div>
             </div>

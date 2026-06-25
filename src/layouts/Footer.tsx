@@ -28,11 +28,6 @@ const Footer = () => (
                 </Link>
               </li>
             ))}
-            <li>
-              <Link to="/portal" className="transition-colors hover:text-gold">
-                Secured Portal
-              </Link>
-            </li>
           </ul>
         </div>
 

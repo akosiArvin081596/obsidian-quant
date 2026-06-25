@@ -22,7 +22,7 @@ export const TAGLINES = {
     "The Architecture of Alpha.",
     "Intelligence, Systematized.",
   ],
-  campaign: ["Beyond the Market. Within the Model.", "Precision Engineered Returns."],
+  campaign: ["Beyond the Market. Within the Model.", "Precision, Systematized."],
 } as const;
 
 export const NAV = [
@@ -35,7 +35,6 @@ export const NAV = [
 export const LEGAL = [
   "Regulatory Disclosure",
   "Data Cryptography",
-  "System Architecture",
 ] as const;
 
 /* ---------- Essence (brand pillars) ---------- */
@@ -104,17 +103,6 @@ export const ARCHITECTURE = {
     "Continuous backtesting across extreme historical market regimes.",
     "Cryptographically secured execution and clearing directives.",
   ],
-  terminal: {
-    title: "Operational System Access",
-    rows: [
-      { k: "System Code", v: "OBSIDIAN_CORE_V4", tone: "ghost" },
-      { k: "Clear Space Requirement", v: "1X Capheight Bounds", tone: "ghost" },
-      { k: "Primary Palette", v: "#0B0D12 · #111A28 · #B88A4A", tone: "gold" },
-      { k: "Compliance Status", v: "Active / Treasury Mandated", tone: "graph" },
-    ],
-    portalLabel: "Secured Regulatory Portal",
-    cta: "Initialize Terminal Gateway",
-  },
 } as const;
 
 /* ---------- The Firm ---------- */
@@ -206,12 +194,4 @@ export const CONTACT = {
     emailPlaceholder: "secure@entity.com",
   },
   submit: "Submit Credentials",
-} as const;
-
-/* ---------- Secured Portal ---------- */
-export const PORTAL = {
-  eyebrow: "Secured Regulatory Portal",
-  title: "Terminal Gateway",
-  body: "Authenticate to access the operational system. Sessions are cryptographically bound and monitored.",
-  systemCode: "OBSIDIAN_CORE_V4",
 } as const;

@@ -35,7 +35,7 @@ export const NAV = [
 export const LEGAL = [
   "Regulatory Disclosure",
   "Data Cryptography",
-  "DOX System Architecture",
+  "System Architecture",
 ] as const;
 
 /* ---------- Essence (brand pillars) ---------- */
@@ -104,8 +104,8 @@ export const ARCHITECTURE = {
     "Continuous backtesting across extreme historical market regimes.",
     "Cryptographically secured execution and clearing directives.",
   ],
-  dox: {
-    title: "DOX Operational System Access",
+  terminal: {
+    title: "Operational System Access",
     rows: [
       { k: "System Code", v: "OBSIDIAN_CORE_V4", tone: "ghost" },
       { k: "Clear Space Requirement", v: "1X Capheight Bounds", tone: "ghost" },
@@ -216,10 +216,10 @@ export const CONTACT = {
   submit: "Submit Credentials",
 } as const;
 
-/* ---------- DOX Portal ---------- */
+/* ---------- Secured Portal ---------- */
 export const PORTAL = {
   eyebrow: "Secured Regulatory Portal",
   title: "Terminal Gateway",
-  body: "Authenticate to access the DOX operational system. Sessions are cryptographically bound and monitored.",
+  body: "Authenticate to access the operational system. Sessions are cryptographically bound and monitored.",
   systemCode: "OBSIDIAN_CORE_V4",
 } as const;

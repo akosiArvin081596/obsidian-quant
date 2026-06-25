@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { fadeUp } from "../lib/motion";
 
 /**
- * The DOX system, rendered as a vertical stack of infrastructure layers.
+ * The operational system, rendered as a vertical stack of infrastructure layers.
  * Each tier connects to the next by a hairline gold rail — an architecture
  * diagram that reads from research down to live execution.
  *

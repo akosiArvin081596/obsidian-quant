@@ -30,7 +30,7 @@ const Footer = () => (
             ))}
             <li>
               <Link to="/portal" className="transition-colors hover:text-gold">
-                DOX Portal
+                Secured Portal
               </Link>
             </li>
           </ul>

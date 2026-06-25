@@ -101,7 +101,7 @@ const Portal = () => {
               Credentials not recognized
             </p>
             <p className="mt-1 text-[0.66rem] text-silver/55">
-              Access to the DOX terminal is provisioned by mandate only.
+              Access to the terminal is provisioned by mandate only.
             </p>
           </motion.div>
         )}

@@ -2,7 +2,7 @@ import { Link, Outlet } from "react-router-dom";
 import Logo from "../components/Logo";
 import ScrollToTop from "./ScrollToTop";
 
-/** Minimal chrome for the gated DOX portal — no marketing nav. */
+/** Minimal chrome for the gated portal — no marketing nav. */
 const PortalLayout = () => (
   <>
     <ScrollToTop />

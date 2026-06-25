@@ -59,7 +59,7 @@ const Access = () => {
                 Request Terminal Access
               </h1>
               <p className="mx-auto mt-3 max-w-xs text-xs font-light leading-relaxed text-silver/55">
-                Submit your institutional details to begin DOX provisioning.
+                Submit your institutional details to begin terminal provisioning.
                 All requests are manually vetted.
               </p>
             </div>

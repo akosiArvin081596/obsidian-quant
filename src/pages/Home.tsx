@@ -240,7 +240,7 @@ const Home = () => {
         </Stagger>
       </Section>
 
-      {/* ============ 03 — ARCHITECTURE / DOX ============ */}
+      {/* ============ 03 — ARCHITECTURE ============ */}
       <Section className="hex-bg">
         <div className="flex flex-col items-center gap-16 lg:flex-row">
           <Stagger className="w-full lg:w-1/2">
@@ -283,10 +283,10 @@ const Home = () => {
             <StaggerItem>
               <div className="relative border border-gold/20 bg-obsidian/70 p-8 backdrop-blur-sm gold-grid lg:p-12">
                 <h4 className="mb-6 font-serif text-xs uppercase tracking-[0.25em] text-gold">
-                  {ARCHITECTURE.dox.title}
+                  {ARCHITECTURE.terminal.title}
                 </h4>
                 <div className="space-y-4 font-mono text-[11px] text-silver/50">
-                  {ARCHITECTURE.dox.rows.map((row) => (
+                  {ARCHITECTURE.terminal.rows.map((row) => (
                     <div
                       key={row.k}
                       className="flex items-center justify-between border-b border-silver/5 pb-2"
@@ -308,13 +308,13 @@ const Home = () => {
                 </div>
                 <div className="mt-8 border-t border-gold/10 pt-6 text-center">
                   <span className="mb-4 block text-[0.6rem] uppercase tracking-[0.3em] text-silver/40">
-                    {ARCHITECTURE.dox.portalLabel}
+                    {ARCHITECTURE.terminal.portalLabel}
                   </span>
                   <Link
                     to="/portal"
                     className="block w-full border border-silver/20 py-3.5 text-xs font-semibold uppercase tracking-[0.22em] text-ghost transition-colors duration-300 hover:border-gold hover:text-gold"
                   >
-                    {ARCHITECTURE.dox.cta}
+                    {ARCHITECTURE.terminal.cta}
                   </Link>
                 </div>
               </div>

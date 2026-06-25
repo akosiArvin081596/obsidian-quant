@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Agent / tooling artifacts (keep out of commits)
+.claude/
+.playwright-mcp/
+
+# Stray root-level screenshot left by tooling.
+# Scoped to the exact file so real assets under src/ or public/ are unaffected.
+# (Brand assets are SVG; there are no legitimate root-level PNGs.)
+/before-essence-positioning-boundary.png

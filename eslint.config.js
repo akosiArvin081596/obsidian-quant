@@ -12,9 +12,19 @@ export default tseslint.config([
     extends: [
       js.configs.recommended,
       tseslint.configs.recommended,
-      reactHooks.configs["recommended-latest"],
+      // NOTE: do NOT extend reactHooks.configs["recommended-latest"] here.
+      // In eslint-plugin-react-hooks v7 that preset is still eslintrc-legacy
+      // shaped (`plugins: ["react-hooks"]`, an array of strings), which ESLint 9
+      // flat config rejects before linting any file. Register the plugin object
+      // explicitly and pull in its rules below instead (same coverage).
       reactRefresh.configs.vite,
     ],
+    plugins: {
+      "react-hooks": reactHooks,
+    },
+    rules: {
+      ...reactHooks.configs["recommended-latest"].rules,
+    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,

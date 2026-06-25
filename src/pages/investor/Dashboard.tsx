@@ -108,7 +108,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          <div className="mt-6 h-56 sm:h-64">
+          <div className="mt-6 aspect-[9/4]">
             <PerformanceChart series={PERFORMANCE_SERIES} />
           </div>
         </div>

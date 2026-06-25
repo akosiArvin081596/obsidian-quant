@@ -134,7 +134,7 @@ const Portfolio = () => {
               </span>
             </div>
           </div>
-          <div className="mt-6 h-60 sm:h-72">
+          <div className="mt-6 aspect-[9/4]">
             <PerformanceChart series={PERFORMANCE_SERIES} benchmark={BENCHMARK_SERIES} />
           </div>
         </div>

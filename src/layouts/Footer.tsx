@@ -40,6 +40,12 @@ const Footer = () => (
           >
             {BRAND.email}
           </a>
+          <Link
+            to="/investor"
+            className="mt-3 block text-sm text-silver/65 transition-colors hover:text-gold"
+          >
+            Member Login
+          </Link>
           <p className="mt-4 text-[0.7rem] uppercase tracking-[0.22em] text-silver/40">
             {BRAND.presence.join(" · ")}
           </p>

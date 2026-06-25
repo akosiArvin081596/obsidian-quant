@@ -79,12 +79,9 @@ const Insights = () => {
             </p>
           </StaggerItem>
           <StaggerItem>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <div className="mt-10 flex justify-center">
               <Button to="/contact" variant="primary">
                 Request Distribution
-              </Button>
-              <Button to="/access" variant="ghost">
-                Counterparty Access
               </Button>
             </div>
           </StaggerItem>

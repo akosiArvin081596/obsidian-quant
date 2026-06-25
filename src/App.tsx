@@ -2,7 +2,6 @@ import { memo } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import RootLayout from "./layouts/RootLayout";
-import PortalLayout from "./layouts/PortalLayout";
 
 import Home from "./pages/Home";
 import Firm from "./pages/Firm";
@@ -10,8 +9,6 @@ import Strategy from "./pages/Strategy";
 import Architecture from "./pages/Architecture";
 import Insights from "./pages/Insights";
 import Contact from "./pages/Contact";
-import Portal from "./pages/Portal";
-import Access from "./pages/Access";
 import NotFound from "./pages/NotFound";
 
 const router = createBrowserRouter([
@@ -25,13 +22,6 @@ const router = createBrowserRouter([
       { path: "/insights", element: <Insights /> },
       { path: "/contact", element: <Contact /> },
       { path: "*", element: <NotFound /> },
-    ],
-  },
-  {
-    element: <PortalLayout />,
-    children: [
-      { path: "/portal", element: <Portal /> },
-      { path: "/access", element: <Access /> },
     ],
   },
 ]);

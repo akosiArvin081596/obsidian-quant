@@ -9,7 +9,7 @@ Live: **https://obsidian.abedubas.dev**
 
 - **Vite 7** + **React 19** + **TypeScript**
 - **Tailwind CSS v4** (design tokens in `src/index.css`)
-- **react-router-dom v7** (SPA), **framer-motion** (motion), **react-countup** (metrics)
+- **react-router-dom v7** (SPA), **framer-motion** (motion)
 
 The brand system (palette, type, motifs) is encoded in `src/index.css`, and all
 copy lives in `src/content/site.ts` (single source of truth).
@@ -27,7 +27,7 @@ npm run preview  # serve the production build
 
 ```
 src/
-  components/   reusable UI + brand motifs (Logo, AuroraRibbon, DataChart, …)
+  components/   reusable UI + brand motifs (Logo, AuroraRibbon, …)
   layouts/      Header, Footer, RootLayout, PortalLayout, Preloader, …
   pages/        Home, Firm, Strategy, Architecture, Insights, Portal, Access, Contact, NotFound
   content/      site.ts — all copy

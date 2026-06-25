@@ -117,14 +117,6 @@ export const ARCHITECTURE = {
   },
 } as const;
 
-/* ---------- Headline metrics (illustrative) ---------- */
-export const STATS = [
-  { end: 2.41, decimals: 2, label: "Net Sharpe Ratio" },
-  { end: 19.8, decimals: 1, suffix: "%", label: "Annualised, net" },
-  { end: 11400, suffix: "+", label: "Markets Tracked" },
-  { end: 24, suffix: " / 6", label: "Systematic Coverage" },
-] as const;
-
 /* ---------- The Firm ---------- */
 export const FIRM = {
   hero: {

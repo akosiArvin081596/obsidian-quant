@@ -7,12 +7,10 @@ import Eyebrow from "../components/Eyebrow";
 import Button from "../components/Button";
 import GoldRule from "../components/GoldRule";
 import AuroraRibbon from "../components/AuroraRibbon";
-import DataChart from "../components/DataChart";
-import StatCounter from "../components/StatCounter";
 import ForgedHeadline from "../components/ForgedHeadline";
 import { Stagger, StaggerItem } from "../components/Stagger";
 import { EASE_LUX } from "../lib/motion";
-import { BRAND, ESSENCE, POSITIONING, ARCHITECTURE, STATS } from "../content/site";
+import { BRAND, ESSENCE, POSITIONING, ARCHITECTURE } from "../content/site";
 
 const Home = () => {
   // Hero entrance begins as the forge curtain lifts; beats hang off this.
@@ -131,68 +129,6 @@ const Home = () => {
                 </div>
               </StaggerItem>
             ))}
-          </Stagger>
-        </div>
-      </Section>
-
-      {/* ============ PERFORMANCE BAND ============ */}
-      <Section className="hex-bg" spacing="py-24 lg:py-28">
-        <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-2">
-          <div>
-            <Stagger>
-              <StaggerItem>
-                <Eyebrow>Track Record</Eyebrow>
-              </StaggerItem>
-              <StaggerItem>
-                <h2 className="mt-6 text-display text-4xl text-ghost lg:text-5xl">
-                  Systematic alpha, compounded with discipline.
-                </h2>
-              </StaggerItem>
-              <StaggerItem>
-                <p className="mt-6 max-w-md text-sm font-light leading-relaxed text-silver/70">
-                  Net performance of the flagship systematic mandate against a
-                  broad-market benchmark. Figures are illustrative of the model's
-                  risk-adjusted objective.
-                </p>
-              </StaggerItem>
-            </Stagger>
-            <Stagger className="mt-10 grid grid-cols-2 gap-8" gap={0.18} delay={0.4}>
-              {STATS.map((s) => (
-                <StaggerItem key={s.label}>
-                  <StatCounter
-                    end={s.end}
-                    decimals={"decimals" in s ? s.decimals : 0}
-                    suffix={"suffix" in s ? s.suffix : undefined}
-                    label={s.label}
-                  />
-                </StaggerItem>
-              ))}
-            </Stagger>
-          </div>
-
-          <Stagger delay={2.3}>
-            <StaggerItem>
-              <div className="relative border border-gold/15 bg-midnight/50 p-6 backdrop-blur-sm gold-grid">
-                <div className="mb-4 flex items-center justify-between text-[0.6rem] uppercase tracking-[0.24em] text-silver/45">
-                  <span className="flex items-center gap-2">
-                    <span className="live-dot h-1.5 w-1.5 rounded-full bg-graph" />
-                    Live mandate · net of fees
-                  </span>
-                  <span className="font-mono text-graph">▲ 19.8%</span>
-                </div>
-                <div className="aspect-[16/8]">
-                  <DataChart />
-                </div>
-                <div className="mt-4 flex items-center gap-6 text-[0.6rem] uppercase tracking-[0.2em] text-silver/45">
-                  <span className="flex items-center gap-2">
-                    <span className="h-px w-5 bg-graph" /> Obsidian Alpha
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <span className="h-px w-5 bg-gold" /> Benchmark
-                  </span>
-                </div>
-              </div>
-            </StaggerItem>
           </Stagger>
         </div>
       </Section>

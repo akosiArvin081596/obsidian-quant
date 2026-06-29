@@ -1,5 +1,7 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { SessionContext } from "./session-context";
+import type { Session } from "./session-context";
 
 /* ============================================================
    Investor session — MOCKUP ONLY.
@@ -8,14 +10,6 @@ import type { ReactNode } from "react";
    member-area page keeps you inside the shell) and records the
    Member ID typed at the gateway for the greeting line.
    ============================================================ */
-
-type Session = {
-  signedIn: boolean;
-  /** The Member ID entered at the gateway — illustrative only. */
-  memberId: string;
-  signIn: (memberId: string) => void;
-  signOut: () => void;
-};
 
 const STORAGE_KEY = "oqg.investor.session";
 
@@ -34,8 +28,6 @@ const read = (): { signedIn: boolean; memberId: string } => {
     return { signedIn: false, memberId: "" };
   }
 };
-
-const SessionContext = createContext<Session | null>(null);
 
 export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState(read);
@@ -67,12 +59,4 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   return (
     <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
   );
-};
-
-export const useSession = (): Session => {
-  const ctx = useContext(SessionContext);
-  if (!ctx) {
-    throw new Error("useSession must be used within a SessionProvider");
-  }
-  return ctx;
 };

@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "../lib/cn";
 import { EASE_LUX } from "../lib/motion";
@@ -6,6 +5,31 @@ import { EASE_LUX } from "../lib/motion";
 /** Gold gradient carrying a bright specular band for the periodic glint. */
 const GOLD_SHIMMER =
   "linear-gradient(110deg,#8a6b30 0%,#b88a4a 26%,#e8cd8a 43%,#fff6df 50%,#e8cd8a 57%,#b88a4a 74%,#8a6b30 100%)";
+
+/* Decorative spark/ember fields — random geometry fixed once at module load
+   so the component renders purely (an identical pattern every mount is fine
+   for the one-shot hero forge). */
+const SPARKS = Array.from({ length: 22 }, () => {
+  const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.5;
+  const dist = 70 + Math.random() * 210;
+  return {
+    x: Math.cos(angle) * dist,
+    y: Math.sin(angle) * dist,
+    dur: 1.1 + Math.random() * 1.1,
+    d: Math.random() * 0.3,
+    size: 2 + Math.random() * 2.4,
+  };
+});
+
+const EMBERS = Array.from({ length: 8 }, () => ({
+  left: `${40 + Math.random() * 55}%`,
+  size: 1.5 + Math.random() * 2,
+  rise: 110 + Math.random() * 140,
+  op: 0.2 + Math.random() * 0.3,
+  dur: 4 + Math.random() * 3,
+  gap: 1.5 + Math.random() * 4,
+  d: Math.random() * 4,
+}));
 
 type Props = {
   className?: string;
@@ -22,36 +46,6 @@ const ForgedHeadline = ({ className, delay = 1.7 }: Props) => {
   const reduce = useReducedMotion();
   const pDelay = delay + 0.6; // "Precision." forges after "Forged in" lands
 
-  const sparks = useMemo(
-    () =>
-      Array.from({ length: 22 }, () => {
-        const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.5;
-        const dist = 70 + Math.random() * 210;
-        return {
-          x: Math.cos(angle) * dist,
-          y: Math.sin(angle) * dist,
-          dur: 1.1 + Math.random() * 1.1,
-          d: Math.random() * 0.3,
-          size: 2 + Math.random() * 2.4,
-        };
-      }),
-    [],
-  );
-
-  const embers = useMemo(
-    () =>
-      Array.from({ length: 8 }, () => ({
-        left: `${40 + Math.random() * 55}%`,
-        size: 1.5 + Math.random() * 2,
-        rise: 110 + Math.random() * 140,
-        op: 0.2 + Math.random() * 0.3,
-        dur: 4 + Math.random() * 3,
-        gap: 1.5 + Math.random() * 4,
-        d: Math.random() * 4,
-      })),
-    [],
-  );
-
   if (reduce) {
     return (
       <h1 className={cn("text-display text-5xl text-ghost md:text-7xl lg:text-8xl", className)}>
@@ -64,7 +58,7 @@ const ForgedHeadline = ({ className, delay = 1.7 }: Props) => {
     <div className={cn("relative", className)}>
       {/* embers rising from the forged word */}
       <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-2 z-0">
-        {embers.map((e, i) => (
+        {EMBERS.map((e, i) => (
           <motion.span
             key={`e${i}`}
             className="absolute bottom-0 block rounded-full"
@@ -92,7 +86,7 @@ const ForgedHeadline = ({ className, delay = 1.7 }: Props) => {
 
       {/* spark shower off the word */}
       <span aria-hidden className="pointer-events-none absolute left-[64%] top-[55%] z-10">
-        {sparks.map((s, i) => (
+        {SPARKS.map((s, i) => (
           <motion.span
             key={`s${i}`}
             className="absolute block rounded-full"

@@ -2,7 +2,7 @@ import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import Eyebrow from "../../components/Eyebrow";
 import GoldRule from "../../components/GoldRule";
-import { useSession } from "./session";
+import { useSession } from "./session-context";
 
 /** Member account — shows the mock session identity + a sign-out path. */
 const Account = () => {

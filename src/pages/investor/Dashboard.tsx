@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Eyebrow from "../../components/Eyebrow";
 import GoldRule from "../../components/GoldRule";
 import PerformanceChart from "../../components/PerformanceChart";
-import { useSession } from "./session";
+import { useSession } from "./session-context";
 import SampleDataBadge from "./SampleDataBadge";
 import {
   ACTIVITY,

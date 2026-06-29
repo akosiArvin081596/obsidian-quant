@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { Fragment, memo } from "react";
 import { Link } from "react-router-dom";
 import Eyebrow from "../../components/Eyebrow";
 import GoldRule from "../../components/GoldRule";
@@ -8,7 +8,9 @@ import SampleDataBadge from "./SampleDataBadge";
 import {
   ACTIVITY,
   INCEPTION_RETURN_PCT,
+  MANDATE,
   PERFORMANCE_SERIES,
+  RELATIONSHIP,
   SUMMARY_TILES,
 } from "./mockData";
 
@@ -31,6 +33,14 @@ const QUICK_LINKS = [
     desc: "Membership, mandate & access",
   },
 ] as const;
+
+/** Glance-level mandate credentials shown as a quiet strip above the tiles. */
+const MANDATE_STRIP: ReadonlyArray<{ k: string; v: string; accent?: boolean }> = [
+  { k: "Mandate", v: MANDATE.name, accent: true },
+  { k: "Inception", v: MANDATE.inception },
+  { k: "Next review", v: MANDATE.nextReview },
+  { k: "Coverage", v: RELATIONSHIP.manager },
+];
 
 /** Member dashboard — the at-a-glance overview shown after sign-in (mockup). */
 const Dashboard = () => {
@@ -56,8 +66,30 @@ const Dashboard = () => {
 
       <GoldRule className="my-10" />
 
+      {/* ============ MANDATE OVERVIEW (quiet credential strip) ============ */}
+      <section
+        aria-label="Mandate overview"
+        className="border border-gold/10 bg-midnight/40 px-6 py-4"
+      >
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3 font-mono text-[0.58rem] uppercase tracking-[0.18em]">
+          {MANDATE_STRIP.map((item, i) => (
+            <Fragment key={item.k}>
+              {i > 0 && (
+                <span className="h-1 w-1 rotate-45 bg-gold/40" aria-hidden />
+              )}
+              <span className="flex items-center gap-2.5">
+                <span className="text-silver/40">{item.k}</span>
+                <span className={item.accent ? "text-gold/85" : "text-silver/80"}>
+                  {item.v}
+                </span>
+              </span>
+            </Fragment>
+          ))}
+        </div>
+      </section>
+
       {/* ============ SUMMARY TILES ============ */}
-      <section aria-label="Portfolio summary">
+      <section className="mt-6" aria-label="Portfolio summary">
         <div className="grid gap-px overflow-hidden border border-gold/10 bg-gold/10 sm:grid-cols-2 lg:grid-cols-4">
           {SUMMARY_TILES.map((tile) => (
             <div

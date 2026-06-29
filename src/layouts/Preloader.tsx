@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Logo from "../components/Logo";
 import { EASE_LUX } from "../lib/motion";
@@ -6,6 +6,20 @@ import { EASE_LUX } from "../lib/motion";
 /** Hammer-strike moments (seconds). */
 const STRIKES = [0.55, 0.95, 1.4];
 const GEM = 96;
+
+/* Spark-shower geometry — random values fixed once at module load so the
+   component renders purely (a one-shot forge curtain; identical each mount). */
+const SPARKS = Array.from({ length: 28 }, (_, i) => {
+  const angle = -Math.PI / 2 + (Math.random() - 0.5) * 2.3;
+  const dist = 55 + Math.random() * 150;
+  return {
+    x: Math.cos(angle) * dist,
+    y: Math.sin(angle) * dist,
+    dur: 0.7 + Math.random() * 0.8,
+    begin: STRIKES[i % STRIKES.length] + Math.random() * 0.1,
+    size: 1.6 + Math.random() * 2.4,
+  };
+});
 
 /**
  * Forge curtain — the obsidian gem is forged: it heats in the hearth, takes
@@ -20,22 +34,6 @@ const Preloader = () => {
     const t = setTimeout(() => setDone(true), reduce ? 650 : 2150);
     return () => clearTimeout(t);
   }, [reduce]);
-
-  const sparks = useMemo(
-    () =>
-      Array.from({ length: 28 }, (_, i) => {
-        const angle = -Math.PI / 2 + (Math.random() - 0.5) * 2.3;
-        const dist = 55 + Math.random() * 150;
-        return {
-          x: Math.cos(angle) * dist,
-          y: Math.sin(angle) * dist,
-          dur: 0.7 + Math.random() * 0.8,
-          begin: STRIKES[i % STRIKES.length] + Math.random() * 0.1,
-          size: 1.6 + Math.random() * 2.4,
-        };
-      }),
-    [],
-  );
 
   return (
     <AnimatePresence>
@@ -84,7 +82,7 @@ const Preloader = () => {
               {/* spark shower */}
               {!reduce && (
                 <span aria-hidden className="pointer-events-none absolute left-1/2 top-1/2">
-                  {sparks.map((s, i) => (
+                  {SPARKS.map((s, i) => (
                     <motion.span
                       key={`s${i}`}
                       className="absolute block rounded-full"

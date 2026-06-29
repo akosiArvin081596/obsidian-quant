@@ -6,7 +6,7 @@ import Logo from "../../components/Logo";
 import GoldRule from "../../components/GoldRule";
 import { EASE_LUX } from "../../lib/motion";
 import { cn } from "../../lib/cn";
-import { useSession } from "./session";
+import { useSession } from "./session-context";
 
 type Status = "idle" | "auth";
 

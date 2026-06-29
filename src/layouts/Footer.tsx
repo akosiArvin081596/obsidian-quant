@@ -63,9 +63,7 @@ const Footer = () => (
         <p>© 2026 {BRAND.name}. All rights reserved.</p>
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
           {LEGAL.map((item) => (
-            <Link key={item} to="#" className="transition-colors hover:text-gold">
-              {item}
-            </Link>
+            <span key={item}>{item}</span>
           ))}
         </div>
       </div>

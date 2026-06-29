@@ -1,6 +1,6 @@
 import { Link, Navigate, Outlet } from "react-router-dom";
 import AuroraRibbon from "../components/AuroraRibbon";
-import { useSession } from "../pages/investor/session";
+import { useSession } from "../pages/investor/session-context";
 
 /**
  * Chrome for the sign-in gateway — full-bleed obsidian field, no marketing nav.

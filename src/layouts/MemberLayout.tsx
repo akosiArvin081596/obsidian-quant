@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import Logo from "../components/Logo";
 import { cn } from "../lib/cn";
 import { EASE_LUX } from "../lib/motion";
-import { useSession } from "../pages/investor/session";
+import { useSession } from "../pages/investor/session-context";
 
 const MEMBER_NAV = [
   { to: "/investor/dashboard", label: "Dashboard" },

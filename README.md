@@ -1,7 +1,7 @@
 # Obsidian Quant Group
 
 Marketing site for **Obsidian Quant Group** — institutional quantitative asset management.
-_Forged in Precision. Beyond the Market. Within the Model._
+_Profit from Market Dislocation. Beyond the Market. Within the Model._
 
 Live: **https://obsidian.abedubas.dev**
 
@@ -28,8 +28,8 @@ npm run preview  # serve the production build
 ```
 src/
   components/   reusable UI + brand motifs (Logo, AuroraRibbon, …)
-  layouts/      Header, Footer, RootLayout, PortalLayout, Preloader, …
-  pages/        Home, Firm, Strategy, Architecture, Insights, Portal, Access, Contact, NotFound
+  layouts/      Header, Footer, RootLayout, Preloader, …
+  pages/        Home, Firm, Strategy, Architecture, Insights, Contact, NotFound
   content/      site.ts — all copy
   lib/          cn(), motion presets
 ```

@@ -6,10 +6,16 @@ import Eyebrow from "../components/Eyebrow";
 import Button from "../components/Button";
 import GoldRule from "../components/GoldRule";
 import AuroraRibbon from "../components/AuroraRibbon";
-import ForgedHeadline from "../components/ForgedHeadline";
 import { Stagger, StaggerItem } from "../components/Stagger";
 import { EASE_LUX } from "../lib/motion";
-import { BRAND, ESSENCE, POSITIONING, ARCHITECTURE } from "../content/site";
+import {
+  BRAND,
+  HERO,
+  CORE_PHILOSOPHY,
+  ESSENCE,
+  POSITIONING,
+  ARCHITECTURE,
+} from "../content/site";
 
 const Home = () => {
   // Hero entrance begins as the forge curtain lifts; beats hang off this.
@@ -35,13 +41,19 @@ const Home = () => {
             </span>
           </motion.div>
 
-          <ForgedHeadline className="mt-8" delay={HERO_T + 0.5} />
+          <motion.h1
+            className="mt-8 text-display text-5xl leading-[1.05] text-ghost md:text-7xl lg:text-8xl"
+            {...beat(0.5)}
+          >
+            {HERO.headlineLead}{" "}
+            <span className="text-gold-gradient">{HERO.headlineAccent}</span>
+          </motion.h1>
 
           <motion.p
-            className="mx-auto mt-6 max-w-2xl font-serif text-xl font-light italic text-silver/80 md:text-2xl"
+            className="mx-auto mt-7 max-w-2xl font-serif text-xl font-light leading-relaxed text-silver/80 md:text-2xl"
             {...beat(1.2)}
           >
-            “{BRAND.slogan}”
+            {HERO.sub}
           </motion.p>
 
           <motion.div {...beat(1.6)}>
@@ -79,8 +91,8 @@ const Home = () => {
       </section>
 
       {/* Mandate strip — a quiet institutional credential line. */}
-      {/* border-t only: Brand Essence supplies the hairline below, so a single
-          rule renders at this boundary instead of a doubled one. */}
+      {/* border-t only: the Core Philosophy section below carries its own top
+          hairline, so a single rule renders at this boundary, not a doubled one. */}
       <div className="border-t border-gold/10 bg-midnight/30 px-6 py-4">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-7 gap-y-2 text-center text-[0.6rem] uppercase tracking-[0.26em] text-silver/45">
           <span>Established {BRAND.established}</span>
@@ -95,6 +107,42 @@ const Home = () => {
           </span>
         </div>
       </div>
+
+      {/* ============ THE CORE PHILOSOPHY ============ */}
+      <Section className="border-t border-gold/10 hex-bg">
+        <Stagger className="mx-auto max-w-3xl text-center">
+          <StaggerItem>
+            <Eyebrow centered>{CORE_PHILOSOPHY.eyebrow}</Eyebrow>
+          </StaggerItem>
+          <StaggerItem>
+            <h2 className="mt-6 text-display text-2xl leading-snug text-ghost md:text-3xl lg:text-4xl">
+              {CORE_PHILOSOPHY.intro}
+            </h2>
+          </StaggerItem>
+        </Stagger>
+
+        <Stagger
+          className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3"
+          gap={0.16}
+          delay={0.3}
+        >
+          {CORE_PHILOSOPHY.columns.map((col, i) => (
+            <StaggerItem key={col.label} className="h-full">
+              <div className="group flex h-full flex-col border-t-2 border-gold bg-obsidian/50 p-8 transition-colors duration-500 hover:bg-obsidian">
+                <div className="font-mono text-[0.62rem] uppercase tracking-[0.24em] text-gold/70">
+                  {`0${i + 1}`}
+                </div>
+                <h3 className="mt-5 font-serif text-xl text-ghost lg:text-2xl">
+                  {col.label}
+                </h3>
+                <p className="mt-3 text-xs font-light leading-relaxed text-silver/60">
+                  {col.body}
+                </p>
+              </div>
+            </StaggerItem>
+          ))}
+        </Stagger>
+      </Section>
 
       {/* ============ 01 — BRAND ESSENCE ============ */}
       <Section className="border-y border-gold/10 bg-midnight">

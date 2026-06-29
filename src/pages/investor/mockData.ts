@@ -56,6 +56,31 @@ export type ActivityItem = {
   detail: string;
 };
 
+/** Mandate summary facts — the glance-level credential line + account header. */
+export type Mandate = {
+  name: string;
+  inception: string;
+  /** Next scheduled portfolio review (sample). */
+  nextReview: string;
+};
+
+/** Dedicated relationship-management coverage for the member (sample). */
+export type Relationship = {
+  manager: string;
+  title: string;
+  /** Secure contact address — illustrative; shown as plain text, not a link. */
+  email: string;
+};
+
+/** A statement / document in the member document vault (sample). */
+export type DocumentItem = {
+  title: string;
+  kind: "Statement" | "Agreement" | "Disclosure" | "Tax" | "Notice";
+  date: string;
+  /** Illustrative file descriptor shown beside the inert download control. */
+  format: string;
+};
+
 /* ---------------------------------------------------------------
    Headline summary — used for the dashboard tiles + portfolio header.
    --------------------------------------------------------------- */
@@ -226,4 +251,55 @@ export const ACCOUNT_INFO: Array<{ k: string; v: string; mono?: boolean }> = [
   { k: "Reporting", v: "Quarterly · monitored", mono: false },
   { k: "Liquidity", v: "Monthly · 30-day notice", mono: false },
   { k: "Custody", v: "Segregated · prime", mono: false },
+];
+
+/* ---------------------------------------------------------------
+   Mandate, coverage & documents — private-client account surfaces.
+   MANDATE is the single object the dashboard credential strip and the
+   account page read from; its facts intentionally match the mandate
+   lines also surfaced through ACCOUNT_INFO above.
+   --------------------------------------------------------------- */
+export const MANDATE: Mandate = {
+  name: "Discretionary · Systematic",
+  inception: "Jul 2025",
+  nextReview: "Aug 2026",
+};
+
+export const RELATIONSHIP: Relationship = {
+  manager: "Helena Vance",
+  title: "Private Client Director",
+  email: "h.vance@obsidianquant.group",
+};
+
+export const DOCUMENTS: DocumentItem[] = [
+  {
+    title: "Q1 2026 Performance Statement",
+    kind: "Statement",
+    date: "Apr 2026",
+    format: "PDF",
+  },
+  {
+    title: "Discretionary Mandate Agreement",
+    kind: "Agreement",
+    date: "Jul 2025",
+    format: "PDF",
+  },
+  {
+    title: "Risk Disclosure Statement",
+    kind: "Disclosure",
+    date: "Jul 2025",
+    format: "PDF",
+  },
+  {
+    title: "Tax Pack 2025",
+    kind: "Tax",
+    date: "Feb 2026",
+    format: "PDF",
+  },
+  {
+    title: "Capacity Review Notice",
+    kind: "Notice",
+    date: "May 2026",
+    format: "PDF",
+  },
 ];

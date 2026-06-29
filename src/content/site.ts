@@ -10,7 +10,7 @@ export const BRAND = {
   slogan: "Beyond the Market. Within the Model.",
   badge: "Institutional Quantitative Asset Management",
   intro:
-    "A luxury quantitative investment architecture combining multi-layer systematic trading, institutional infrastructure, and absolute risk discipline.",
+    "A quantitative investment architecture combining multi-layer systematic trading, institutional infrastructure, and absolute risk discipline.",
   email: "access@obsidianquant.group",
   presence: ["Zurich", "Singapore", "New York"],
   established: "MMXXVI",

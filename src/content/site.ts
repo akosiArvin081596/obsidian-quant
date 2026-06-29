@@ -6,7 +6,7 @@
 export const BRAND = {
   name: "Obsidian Quant Group",
   short: "Obsidian Quant",
-  primaryTagline: "Forged in Precision.",
+  primaryTagline: "Profit from Market Dislocation.",
   slogan: "Beyond the Market. Within the Model.",
   badge: "Institutional Quantitative Asset Management",
   intro:
@@ -14,6 +14,13 @@ export const BRAND = {
   email: "access@obsidianquant.group",
   presence: ["Zurich", "Singapore", "New York"],
   established: "MMXXVI",
+} as const;
+
+/* ---------- Hero (Home) ---------- */
+export const HERO = {
+  headlineLead: "Profit from",
+  headlineAccent: "Market Dislocation.",
+  sub: "Moving beyond passive indexing. We capture alpha by mathematically pricing human emotion and structural market inefficiencies.",
 } as const;
 
 export const TAGLINES = {
@@ -36,6 +43,27 @@ export const LEGAL = [
   "Regulatory Disclosure",
   "Data Cryptography",
 ] as const;
+
+/* ---------- Core Philosophy (Home — three-column feature) ---------- */
+export const CORE_PHILOSOPHY = {
+  eyebrow: "The Core Philosophy",
+  intro:
+    "While passive strategies simply participate in market appreciation, our active multi-strategy approach targets the underlying mechanics of how markets misprice risk.",
+  columns: [
+    {
+      label: "The Problem",
+      body: "Human emotions and systemic behavioral biases create recurring, predictable inefficiencies that standard models fail to reflect in market prices.",
+    },
+    {
+      label: "Our Solution",
+      body: "We express human behavior mathematically. Utilizing sentiment analysis, volatility modeling, and advanced probability theory, we deploy diversified, complementary strategies engineered to perform in all market environments.",
+    },
+    {
+      label: "The Result",
+      body: "A highly differentiated return profile driven by volatility, time decay, and relative value rather than pure market direction.",
+    },
+  ],
+} as const;
 
 /* ---------- Essence (brand pillars) ---------- */
 export const ESSENCE = {

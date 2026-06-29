@@ -60,16 +60,9 @@ const Home = () => {
             <GoldRule className="mx-auto my-8 w-28" />
           </motion.div>
 
-          <motion.p
-            className="mx-auto max-w-xl text-sm font-light leading-relaxed tracking-wide text-silver/60"
-            {...beat(1.95)}
-          >
-            {BRAND.intro}
-          </motion.p>
-
           <motion.div
             className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
-            {...beat(2.3)}
+            {...beat(1.95)}
           >
             <Button to="/strategy" variant="primary">
               Explore Strategy
@@ -121,21 +114,19 @@ const Home = () => {
           </StaggerItem>
         </Stagger>
 
-        <Stagger
-          className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3"
-          gap={0.16}
-          delay={0.3}
-        >
+        <Stagger className="mt-16 border-t border-gold/15" gap={0.16} delay={0.3}>
           {CORE_PHILOSOPHY.columns.map((col, i) => (
-            <StaggerItem key={col.label} className="h-full">
-              <div className="group flex h-full flex-col border-t-2 border-gold bg-obsidian/50 p-8 transition-colors duration-500 hover:bg-obsidian">
-                <div className="font-mono text-[0.62rem] uppercase tracking-[0.24em] text-gold/70">
-                  {`0${i + 1}`}
+            <StaggerItem key={col.label}>
+              <div className="group grid grid-cols-1 gap-4 border-b border-gold/15 py-10 md:grid-cols-12 md:gap-8 md:py-12">
+                <div className="flex items-baseline gap-4 md:col-span-4">
+                  <span className="font-serif text-4xl leading-none text-gold/80 transition-colors duration-500 group-hover:text-gold lg:text-5xl">
+                    {`0${i + 1}`}
+                  </span>
+                  <h3 className="font-serif text-2xl text-ghost lg:text-3xl">
+                    {col.label}
+                  </h3>
                 </div>
-                <h3 className="mt-5 font-serif text-xl text-ghost lg:text-2xl">
-                  {col.label}
-                </h3>
-                <p className="mt-3 text-xs font-light leading-relaxed text-silver/60">
+                <p className="text-sm font-light leading-relaxed text-silver/70 md:col-span-8 lg:text-base">
                   {col.body}
                 </p>
               </div>

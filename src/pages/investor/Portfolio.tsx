@@ -55,7 +55,12 @@ const Portfolio = () => {
 
   return (
     <div>
-      <header className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <header className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        {/* faint ambient bloom behind the header */}
+        <div
+          aria-hidden
+          className="gold-bloom pointer-events-none absolute -left-16 -top-20 z-[-1] h-[18rem] w-[18rem] opacity-50"
+        />
         <div className="max-w-2xl">
           <Eyebrow index="02">Member Portfolio</Eyebrow>
           <h1 className="mt-5 text-display text-4xl text-ghost lg:text-5xl">

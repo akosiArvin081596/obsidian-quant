@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Eyebrow from "../../components/Eyebrow";
 import GoldRule from "../../components/GoldRule";
 import PerformanceChart from "../../components/PerformanceChart";
+import Spotlight from "../../components/Spotlight";
 import { useSession } from "./session-context";
 import SampleDataBadge from "./SampleDataBadge";
 import {
@@ -48,12 +49,17 @@ const Dashboard = () => {
 
   return (
     <div>
-      <header className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <header className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        {/* soft ambient bloom behind the greeting */}
+        <div
+          aria-hidden
+          className="gold-bloom pointer-events-none absolute -left-16 -top-20 z-[-1] h-[20rem] w-[20rem] opacity-60"
+        />
         <div className="max-w-2xl">
           <Eyebrow index="01">Member Dashboard</Eyebrow>
           <h1 className="mt-5 text-display text-4xl text-ghost lg:text-5xl">
             Welcome back,{" "}
-            <span className="text-gold-gradient">{memberId || "Member"}</span>.
+            <span className="text-gold-shimmer">{memberId || "Member"}</span>.
           </h1>
           <p className="mt-4 text-sm font-light leading-relaxed text-silver/60">
             Your private overview — mandate at a glance, with the latest
@@ -146,30 +152,35 @@ const Dashboard = () => {
         </div>
 
         {/* Quick links into the rest of the member area */}
-        <nav className="flex flex-col gap-4" aria-label="Member area shortcuts">
-          {QUICK_LINKS.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className="group flex flex-1 flex-col justify-between border border-gold/10 bg-obsidian/40 p-6 transition-all duration-500 hover:-translate-y-1 hover:border-gold/30"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[0.6rem] font-semibold uppercase tracking-[0.22em] text-gold">
-                  {link.label}
-                </span>
-                <span
-                  className="text-silver/40 transition-transform duration-500 group-hover:translate-x-1 group-hover:text-gold"
-                  aria-hidden
-                >
-                  &rarr;
-                </span>
-              </div>
-              <p className="mt-6 text-sm font-light leading-relaxed text-silver/65">
-                {link.desc}
-              </p>
-            </Link>
-          ))}
-        </nav>
+        <Spotlight className="flex" size={320} strength={0.1}>
+          <nav
+            className="flex flex-1 flex-col gap-4"
+            aria-label="Member area shortcuts"
+          >
+            {QUICK_LINKS.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="group relative flex flex-1 flex-col justify-between border border-gold/10 bg-obsidian/40 p-6 transition-all duration-500 hover:-translate-y-1 hover:border-gold/30"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[0.6rem] font-semibold uppercase tracking-[0.22em] text-gold">
+                    {link.label}
+                  </span>
+                  <span
+                    className="text-silver/40 transition-transform duration-500 group-hover:translate-x-1 group-hover:text-gold"
+                    aria-hidden
+                  >
+                    &rarr;
+                  </span>
+                </div>
+                <p className="mt-6 text-sm font-light leading-relaxed text-silver/65">
+                  {link.desc}
+                </p>
+              </Link>
+            ))}
+          </nav>
+        </Spotlight>
       </section>
 
       {/* ============ RECENT ACTIVITY / NOTICES ============ */}

@@ -8,6 +8,8 @@ import Button from "../components/Button";
 import GoldRule from "../components/GoldRule";
 import AuroraRibbon from "../components/AuroraRibbon";
 import HexField from "../components/HexField";
+import Parallax from "../components/Parallax";
+import Spotlight from "../components/Spotlight";
 import StrategyProcess from "../components/StrategyProcess";
 import { STRATEGY, POSITIONING } from "../content/site";
 
@@ -87,7 +89,16 @@ const Strategy = () => (
     </Section>
 
     {/* ============ PROCESS — SYSTEMATIC PIPELINE ============ */}
-    <Section className="hex-bg">
+    <Section className="isolate hex-bg">
+      {/* ambient gold bloom behind the pipeline — drifts gently on scroll */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      >
+        <Parallax className="absolute inset-0" speed={0.18}>
+          <div className="gold-bloom absolute left-1/2 top-[60%] h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2" />
+        </Parallax>
+      </div>
       <Stagger className="mx-auto max-w-3xl text-center">
         <StaggerItem>
           <Eyebrow centered>The Pipeline</Eyebrow>
@@ -138,8 +149,9 @@ const Strategy = () => (
           </StaggerItem>
         </Stagger>
 
-        <Stagger
-          className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-8"
+        <Spotlight className="lg:col-span-8">
+          <Stagger
+          className="grid grid-cols-1 gap-5 sm:grid-cols-2"
           gap={0.15}
           delay={1.95}
         >
@@ -164,7 +176,8 @@ const Strategy = () => (
               </div>
             </StaggerItem>
           ))}
-        </Stagger>
+          </Stagger>
+        </Spotlight>
       </div>
     </Section>
 

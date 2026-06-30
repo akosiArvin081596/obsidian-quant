@@ -60,9 +60,11 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-4">
-          <Button to="/contact" variant="outline" className="hidden sm:inline-flex">
-            Request Access
-          </Button>
+          <span className="hidden sm:inline-flex">
+            <Button to="/contact" variant="outline">
+              Request Access
+            </Button>
+          </span>
 
           {/* Mobile toggle */}
           <button

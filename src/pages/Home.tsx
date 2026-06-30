@@ -1,11 +1,13 @@
-import { memo } from "react";
-import { motion } from "framer-motion";
+import { memo, useRef } from "react";
+import type { PointerEvent } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 
 import Section from "../components/Section";
 import Eyebrow from "../components/Eyebrow";
 import Button from "../components/Button";
 import GoldRule from "../components/GoldRule";
 import AuroraRibbon from "../components/AuroraRibbon";
+import Parallax from "../components/Parallax";
 import { Stagger, StaggerItem } from "../components/Stagger";
 import { EASE_LUX } from "../lib/motion";
 import {
@@ -17,21 +19,98 @@ import {
   ARCHITECTURE,
 } from "../content/site";
 
+/** Sparse gold motes drifting up through the hero (deterministic — fixed once). */
+const EMBERS = [
+  { left: "14%", delay: 0, dur: 7.5, drift: 10 },
+  { left: "27%", delay: 2.4, dur: 9, drift: -8 },
+  { left: "41%", delay: 4.1, dur: 8, drift: 6 },
+  { left: "56%", delay: 1.3, dur: 9.5, drift: -10 },
+  { left: "68%", delay: 5.4, dur: 7, drift: 9 },
+  { left: "81%", delay: 3.2, dur: 10, drift: -6 },
+  { left: "35%", delay: 6.6, dur: 8.5, drift: 5 },
+  { left: "73%", delay: 7.8, dur: 9, drift: -7 },
+] as const;
+
 const Home = () => {
-  // Hero entrance begins as the forge curtain lifts; beats hang off this.
-  const HERO_T = 2.4;
+  const reduce = useReducedMotion();
+  // Hero entrance begins as the forge curtain lifts; under reduced motion the
+  // curtain is much shorter, so the beats start sooner.
+  const HERO_T = reduce ? 0.7 : 2.4;
   const beat = (t: number) => ({
     initial: { opacity: 0, y: 22, filter: "blur(6px)" },
     animate: { opacity: 1, y: 0, filter: "blur(0px)" },
     transition: { delay: HERO_T + t, duration: 0.9, ease: EASE_LUX },
   });
 
+  const heroRef = useRef<HTMLElement>(null);
+  const onHeroMove = (e: PointerEvent<HTMLElement>) => {
+    const el = heroRef.current;
+    if (!el || e.pointerType === "touch") return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    el.style.setProperty("--my", `${e.clientY - r.top}px`);
+    el.style.setProperty("--glow", "1");
+  };
+  const onHeroLeave = () => heroRef.current?.style.setProperty("--glow", "0");
+
   return (
     <>
       {/* ============ HERO ============ */}
-      <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 pt-28 hex-bg gold-grid">
-        <AuroraRibbon intensity={0.85} />
+      <section
+        ref={heroRef}
+        onPointerMove={reduce ? undefined : onHeroMove}
+        onPointerLeave={reduce ? undefined : onHeroLeave}
+        className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 pt-28 hex-bg gold-grid"
+      >
+        {/* parallax aurora — drifts as you scroll for depth */}
+        <Parallax className="absolute inset-0" speed={0.3}>
+          <AuroraRibbon intensity={0.7} />
+        </Parallax>
+
+        {/* ambient gold bloom behind the headline */}
+        <div
+          aria-hidden
+          className="gold-bloom pointer-events-none absolute left-1/2 top-[44%] h-[34rem] w-[34rem] -translate-x-1/2 -translate-y-1/2"
+        />
+
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-obsidian/50 via-transparent to-obsidian" />
+
+        {/* cursor-following gold glow */}
+        {!reduce && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-[1] transition-opacity duration-500"
+            style={{
+              opacity: "var(--glow, 0)",
+              background:
+                "radial-gradient(460px circle at var(--mx, 50%) var(--my, 50%), rgba(184,138,74,0.16), transparent 65%)",
+            }}
+          />
+        )}
+
+        {/* drifting gold embers */}
+        {!reduce && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-[1] overflow-hidden"
+          >
+            {EMBERS.map((e, i) => (
+              <motion.span
+                key={i}
+                className="absolute bottom-[-12px] block h-1 w-1 rounded-full bg-warm-gold/50"
+                style={{ left: e.left, filter: "blur(0.5px)" }}
+                initial={{ opacity: 0, y: 0, x: 0 }}
+                animate={{ opacity: [0, 0.6, 0], y: [-20, -340], x: [0, e.drift] }}
+                transition={{
+                  duration: e.dur,
+                  delay: e.delay,
+                  repeat: Infinity,
+                  ease: "easeOut",
+                }}
+              />
+            ))}
+          </span>
+        )}
 
         <div className="relative z-10 mx-auto max-w-4xl text-center">
           <motion.div className="flex justify-center" {...beat(0)}>
@@ -46,7 +125,7 @@ const Home = () => {
             {...beat(0.5)}
           >
             {HERO.headlineLead}{" "}
-            <span className="text-gold-gradient">{HERO.headlineAccent}</span>
+            <span className="text-gold-shimmer">{HERO.headlineAccent}</span>
           </motion.h1>
 
           <motion.p

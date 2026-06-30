@@ -4,6 +4,7 @@ import PageHero from "../components/PageHero";
 import Section from "../components/Section";
 import Button from "../components/Button";
 import Reveal from "../components/Reveal";
+import Spotlight from "../components/Spotlight";
 import { BRAND, CONTACT } from "../content/site";
 import { cn } from "../lib/cn";
 
@@ -29,10 +30,16 @@ const Contact = () => {
       />
 
       <Section className="bg-midnight" spacing="py-20 lg:py-28">
-        <div className="grid grid-cols-1 gap-14 lg:grid-cols-12">
+        <div className="relative grid grid-cols-1 gap-14 lg:grid-cols-12">
+          {/* ambient gold bloom seated behind the form + sidebar */}
+          <div
+            aria-hidden
+            className="gold-bloom pointer-events-none absolute left-[38%] top-1/2 h-[26rem] w-[26rem] -translate-y-1/2 opacity-60"
+          />
           {/* Form */}
           <Reveal className="lg:col-span-7">
-            <div className="border border-gold/15 bg-obsidian/50 p-8 backdrop-blur-sm lg:p-10 gold-grid">
+            <Spotlight size={360} strength={0.1}>
+              <div className="relative z-10 border border-gold/15 bg-obsidian/50 p-8 backdrop-blur-sm lg:p-10 gold-grid">
               {submitted ? (
                 <div className="flex min-h-[26rem] flex-col items-center justify-center text-center">
                   <div className="flex h-14 w-14 items-center justify-center border border-graph/50 text-graph">
@@ -114,7 +121,8 @@ const Contact = () => {
                   </p>
                 </form>
               )}
-            </div>
+              </div>
+            </Spotlight>
           </Reveal>
 
           {/* Secure info */}

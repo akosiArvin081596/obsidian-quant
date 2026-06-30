@@ -19,7 +19,7 @@ type ButtonProps = {
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    "bg-gold text-obsidian hover:bg-warm-gold shadow-[0_14px_40px_-16px_rgba(184,138,74,0.7)]",
+    "btn-sheen bg-gold text-obsidian hover:bg-warm-gold hover:-translate-y-0.5 shadow-[0_14px_40px_-16px_rgba(184,138,74,0.7)] hover:shadow-[0_20px_52px_-14px_rgba(212,175,55,0.85)]",
   outline:
     "border border-gold text-gold hover:bg-gold hover:text-obsidian",
   ghost:

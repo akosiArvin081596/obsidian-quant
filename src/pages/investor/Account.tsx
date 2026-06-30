@@ -2,6 +2,7 @@ import { memo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Eyebrow from "../../components/Eyebrow";
 import GoldRule from "../../components/GoldRule";
+import Spotlight from "../../components/Spotlight";
 import SampleDataBadge from "./SampleDataBadge";
 import { useSession } from "./session-context";
 import { DOCUMENTS, MANDATE, RELATIONSHIP } from "./mockData";
@@ -49,7 +50,12 @@ const Account = () => {
 
   return (
     <div>
-      <header className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <header className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        {/* faint ambient bloom behind the header */}
+        <div
+          aria-hidden
+          className="gold-bloom pointer-events-none absolute -left-16 -top-20 z-[-1] h-[18rem] w-[18rem] opacity-50"
+        />
         <div className="max-w-2xl">
           <Eyebrow index="03">Account</Eyebrow>
           <h1 className="mt-5 text-display text-4xl text-ghost lg:text-5xl">
@@ -67,73 +73,73 @@ const Account = () => {
       <GoldRule className="my-10" />
 
       {/* ============ IDENTITY + RELATIONSHIP ============ */}
-      <section
-        className="grid gap-6 lg:grid-cols-2"
-        aria-label="Membership and relationship"
-      >
-        {/* Membership identity */}
-        <div className="relative overflow-hidden border border-gold/10 bg-midnight/40 p-6 gold-grid lg:p-8">
-          <div className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-gold">
-            Membership
-          </div>
-          <dl className="mt-5 divide-y divide-silver/5">
-            {identity.map((row) => (
-              <div
-                key={row.k}
-                className="flex items-center justify-between gap-6 py-3.5"
-              >
-                <dt className="text-[0.62rem] font-medium uppercase tracking-[0.22em] text-silver/45">
-                  {row.k}
-                </dt>
-                <dd
-                  className={`text-sm ${row.mono ? "font-mono" : "font-light"} ${
-                    row.tone === "graph" ? "text-graph" : "text-ghost"
-                  }`}
+      <section aria-label="Membership and relationship">
+        {/* very faint cursor spotlight drifting across the two cards */}
+        <Spotlight className="grid gap-6 lg:grid-cols-2" size={420} strength={0.08}>
+          {/* Membership identity */}
+          <div className="relative overflow-hidden border border-gold/10 bg-midnight/40 p-6 gold-grid lg:p-8">
+            <div className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-gold">
+              Membership
+            </div>
+            <dl className="mt-5 divide-y divide-silver/5">
+              {identity.map((row) => (
+                <div
+                  key={row.k}
+                  className="flex items-center justify-between gap-6 py-3.5"
                 >
-                  {row.v}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </div>
+                  <dt className="text-[0.62rem] font-medium uppercase tracking-[0.22em] text-silver/45">
+                    {row.k}
+                  </dt>
+                  <dd
+                    className={`text-sm ${row.mono ? "font-mono" : "font-light"} ${
+                      row.tone === "graph" ? "text-graph" : "text-ghost"
+                    }`}
+                  >
+                    {row.v}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
 
-        {/* Relationship & coverage */}
-        <div className="relative overflow-hidden border border-gold/10 bg-midnight/40 p-6 gold-grid lg:p-8">
-          <div className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-gold">
-            Relationship & coverage
-          </div>
-          <div className="mt-5">
-            <div className="font-serif text-xl text-ghost">
-              {RELATIONSHIP.manager}
+          {/* Relationship & coverage */}
+          <div className="relative overflow-hidden border border-gold/10 bg-midnight/40 p-6 gold-grid lg:p-8">
+            <div className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-gold">
+              Relationship & coverage
             </div>
-            <div className="mt-1 text-[0.62rem] font-medium uppercase tracking-[0.18em] text-silver/50">
-              {RELATIONSHIP.title}
-            </div>
-          </div>
-          <dl className="mt-6 divide-y divide-silver/5 border-t border-silver/5">
-            {coverage.map((row) => (
-              <div
-                key={row.k}
-                className="flex items-center justify-between gap-6 py-3.5"
-              >
-                <dt className="text-[0.62rem] font-medium uppercase tracking-[0.22em] text-silver/45">
-                  {row.k}
-                </dt>
-                <dd
-                  className={`text-sm text-ghost ${
-                    row.mono ? "font-mono" : "font-light"
-                  }`}
-                >
-                  {row.v}
-                </dd>
+            <div className="mt-5">
+              <div className="font-serif text-xl text-ghost">
+                {RELATIONSHIP.manager}
               </div>
-            ))}
-          </dl>
-          <p className="mt-6 text-[0.66rem] font-light leading-relaxed text-silver/45">
-            Your dedicated coverage for mandate queries, reporting and reviews.
-            Contact details are illustrative in this sample environment.
-          </p>
-        </div>
+              <div className="mt-1 text-[0.62rem] font-medium uppercase tracking-[0.18em] text-silver/50">
+                {RELATIONSHIP.title}
+              </div>
+            </div>
+            <dl className="mt-6 divide-y divide-silver/5 border-t border-silver/5">
+              {coverage.map((row) => (
+                <div
+                  key={row.k}
+                  className="flex items-center justify-between gap-6 py-3.5"
+                >
+                  <dt className="text-[0.62rem] font-medium uppercase tracking-[0.22em] text-silver/45">
+                    {row.k}
+                  </dt>
+                  <dd
+                    className={`text-sm text-ghost ${
+                      row.mono ? "font-mono" : "font-light"
+                    }`}
+                  >
+                    {row.v}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-6 text-[0.66rem] font-light leading-relaxed text-silver/45">
+              Your dedicated coverage for mandate queries, reporting and reviews.
+              Contact details are illustrative in this sample environment.
+            </p>
+          </div>
+        </Spotlight>
       </section>
 
       {/* ============ DOCUMENTS & STATEMENTS ============ */}

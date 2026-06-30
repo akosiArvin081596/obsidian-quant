@@ -40,11 +40,16 @@ const Login = () => {
 
   return (
     <motion.div
-      className="w-full max-w-md"
+      className="relative w-full max-w-md"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: EASE_LUX }}
     >
+      {/* soft gold bloom behind the gateway card */}
+      <div
+        aria-hidden
+        className="gold-bloom pointer-events-none absolute left-1/2 top-1/2 z-[-1] h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2"
+      />
       <div className="border border-gold/20 bg-midnight/60 p-8 backdrop-blur-md gold-grid lg:p-10">
         <div className="text-center">
           <div className="mb-7 flex justify-center">

@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import ScrollToTop from "./ScrollToTop";
 import { SessionProvider } from "../pages/investor/session";
+import GrainVignette from "../components/GrainVignette";
 
 /**
  * Root of the investor experience (mockup). Owns the mock session so both the
@@ -9,6 +10,7 @@ import { SessionProvider } from "../pages/investor/session";
  */
 const InvestorLayout = () => (
   <SessionProvider>
+    <GrainVignette />
     <ScrollToTop />
     <Outlet />
   </SessionProvider>

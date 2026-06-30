@@ -6,6 +6,8 @@ import Eyebrow from "../components/Eyebrow";
 import { Stagger, StaggerItem } from "../components/Stagger";
 import Button from "../components/Button";
 import AuroraRibbon from "../components/AuroraRibbon";
+import Parallax from "../components/Parallax";
+import Spotlight from "../components/Spotlight";
 import ArchitectureLayers from "../components/ArchitectureLayers";
 import { ARCHITECTURE } from "../content/site";
 
@@ -19,7 +21,16 @@ const Architecture = () => (
     />
 
     {/* ============ SYSTEM LAYERS ============ */}
-    <Section className="border-y border-gold/10 bg-midnight">
+    <Section className="isolate border-y border-gold/10 bg-midnight">
+      {/* ambient gold bloom behind the layer diagram — subtle scroll parallax */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      >
+        <Parallax className="absolute inset-0" speed={0.18}>
+          <div className="gold-bloom absolute left-[60%] top-1/2 h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2" />
+        </Parallax>
+      </div>
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
         <div className="lg:col-span-4">
           <Stagger className="lg:sticky lg:top-32">
@@ -60,8 +71,9 @@ const Architecture = () => (
         </StaggerItem>
       </Stagger>
 
-      <Stagger
-        className="mt-14 grid grid-cols-1 gap-px overflow-hidden border border-gold/10 bg-gold/10 md:grid-cols-2"
+      <Spotlight className="mt-14">
+        <Stagger
+        className="grid grid-cols-1 gap-px overflow-hidden border border-gold/10 bg-gold/10 md:grid-cols-2"
         gap={0.15}
         delay={0.3}
       >
@@ -93,7 +105,8 @@ const Architecture = () => (
             </div>
           </StaggerItem>
         ))}
-      </Stagger>
+        </Stagger>
+      </Spotlight>
     </Section>
 
     {/* ============ CLOSING CTA ============ */}

@@ -39,7 +39,7 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   body {
@@ -50,7 +50,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   ::selection {
@@ -167,6 +167,53 @@
     background: rgba(17, 26, 40, 0.6);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Periodic specular sheen sweeping across a gold surface (primary button) */
+  .btn-sheen {
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255, 248, 230, 0.4) 50%,
+      transparent 60%
+    );
+    background-size: 220% 100%;
+    animation: shimmer 5s ease-in-out infinite;
+  }
+
+  /* Gold gradient text with a slow specular band sweeping across — light on gold */
+  .text-gold-shimmer {
+    background: linear-gradient(
+      110deg,
+      #8a6b30 0%,
+      #b88a4a 28%,
+      #f3e3b8 50%,
+      #b88a4a 72%,
+      #8a6b30 100%
+    );
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 6.5s ease-in-out infinite;
+  }
+
+  /* Soft radial gold bloom for ambient section light */
+  .gold-bloom {
+    background: radial-gradient(
+      closest-side,
+      rgba(184, 138, 74, 0.2),
+      transparent 70%
+    );
+    filter: blur(34px);
   }
 }
 

@@ -6,6 +6,7 @@ import Eyebrow from "../components/Eyebrow";
 import { Stagger, StaggerItem } from "../components/Stagger";
 import Button from "../components/Button";
 import AuroraRibbon from "../components/AuroraRibbon";
+import Spotlight from "../components/Spotlight";
 import InsightCard from "../components/InsightCard";
 import { INSIGHTS } from "../content/site";
 
@@ -40,22 +41,31 @@ const Insights = () => {
           </StaggerItem>
         </Stagger>
 
-        <Stagger
-          className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3"
-          gap={0.15}
-          delay={0.3}
-        >
-          {/* Featured — spans two columns where space allows */}
-          <StaggerItem className="md:col-span-2">
-            <InsightCard article={featured} featured />
-          </StaggerItem>
+        {/* Article grid — ambient gold bloom behind, cursor spotlight across */}
+        <div className="relative mt-12">
+          <div
+            aria-hidden
+            className="gold-bloom pointer-events-none absolute left-1/2 top-1/2 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 opacity-70"
+          />
+          <Spotlight>
+            <Stagger
+              className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3"
+              gap={0.15}
+              delay={0.3}
+            >
+              {/* Featured — spans two columns where space allows */}
+              <StaggerItem className="md:col-span-2">
+                <InsightCard article={featured} featured />
+              </StaggerItem>
 
-          {rest.map((article) => (
-            <StaggerItem key={article.title}>
-              <InsightCard article={article} />
-            </StaggerItem>
-          ))}
-        </Stagger>
+              {rest.map((article) => (
+                <StaggerItem key={article.title}>
+                  <InsightCard article={article} />
+                </StaggerItem>
+              ))}
+            </Stagger>
+          </Spotlight>
+        </div>
       </Section>
 
       {/* ============ RESTRICTED DISTRIBUTION + CTA ============ */}

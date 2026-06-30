@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import Logo from "../../components/Logo";
 import GoldRule from "../../components/GoldRule";
 import { EASE_LUX } from "../../lib/motion";
-import { cn } from "../../lib/cn";
 import { useSession } from "./session-context";
 
 type Status = "idle" | "auth";
@@ -98,9 +97,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={status === "auth"}
-            className={cn(
-              "flex w-full items-center justify-center gap-3 rounded-none bg-gold py-3.5 text-xs font-semibold uppercase tracking-[0.22em] text-obsidian transition-colors hover:bg-warm-gold disabled:opacity-70",
-            )}
+            className="flex w-full items-center justify-center gap-3 rounded-none bg-gold py-3.5 text-xs font-semibold uppercase tracking-[0.22em] text-obsidian transition-colors hover:bg-warm-gold disabled:opacity-70"
           >
             {status === "auth" ? (
               <>

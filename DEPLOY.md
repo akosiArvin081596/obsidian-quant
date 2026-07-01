@@ -24,7 +24,11 @@ push to main ──▶ GitHub Actions ──ssh──▶ VPS forced-command ─�
 | Deploy script | `/usr/local/bin/deploy-obsidian.sh` |
 | VPS → GitHub | read-only **deploy key** `/root/.ssh/obsidian_deploy` |
 | GitHub Actions → VPS | `gha-obsidian-deploy` key, **forced command** (deploy only, no shell) |
-| GH secrets | `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` |
+| GH secrets | `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_KNOWN_HOSTS` |
+
+`VPS_KNOWN_HOSTS` must contain the VPS host key captured through a trusted
+channel. The workflow requires an exact match and will not trust a key learned
+during deployment.
 
 ## ⚠️ One-time DNS (manual — Hostinger hPanel)
 

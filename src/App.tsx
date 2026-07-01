@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { lazy, memo, Suspense } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import RootLayout from "./layouts/RootLayout";
@@ -6,18 +6,17 @@ import InvestorLayout from "./layouts/InvestorLayout";
 import GatewayLayout from "./layouts/GatewayLayout";
 import MemberLayout from "./layouts/MemberLayout";
 
-import Home from "./pages/Home";
-import Firm from "./pages/Firm";
-import Strategy from "./pages/Strategy";
-import Architecture from "./pages/Architecture";
-import Insights from "./pages/Insights";
-import Contact from "./pages/Contact";
-import NotFound from "./pages/NotFound";
-
-import InvestorLogin from "./pages/investor/Login";
-import InvestorDashboard from "./pages/investor/Dashboard";
-import InvestorPortfolio from "./pages/investor/Portfolio";
-import InvestorAccount from "./pages/investor/Account";
+const Home = lazy(() => import("./pages/Home"));
+const Firm = lazy(() => import("./pages/Firm"));
+const Strategy = lazy(() => import("./pages/Strategy"));
+const Architecture = lazy(() => import("./pages/Architecture"));
+const Insights = lazy(() => import("./pages/Insights"));
+const Contact = lazy(() => import("./pages/Contact"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const InvestorLogin = lazy(() => import("./pages/investor/Login"));
+const InvestorDashboard = lazy(() => import("./pages/investor/Dashboard"));
+const InvestorPortfolio = lazy(() => import("./pages/investor/Portfolio"));
+const InvestorAccount = lazy(() => import("./pages/investor/Account"));
 
 const router = createBrowserRouter([
   {
@@ -56,6 +55,10 @@ const router = createBrowserRouter([
   },
 ]);
 
-const App = () => <RouterProvider router={router} />;
+const App = () => (
+  <Suspense fallback={<div className="min-h-screen bg-obsidian" aria-label="Loading page" />}>
+    <RouterProvider router={router} />
+  </Suspense>
+);
 
 export default memo(App);

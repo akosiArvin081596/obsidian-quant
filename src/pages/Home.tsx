@@ -129,7 +129,7 @@ const Home = () => {
               {quantFlow.map(([icon, label], index) => (
                 <Fragment key={label}>
                   <div className="kev-hex">
-                    <span className="kev-hex-icon" aria-hidden>{index === quantFlow.length - 1 ? <img src="/assets/obsidian-gem.png" alt="" /> : icon}</span>
+                    <span className="kev-hex-icon" aria-hidden>{index === quantFlow.length - 1 ? <img src="/assets/obsidian-gem.webp" alt="" /> : icon}</span>
                     <span>{label}</span>
                   </div>
                   {index < quantFlow.length - 1 && <b aria-hidden />}

@@ -116,7 +116,7 @@ const ScrollChoreography = () => {
         transition={{ duration: 34, repeat: Infinity, ease: "linear" }}
       />
       <motion.img
-        src="/assets/obsidian-gem.png"
+        src="/assets/obsidian-gem.webp"
         alt=""
         className="relative w-full object-contain drop-shadow-[0_0_34px_rgba(184,138,74,.36)]"
         animate={reduce ? undefined : { y: [0, -10, 0] }}

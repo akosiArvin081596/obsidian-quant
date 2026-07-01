@@ -1,380 +1,227 @@
-import { memo, useRef } from "react";
-import type { PointerEvent } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-
+import { Fragment, memo, useRef } from "react";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import Section from "../components/Section";
 import Eyebrow from "../components/Eyebrow";
 import Button from "../components/Button";
-import GoldRule from "../components/GoldRule";
-import AuroraRibbon from "../components/AuroraRibbon";
-import Parallax from "../components/Parallax";
 import { Stagger, StaggerItem } from "../components/Stagger";
-import { EASE_LUX } from "../lib/motion";
+import Reveal from "../components/Reveal";
+import AnimatedCounter from "../components/AnimatedCounter";
 import {
-  BRAND,
-  HERO,
-  CORE_PHILOSOPHY,
-  ESSENCE,
-  POSITIONING,
   ARCHITECTURE,
+  BRAND,
+  CORE_PHILOSOPHY,
+  HERO,
+  POSITIONING,
+  STRATEGY,
 } from "../content/site";
 
-/** Sparse gold motes drifting up through the hero (deterministic — fixed once). */
-const EMBERS = [
-  { left: "14%", delay: 0, dur: 7.5, drift: 10 },
-  { left: "27%", delay: 2.4, dur: 9, drift: -8 },
-  { left: "41%", delay: 4.1, dur: 8, drift: 6 },
-  { left: "56%", delay: 1.3, dur: 9.5, drift: -10 },
-  { left: "68%", delay: 5.4, dur: 7, drift: 9 },
-  { left: "81%", delay: 3.2, dur: 10, drift: -6 },
-  { left: "35%", delay: 6.6, dur: 8.5, drift: 5 },
-  { left: "73%", delay: 7.8, dur: 9, drift: -7 },
+const passive = [
+  "Market beta exposure",
+  "No emotional advantage",
+  "One-dimensional returns",
+  "Market-direction dependent",
+  "Crowded and correlated",
+] as const;
+
+const systematic = [
+  "Multiple uncorrelated strategies",
+  "Behavioral inefficiencies mathematically priced",
+  "Volatility and time-decay edge",
+  "Market-direction agnostic",
+  "Diversified and complementary",
+] as const;
+
+const quantFlow = [
+  ["⌁", "Market Noise"],
+  ["◎", "Sentiment Analysis"],
+  ["▥", "Volatility Modeling"],
+  ["△", "Probability Engine"],
+  ["◔", "Portfolio Allocation"],
+  ["◆", "Alpha Generation"],
+] as const;
+
+const siteFacts = [
+  ["⌘", 4, "Process Stages"],
+  ["◎", 4, "Mandate Arenas"],
+  ["◇", 3, "Global Presences"],
+  ["Σ", 3, "Core Disciplines"],
+  ["⌄", 4, "Architecture Controls"],
+  ["◷", 6, "Research Notes"],
 ] as const;
 
 const Home = () => {
   const reduce = useReducedMotion();
-  // Hero entrance begins as the forge curtain lifts; under reduced motion the
-  // curtain is much shorter, so the beats start sooner.
-  const HERO_T = reduce ? 0.7 : 2.4;
-  const beat = (t: number) => ({
-    initial: { opacity: 0, y: 22, filter: "blur(6px)" },
-    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-    transition: { delay: HERO_T + t, duration: 0.9, ease: EASE_LUX },
-  });
-
   const heroRef = useRef<HTMLElement>(null);
-  const onHeroMove = (e: PointerEvent<HTMLElement>) => {
-    const el = heroRef.current;
-    if (!el || e.pointerType === "touch") return;
-    const r = el.getBoundingClientRect();
-    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
-    el.style.setProperty("--my", `${e.clientY - r.top}px`);
-    el.style.setProperty("--glow", "1");
-  };
-  const onHeroLeave = () => heroRef.current?.style.setProperty("--glow", "0");
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "8%"]);
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1.03, 1.065]);
 
   return (
     <>
-      {/* ============ HERO ============ */}
-      <section
-        ref={heroRef}
-        onPointerMove={reduce ? undefined : onHeroMove}
-        onPointerLeave={reduce ? undefined : onHeroLeave}
-        className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 pt-28 hex-bg gold-grid"
-      >
-        {/* parallax aurora — drifts as you scroll for depth */}
-        <Parallax className="absolute inset-0" speed={0.3}>
-          <AuroraRibbon intensity={0.7} />
-        </Parallax>
-
-        {/* ambient gold bloom behind the headline */}
-        <div
-          aria-hidden
-          className="gold-bloom pointer-events-none absolute left-1/2 top-[44%] h-[34rem] w-[34rem] -translate-x-1/2 -translate-y-1/2"
-        />
-
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-obsidian/50 via-transparent to-obsidian" />
-
-        {/* cursor-following gold glow */}
-        {!reduce && (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 z-[1] transition-opacity duration-500"
-            style={{
-              opacity: "var(--glow, 0)",
-              background:
-                "radial-gradient(460px circle at var(--mx, 50%) var(--my, 50%), rgba(184,138,74,0.16), transparent 65%)",
-            }}
-          />
-        )}
-
-        {/* drifting gold embers */}
-        {!reduce && (
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-0 z-[1] overflow-hidden"
-          >
-            {EMBERS.map((e, i) => (
-              <motion.span
-                key={i}
-                className="absolute bottom-[-12px] block h-1 w-1 rounded-full bg-warm-gold/50"
-                style={{ left: e.left, filter: "blur(0.5px)" }}
-                initial={{ opacity: 0, y: 0, x: 0 }}
-                animate={{ opacity: [0, 0.6, 0], y: [-20, -340], x: [0, e.drift] }}
-                transition={{
-                  duration: e.dur,
-                  delay: e.delay,
-                  repeat: Infinity,
-                  ease: "easeOut",
-                }}
-              />
-            ))}
-          </span>
-        )}
-
-        <div className="relative z-10 mx-auto max-w-4xl text-center">
-          <motion.div className="flex justify-center" {...beat(0)}>
-            <span className="inline-flex items-center gap-2 border border-gold/25 bg-midnight/50 px-4 py-1.5 text-[0.6rem] uppercase tracking-[0.28em] text-gold backdrop-blur-sm">
-              <span className="live-dot h-1.5 w-1.5 rounded-full bg-graph" />
-              {BRAND.badge}
-            </span>
-          </motion.div>
-
-          <motion.h1
-            className="mt-8 text-display text-5xl leading-[1.05] text-ghost md:text-7xl lg:text-8xl"
-            {...beat(0.5)}
-          >
-            {HERO.headlineLead}{" "}
-            <span className="text-gold-shimmer">{HERO.headlineAccent}</span>
-          </motion.h1>
-
-          <motion.p
-            className="mx-auto mt-7 max-w-2xl font-serif text-xl font-light leading-relaxed text-silver/80 md:text-2xl"
-            {...beat(1.2)}
-          >
-            {HERO.sub}
-          </motion.p>
-
-          <motion.div {...beat(1.6)}>
-            <GoldRule className="mx-auto my-8 w-28" />
-          </motion.div>
-
+      <section ref={heroRef} className="home-reference-hero reference-hero relative min-h-screen overflow-hidden border-b border-gold/20 px-6 pb-20 pt-36 lg:px-16 lg:pb-0 lg:pt-24">
+        <motion.div className="home-hero-bg absolute inset-0" style={reduce ? undefined : { y: heroY, scale: heroScale }} aria-hidden />
+        <div className="reference-stars absolute inset-0" aria-hidden />
+        <div className="reference-fog absolute inset-0" aria-hidden />
+        <div className="hero-side-dots" aria-hidden><b /><i /><i /><i /><i /></div>
+        <div className="mx-auto grid min-h-[calc(100vh-6rem)] max-w-7xl items-center gap-10 lg:grid-cols-[1.05fr_.95fr]">
           <motion.div
-            className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
-            {...beat(1.95)}
+            className="relative z-10 min-w-0 max-w-3xl"
+            initial={reduce ? false : { opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: reduce ? 0 : 0.7 }}
           >
-            <Button to="/strategy" variant="primary">
-              Explore Strategy
-            </Button>
-            <Button to="/contact" variant="ghost">
-              Request Access
-            </Button>
+            <Eyebrow>{BRAND.badge}</Eyebrow>
+            <h1 className="mt-7 text-display text-6xl leading-[.98] text-ghost sm:text-7xl lg:text-[6.5rem]">
+              {HERO.headlineLead}<br />
+              <span className="text-gold-gradient">{HERO.headlineAccent}</span>
+            </h1>
+            <p className="mt-7 max-w-xl text-base font-light leading-relaxed text-silver/80 lg:text-lg">
+              {HERO.sub}
+            </p>
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+              <Button to="/firm" variant="primary">Explore Our Philosophy</Button>
+              <Button to="/strategy" variant="outline">Our Strategies</Button>
+            </div>
+            <div className="mt-16 flex items-center gap-3 text-[.6rem] uppercase tracking-[.28em] text-silver/55">
+              <span className="flex h-8 w-5 items-center justify-center rounded-full border border-silver/40"><span className="h-1.5 w-1.5 rounded-full bg-gold" /></span>
+              Scroll to explore
+            </div>
           </motion.div>
+          <div className="hidden lg:block" aria-hidden />
         </div>
-
-        <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: HERO_T + 2.8, duration: 1.2 }}
-        >
-          <div className="h-20 w-px bg-gradient-to-b from-gold/50 to-transparent" />
-        </motion.div>
       </section>
 
-      {/* Mandate strip — a quiet institutional credential line. */}
-      {/* border-t only: the Core Philosophy section below carries its own top
-          hairline, so a single rule renders at this boundary, not a doubled one. */}
-      <div className="border-t border-gold/10 bg-midnight/30 px-6 py-4">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-7 gap-y-2 text-center text-[0.6rem] uppercase tracking-[0.26em] text-silver/45">
-          <span>Established {BRAND.established}</span>
-          <span className="h-1 w-1 rotate-45 bg-gold/50" aria-hidden />
-          <span>{BRAND.presence.join(" · ")}</span>
-          <span className="h-1 w-1 rotate-45 bg-gold/50" aria-hidden />
-          <span>Institutional Counterparties Only</span>
-          <span className="h-1 w-1 rotate-45 bg-gold/50" aria-hidden />
-          <span className="flex items-center gap-2 text-gold/80">
-            <span className="live-dot h-1.5 w-1.5 rounded-full bg-graph" />
-            Limited Capacity
-          </span>
+      <Section className="philosophy-showcase reference-panel overflow-hidden border-b border-gold/15">
+        <div className="grid items-center gap-12 lg:grid-cols-[1fr_18rem]">
+          <div>
+            <Stagger className="max-w-3xl">
+              <StaggerItem><Eyebrow>{CORE_PHILOSOPHY.eyebrow}</Eyebrow></StaggerItem>
+              <StaggerItem><h2 className="mt-5 text-display text-4xl text-ghost lg:text-6xl">The Architecture of Alpha</h2></StaggerItem>
+              <StaggerItem><p className="mt-4 max-w-2xl text-sm leading-relaxed text-silver/60">{CORE_PHILOSOPHY.intro}</p></StaggerItem>
+            </Stagger>
+            <Stagger className="philosophy-card-grid mt-12 grid gap-6 md:grid-cols-3" gap={0.14}>
+              {CORE_PHILOSOPHY.columns.map((item, index) => (
+                <StaggerItem key={item.label} className="h-full">
+                  <article className={`kev-philosophy-card h-full ${index === 1 ? "kev-philosophy-card-active" : ""}`}>
+                    <strong>0{index + 1}</strong>
+                    <h3>{item.label}</h3>
+                    <p>{item.body}</p>
+                    <div className={`kev-graphic ${["kev-brain", "kev-wave", "kev-chart"][index]}`} aria-hidden />
+                  </article>
+                </StaggerItem>
+              ))}
+            </Stagger>
+          </div>
+          <div className="hidden lg:block" aria-hidden />
         </div>
-      </div>
-
-      {/* ============ THE CORE PHILOSOPHY ============ */}
-      <Section className="border-t border-gold/10 hex-bg">
-        <Stagger className="mx-auto max-w-3xl text-center">
-          <StaggerItem>
-            <Eyebrow centered>{CORE_PHILOSOPHY.eyebrow}</Eyebrow>
-          </StaggerItem>
-          <StaggerItem>
-            <h2 className="mt-6 text-display text-2xl leading-snug text-ghost md:text-3xl lg:text-4xl">
-              {CORE_PHILOSOPHY.intro}
-            </h2>
-          </StaggerItem>
-        </Stagger>
-
-        <Stagger className="mt-16 border-t border-gold/15" gap={0.16} delay={0.3}>
-          {CORE_PHILOSOPHY.columns.map((col, i) => (
-            <StaggerItem key={col.label}>
-              <div className="group grid grid-cols-1 gap-4 border-b border-gold/15 py-10 md:grid-cols-12 md:gap-8 md:py-12">
-                <div className="flex items-baseline gap-4 md:col-span-4">
-                  <span className="font-serif text-4xl leading-none text-gold/80 transition-colors duration-500 group-hover:text-gold lg:text-5xl">
-                    {`0${i + 1}`}
-                  </span>
-                  <h3 className="font-serif text-2xl text-ghost lg:text-3xl">
-                    {col.label}
-                  </h3>
-                </div>
-                <p className="text-sm font-light leading-relaxed text-silver/70 md:col-span-8 lg:text-base">
-                  {col.body}
-                </p>
-              </div>
-            </StaggerItem>
-          ))}
-        </Stagger>
       </Section>
 
-      {/* ============ 01 — BRAND ESSENCE ============ */}
-      <Section className="border-y border-gold/10 bg-midnight">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
-          <Stagger className="lg:col-span-5">
-            <StaggerItem>
-              <Eyebrow index={ESSENCE.index}>{ESSENCE.eyebrow}</Eyebrow>
-            </StaggerItem>
-            <StaggerItem>
-              <h2 className="mt-6 text-display text-4xl text-ghost lg:text-5xl">
-                {ESSENCE.title}
-              </h2>
-            </StaggerItem>
-            <StaggerItem>
-              <p className="mt-6 max-w-md text-sm font-light leading-relaxed text-silver/70">
-                {ESSENCE.body}
-              </p>
-            </StaggerItem>
+      <Section className="kev-engine reference-engine overflow-hidden border-b border-gold/15">
+        <div className="kev-engine-layout grid items-center gap-14 lg:grid-cols-[310px_1fr]">
+          <Stagger>
+            <StaggerItem><Eyebrow>The Quant Engine</Eyebrow></StaggerItem>
+            <StaggerItem><h2 className="mt-5 text-display text-4xl text-ghost lg:text-6xl">Turning Complexity<br />Into Conviction</h2></StaggerItem>
+            <StaggerItem><p className="mt-5 max-w-sm text-sm leading-relaxed text-silver/65">{STRATEGY.hero.body}</p></StaggerItem>
+            <StaggerItem><div className="mt-8"><Button to="/strategy" variant="outline">See Our Strategies</Button></div></StaggerItem>
           </Stagger>
+          <Reveal>
+            <div className="kev-flow" aria-label="Systematic quantitative process">
+              {quantFlow.map(([icon, label], index) => (
+                <Fragment key={label}>
+                  <div className="kev-hex">
+                    <span className="kev-hex-icon" aria-hidden>{index === quantFlow.length - 1 ? <img src="/assets/obsidian-gem.png" alt="" /> : icon}</span>
+                    <span>{label}</span>
+                  </div>
+                  {index < quantFlow.length - 1 && <b aria-hidden />}
+                </Fragment>
+              ))}
+            </div>
+          </Reveal>
+        </div>
+      </Section>
 
-          <Stagger
-            className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:col-span-7"
-            delay={1.7}
-          >
-            {ESSENCE.cards.map((card) => (
-              <StaggerItem key={card.title} className="h-full">
-                <div className="group h-full border border-gold/10 bg-obsidian/40 p-7 backdrop-blur-sm transition-colors duration-500 hover:border-gold/30">
-                  <div className="mb-4 h-1.5 w-1.5 rotate-45 bg-gold transition-transform duration-500 group-hover:scale-150" />
-                  <h3 className="font-serif text-2xl text-ghost">{card.title}</h3>
-                  <p className="mt-3 text-xs leading-relaxed text-silver/60">
-                    {card.body}
-                  </p>
-                </div>
-              </StaggerItem>
+      <Section className="kev-compare reference-panel overflow-hidden border-b border-gold/15">
+        <div className="kev-compare-layout grid items-center gap-12 lg:grid-cols-[310px_1fr]">
+          <Stagger>
+            <StaggerItem><Eyebrow>Beyond Passive</Eyebrow></StaggerItem>
+            <StaggerItem><h2 className="mt-5 text-display text-4xl text-ghost lg:text-6xl">Not All Strategies<br />Are Created Equal</h2></StaggerItem>
+            <StaggerItem><p className="mt-5 text-sm leading-relaxed text-silver/65">{CORE_PHILOSOPHY.intro}</p></StaggerItem>
+            <StaggerItem><div className="mt-8"><Button to="/architecture" variant="outline">Why It Matters</Button></div></StaggerItem>
+          </Stagger>
+          <Stagger className="kev-compare-grid" gap={0.15}>
+            {[{ title: "Passive Investing", rows: passive }, { title: BRAND.short, rows: systematic }].map((group, i) => (
+              <Fragment key={group.title}>
+                {i === 1 && <div className="kev-vs" aria-hidden>VS</div>}
+                <article className={i ? "active" : ""}>
+                  <h3>{group.title}</h3>
+                  {group.rows.map((row) => <p key={row}>{row}</p>)}
+                  <div className={`kev-mini ${i ? "kev-goldline" : "kev-redline"}`} aria-hidden />
+                </article>
+              </Fragment>
             ))}
           </Stagger>
         </div>
       </Section>
 
-      {/* ============ 02 — POSITIONING ============ */}
-      {/* border-b only: Brand Essence supplies the hairline above, so a single
-          rule renders at that boundary instead of a doubled one. */}
-      <Section className="border-b border-gold/10 bg-midnight">
-        <Stagger className="mx-auto max-w-3xl text-center">
-          <StaggerItem>
-            <Eyebrow index={POSITIONING.index} centered>
-              {POSITIONING.eyebrow}
-            </Eyebrow>
-          </StaggerItem>
-          <StaggerItem>
-            <h2 className="mt-6 text-display text-4xl text-ghost lg:text-6xl">
-              {POSITIONING.title}
-            </h2>
-          </StaggerItem>
-          <StaggerItem>
-            <p className="mt-5 text-sm font-light tracking-wide text-silver/60">
-              {POSITIONING.body}
-            </p>
-          </StaggerItem>
-        </Stagger>
-
-        <Stagger className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3" delay={0.3}>
-          {POSITIONING.pillars.map((p) => (
-            <StaggerItem key={p.no} className="h-full">
-              <div className="group flex h-full flex-col justify-between border-t-2 border-gold bg-obsidian/50 p-8 transition-colors duration-500 hover:bg-obsidian">
-                <div>
-                  <div className="font-serif text-3xl text-gold">{p.no}</div>
-                  <h4 className="mt-5 text-lg font-medium text-ghost">
-                    {p.title}
-                  </h4>
-                  <p className="mt-3 text-xs font-light leading-relaxed text-silver/60">
-                    {p.body}
-                  </p>
-                </div>
-                <div className="mt-8 flex items-center justify-between border-t border-silver/10 pt-5 text-[0.6rem] uppercase tracking-[0.22em] text-gold">
-                  <span>{p.tag}</span>
-                  <span className="h-1 w-1 bg-gold" />
-                </div>
-              </div>
+      <Section className="facts-section overflow-hidden border-b border-gold/15" spacing="py-14 lg:py-16">
+        <div className="facts-orbit" aria-hidden />
+        <div className="relative z-10 mb-8 flex flex-wrap items-center justify-between gap-4">
+          <Eyebrow>By the Structure</Eyebrow>
+          <span className="text-[.58rem] uppercase tracking-[.22em] text-silver/40">Counts derived from this site’s published structure</span>
+        </div>
+        <Stagger className="facts-grid" gap={.1}>
+          {siteFacts.map(([icon, value, label]) => (
+            <StaggerItem key={label}>
+              <article>
+                <i aria-hidden>{icon}</i>
+                <strong><AnimatedCounter value={value} /></strong>
+                <span>{label}</span>
+              </article>
             </StaggerItem>
           ))}
         </Stagger>
       </Section>
 
-      {/* ============ 03 — ARCHITECTURE ============ */}
-      <Section className="hex-bg">
-        <Stagger className="mx-auto max-w-3xl text-center">
-          <StaggerItem>
-            <Eyebrow index={ARCHITECTURE.index} centered>
-              {ARCHITECTURE.eyebrow}
-            </Eyebrow>
-          </StaggerItem>
-          <StaggerItem>
-            <h2 className="mt-6 text-display text-4xl leading-tight text-ghost lg:text-5xl">
-              {ARCHITECTURE.title}
-            </h2>
-          </StaggerItem>
-          <StaggerItem>
-            <p className="mt-6 text-sm font-light leading-relaxed text-silver/70">
-              {ARCHITECTURE.body}
-            </p>
-          </StaggerItem>
+      <Section className="reference-panel border-b border-gold/15">
+        <Stagger className="text-center">
+          <StaggerItem><Eyebrow centered>Market Intelligence</Eyebrow></StaggerItem>
+          <StaggerItem><h2 className="mt-5 text-display text-4xl text-ghost lg:text-6xl">Where Data Becomes Conviction.</h2></StaggerItem>
         </Stagger>
-
-        <Stagger
-          className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2"
-          gap={0.15}
-          delay={0.3}
-        >
-          {ARCHITECTURE.checklist.map((item) => (
-            <StaggerItem key={item} className="h-full">
-              <div className="group flex h-full items-start gap-4 border border-gold/10 bg-obsidian/40 p-7 backdrop-blur-sm transition-colors duration-500 hover:border-gold/30">
-                <svg
-                  className="mt-0.5 h-5 w-5 flex-shrink-0 text-gold"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.6"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span className="text-xs font-medium leading-relaxed text-silver/80">
-                  {item}
-                </span>
-              </div>
+        <Stagger className="mt-12 grid gap-5 md:grid-cols-3" gap={0.15}>
+          {POSITIONING.pillars.map((item) => (
+            <StaggerItem key={item.no} className="h-full">
+              <article className="reference-card h-full p-8 text-center">
+                <span className="font-serif text-3xl text-gold">{item.no}</span>
+                <h3 className="mt-5 text-2xl">{item.title}</h3>
+                <p className="mt-4 text-xs leading-relaxed text-silver/65">{item.body}</p>
+              </article>
             </StaggerItem>
           ))}
         </Stagger>
       </Section>
 
-      {/* ============ CLOSING CTA ============ */}
-      <section className="relative overflow-hidden border-t border-gold/10 bg-midnight px-6 py-28 text-center lg:py-36">
-        <AuroraRibbon intensity={0.4} className="opacity-60" />
-        <Stagger className="relative z-10 mx-auto max-w-2xl">
-          <StaggerItem>
-            <Eyebrow centered>Limited Capacity</Eyebrow>
-          </StaggerItem>
-          <StaggerItem>
-            <h2 className="mt-6 text-display text-4xl text-ghost lg:text-6xl">
-              Access is by mandate, not by market.
-            </h2>
-          </StaggerItem>
-          <StaggerItem>
-            <p className="mx-auto mt-6 max-w-lg text-sm font-light leading-relaxed text-silver/60">
-              Obsidian Quant operates a strict limited-capacity footprint for
-              institutional counterparties. Begin secure verification to schedule a
-              briefing with our technical committee.
-            </p>
-          </StaggerItem>
-          <StaggerItem>
-            <div className="mt-10">
-              <Button to="/contact" variant="primary">
-                Request Strategic Allocation
-              </Button>
-            </div>
-          </StaggerItem>
-        </Stagger>
+      <section className="reference-quote relative grid min-h-[600px] place-items-center overflow-hidden border-b border-gold/15 px-6 py-28 text-center">
+        <div className="quote-stars absolute inset-0" aria-hidden />
+        <Reveal className="relative z-10 mx-auto max-w-5xl">
+          <Eyebrow centered>Precision, Systematized</Eyebrow>
+          <blockquote className="mt-8 font-serif text-4xl font-semibold leading-[1.05] text-ghost sm:text-6xl lg:text-8xl">
+            Markets misprice human emotion.<br />
+            We express it <span className="text-gold-gradient">mathematically.</span>
+          </blockquote>
+          <div className="mt-10"><Button to="/contact" variant="primary">Contact Obsidian Quant</Button></div>
+        </Reveal>
+      </section>
+
+      <section className="reference-closing relative overflow-hidden px-6 py-28 lg:px-16 lg:py-40">
+        <div className="mx-auto grid max-w-7xl items-center lg:grid-cols-[1fr_.8fr]">
+          <Stagger className="relative z-10 max-w-2xl">
+            <StaggerItem><Eyebrow>Built Different</Eyebrow></StaggerItem>
+            <StaggerItem><h2 className="mt-6 text-display text-5xl text-ghost lg:text-7xl">{ARCHITECTURE.title}</h2></StaggerItem>
+            <StaggerItem><p className="mt-6 max-w-lg text-sm leading-relaxed text-silver/70">{ARCHITECTURE.body}</p></StaggerItem>
+            <StaggerItem><div className="mt-9"><Button to="/contact" variant="primary">Partner With Obsidian</Button></div></StaggerItem>
+          </Stagger>
+          <div className="hidden lg:block" aria-hidden />
+        </div>
       </section>
     </>
   );

@@ -21,7 +21,7 @@ const Eyebrow = ({ children, index, centered, className }: EyebrowProps) => (
     <span className="h-1.5 w-1.5 rotate-45 bg-gold" aria-hidden />
     {index && <span className="text-gold/70">{index}</span>}
     {index && <span className="text-gold/40" aria-hidden>/</span>}
-    <span className="text-gold">{children}</span>
+    <span className="min-w-0 break-words text-gold">{children}</span>
     {centered && (
       <span className="h-px w-8 bg-gradient-to-r from-gold/50 to-transparent" aria-hidden />
     )}

@@ -47,9 +47,8 @@ const ScrollChoreography = () => {
     let observer: IntersectionObserver | undefined;
     const frame = requestAnimationFrame(() => {
       const sections = Array.from(document.querySelectorAll<HTMLElement>("main section"));
-      sections.forEach((section, index) => {
+      sections.forEach((section) => {
         section.classList.add("scroll-scene");
-        section.style.setProperty("--scene-index", String(index));
       });
 
       if (reduce) {

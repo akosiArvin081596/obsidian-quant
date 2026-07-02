@@ -7,6 +7,7 @@ import Reveal from "../components/Reveal";
 import Spotlight from "../components/Spotlight";
 import { BRAND, CONTACT } from "../content/site";
 import { cn } from "../lib/cn";
+import { buildContactMailto } from "../lib/contact";
 
 const inputClass =
   "w-full rounded-none border border-gold/20 bg-midnight/70 px-4 py-3.5 text-sm text-ghost placeholder:text-silver/30 transition-colors focus:border-gold focus:outline-none";
@@ -14,11 +15,14 @@ const labelClass =
   "mb-2 block text-[0.62rem] font-medium uppercase tracking-[0.24em] text-silver/55";
 
 const Contact = () => {
-  const [submitted, setSubmitted] = useState(false);
+  const [handoffStarted, setHandoffStarted] = useState(false);
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (!e.currentTarget.reportValidity()) return;
+    const mailto = buildContactMailto(BRAND.email, new FormData(e.currentTarget));
+    setHandoffStarted(true);
+    window.location.assign(mailto);
   };
 
   return (
@@ -40,39 +44,14 @@ const Contact = () => {
           <Reveal className="lg:col-span-7">
             <Spotlight size={360} strength={0.1}>
               <div className="relative z-10 border border-gold/15 bg-obsidian/50 p-8 backdrop-blur-sm lg:p-10 gold-grid">
-              {submitted ? (
-                <div className="flex min-h-[26rem] flex-col items-center justify-center text-center">
-                  <div className="flex h-14 w-14 items-center justify-center border border-graph/50 text-graph">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M5 13l4 4L19 7"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="mt-6 font-serif text-2xl text-ghost">
-                    Credentials received.
-                  </h3>
-                  <p className="mt-3 max-w-sm text-sm font-light text-silver/60">
-                    Your submission has entered our secure verification queue.
-                    Our technical committee will respond to qualified
-                    institutional counterparties directly.
-                  </p>
-                  <p className="mt-6 font-mono text-[0.65rem] uppercase tracking-[0.22em] text-gold">
-                    REF · OQG-{new Date().getFullYear()}-VERIFY
-                  </p>
-                </div>
-              ) : (
-                <form className="space-y-6" onSubmit={onSubmit} noValidate>
+                <form className="space-y-6" onSubmit={onSubmit}>
                   <div>
                     <label className={labelClass} htmlFor="entity">
                       {CONTACT.fields.entity}
                     </label>
                     <input
                       id="entity"
+                      name="entity"
                       type="text"
                       required
                       placeholder={CONTACT.fields.entityPlaceholder}
@@ -85,6 +64,7 @@ const Contact = () => {
                     </label>
                     <input
                       id="email"
+                      name="email"
                       type="email"
                       required
                       placeholder={CONTACT.fields.emailPlaceholder}
@@ -95,7 +75,7 @@ const Contact = () => {
                     <label className={labelClass} htmlFor="mandate">
                       Counterparty Profile
                     </label>
-                    <select id="mandate" className={cn(inputClass, "appearance-none")}>
+                    <select id="mandate" name="profile" className={cn(inputClass, "appearance-none")}>
                       <option>Sovereign Wealth Fund</option>
                       <option>Family Office</option>
                       <option>Institutional Allocator</option>
@@ -108,6 +88,7 @@ const Contact = () => {
                     </label>
                     <textarea
                       id="note"
+                      name="note"
                       rows={4}
                       placeholder="Mandate objectives, timeline, jurisdiction…"
                       className={cn(inputClass, "resize-none")}
@@ -117,10 +98,12 @@ const Contact = () => {
                     {CONTACT.submit}
                   </Button>
                   <p className="text-center text-[0.62rem] uppercase tracking-[0.2em] text-silver/35">
-                    Transmitted under data-cryptography protocol
+                    Opens your email client. Nothing is transmitted by this website.
+                  </p>
+                  <p aria-live="polite" className="min-h-4 text-center text-xs text-silver/55">
+                    {handoffStarted && "Email draft prepared. Complete and send it from your email client."}
                   </p>
                 </form>
-              )}
               </div>
             </Spotlight>
           </Reveal>

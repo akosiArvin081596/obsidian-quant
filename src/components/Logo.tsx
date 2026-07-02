@@ -23,7 +23,7 @@ const Logo = ({
   return (
     <span className={cn("inline-flex items-center gap-3", className)}>
       <img
-        src="/assets/obsidian-gem.png"
+        src="/assets/obsidian-gem.webp"
         alt=""
         width={size}
         height={size}

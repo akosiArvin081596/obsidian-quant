@@ -29,7 +29,7 @@ const ObsidianGem = ({ className, compact = false }: Props) => {
         transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
       />
       <motion.img
-        src="/assets/obsidian-gem.png"
+        src="/assets/obsidian-gem.webp"
         alt=""
         className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_0_42px_rgba(184,138,74,0.32)]"
         animate={reduce ? undefined : { y: [0, -13, 0], rotate: [-1.2, 1.2, -1.2] }}

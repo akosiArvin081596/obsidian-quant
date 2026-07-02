@@ -5,14 +5,18 @@ import Preloader from "./Preloader";
 import BackToTop from "./BackToTop";
 import ScrollToTop from "./ScrollToTop";
 import GrainVignette from "../components/GrainVignette";
+import ScrollChoreography from "../components/ScrollChoreography";
+import CursorGlow from "../components/CursorGlow";
 
 const RootLayout = () => (
   <>
     <Preloader />
     <GrainVignette />
+    <CursorGlow />
     <ScrollToTop />
     <Header />
-    <main className="min-h-screen">
+    <main className="relative isolate min-h-screen">
+      <ScrollChoreography />
       <Outlet />
     </main>
     <Footer />

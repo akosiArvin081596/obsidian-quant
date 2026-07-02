@@ -12,7 +12,7 @@ type PageHeroProps = {
 
 /** Standard sub-page header — clears the fixed nav, sets the tone. */
 const PageHero = ({ eyebrow, index, title, body }: PageHeroProps) => (
-  <section className="relative overflow-hidden px-6 pb-20 pt-40 hex-bg gold-grid lg:px-16 lg:pb-24 lg:pt-48">
+  <section className="reference-hero relative overflow-hidden border-b border-gold/20 px-6 pb-20 pt-40 lg:px-16 lg:pb-24 lg:pt-48">
     <Parallax className="absolute inset-0" speed={0.25}>
       <AuroraRibbon intensity={0.4} className="opacity-50" />
     </Parallax>

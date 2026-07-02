@@ -155,7 +155,7 @@ const Home = () => {
                 <article className={i ? "active" : ""}>
                   <h3>{group.title}</h3>
                   {group.rows.map((row) => <p key={row}>{row}</p>)}
-                  <div className={`kev-mini ${i ? "kev-goldline" : "kev-redline"}`} aria-hidden />
+                  <div className={i ? "kev-mini" : "kev-mini kev-redline"} aria-hidden />
                 </article>
               </Fragment>
             ))}

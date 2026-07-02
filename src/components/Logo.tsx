@@ -24,7 +24,7 @@ const Logo = ({
     <span className={cn("inline-flex items-center gap-3", className)}>
       <img
         src="/assets/obsidian-gem.webp"
-        alt=""
+        alt={withWordmark ? "" : "Obsidian Quant Group"}
         width={size}
         height={size}
         className={cn("shrink-0 object-contain drop-shadow-[0_0_8px_rgba(184,138,74,0.35)]", !ring && "scale-125")}

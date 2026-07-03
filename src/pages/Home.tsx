@@ -40,13 +40,40 @@ const quantFlow = [
   ["◆", "Alpha Generation"],
 ] as const;
 
+const QuantIcon = ({ index }: { index: number }) => {
+  if (index === 5) return <img src="/assets/obsidian-gem.webp" alt="" />;
+
+  const icons = [
+    <><path d="M4 32h8l3-13 5 27 6-36 6 43 5-30 5 18 4-9h10" /><path d="M8 26v12M52 25v14" /></>,
+    <><path d="M32 11c-7-6-15 0-13 7-8 0-10 11-4 15-4 8 5 15 12 10 2 8 12 8 13 0 8 5 16-3 12-10 7-5 3-15-5-15 2-8-7-14-13-8Z" /><path d="M32 12v36M21 20c7 1 8 5 7 10M43 20c-7 1-8 5-7 10M18 34c5-2 9 0 10 5M46 34c-5-2-9 0-10 5" /></>,
+    <><path d="M10 51V13M10 51h45" /><path d="m16 43 8-10 8 5 9-16 7 5 8-14M48 13h8v8" /><path d="M19 47v-6M28 47V36M37 47V29M46 47V23" /></>,
+    <><path d="m32 9 23 42H9L32 9Z" /><circle cx="32" cy="25" r="3" /><path d="m32 28-11 16M32 28l11 16M21 44h22" /></>,
+    <><circle cx="32" cy="32" r="23" /><path d="M32 9v23h23M32 32 17 49M32 32 12 21" /><path d="M37 10a23 23 0 0 1 17 17H37V10Z" /></>,
+  ];
+
+  return <svg viewBox="0 0 64 64" aria-hidden>{icons[index]}</svg>;
+};
+
+const FactIcon = ({ index }: { index: number }) => {
+  const icons = [
+    <><circle cx="32" cy="32" r="5" /><circle cx="32" cy="9" r="3" /><circle cx="53" cy="21" r="3" /><circle cx="53" cy="44" r="3" /><circle cx="32" cy="55" r="3" /><circle cx="11" cy="44" r="3" /><circle cx="11" cy="21" r="3" /><path d="m32 14v13m5-1 12-4m-12 16 12 5M32 37v13m-5-12-12 5m12-17-12-4" /></>,
+    <><circle cx="32" cy="32" r="24" /><circle cx="32" cy="32" r="12" /><path d="M32 8v12M56 32H44M32 56V44M8 32h12" /><circle cx="32" cy="32" r="3" /></>,
+    <><circle cx="32" cy="32" r="24" /><path d="M8 32h48M32 8c8 7 12 15 12 24S40 49 32 56c-8-7-12-15-12-24S24 15 32 8ZM13 20h38M13 44h38" /></>,
+    <><circle cx="32" cy="32" r="24" /><path d="M40 18H23l12 14-12 14h17" /></>,
+    <><path d="M32 7 53 15v16c0 13-8 21-21 27C19 52 11 44 11 31V15L32 7Z" /><path d="m23 32 6 6 13-14" /></>,
+    <><path d="M15 8h25l10 10v38H15V8Z" /><path d="M40 8v11h10M23 28h19M23 36h13M23 44h9" /><circle cx="43" cy="43" r="7" /><path d="m48 48 7 7" /></>,
+  ];
+
+  return <svg viewBox="0 0 64 64" aria-hidden>{icons[index]}</svg>;
+};
+
 const siteFacts = [
-  ["⌘", 4, "Process Stages"],
-  ["◎", 4, "Mandate Arenas"],
-  ["◇", 3, "Global Presences"],
-  ["Σ", 3, "Core Disciplines"],
-  ["⌄", 4, "Architecture Controls"],
-  ["◷", 6, "Research Notes"],
+  [4, "Process Stages"],
+  [4, "Mandate Arenas"],
+  [3, "Global Presences"],
+  [3, "Core Disciplines"],
+  [4, "Architecture Controls"],
+  [6, "Research Notes"],
 ] as const;
 
 const Home = () => {
@@ -58,14 +85,13 @@ const Home = () => {
 
   return (
     <>
-      <section ref={heroRef} className="home-reference-hero reference-hero relative min-h-screen overflow-hidden border-b border-gold/20 px-6 pb-20 pt-36 lg:px-16 lg:pb-0 lg:pt-24">
+      <section ref={heroRef} className="home-reference-hero reference-hero relative flex h-screen flex-col overflow-hidden border-b border-gold/20 px-6 pt-36 pb-8 lg:px-16 lg:pt-24 lg:pb-0">
         <motion.div className="home-hero-bg absolute inset-0" style={reduce ? undefined : { y: heroY, scale: heroScale }} aria-hidden />
         <div className="reference-stars absolute inset-0" aria-hidden />
-        <div className="reference-fog absolute inset-0" aria-hidden />
-        <div className="hero-side-dots" aria-hidden><b /><i /><i /><i /><i /></div>
-        <div className="mx-auto grid min-h-[calc(100vh-6rem)] max-w-7xl items-center gap-10 lg:grid-cols-[1.05fr_.95fr]">
+        <div className="hero-side-dots hidden lg:grid" aria-hidden><b /><i /><i /><i /><i /></div>
+        <div className="relative z-10 flex flex-1 items-center">
           <motion.div
-            className="relative z-10 min-w-0 max-w-3xl"
+            className="hero-copy relative min-w-0 max-w-3xl lg:max-w-[720px]"
             initial={reduce ? false : { opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: reduce ? 0 : 0.7 }}
@@ -82,16 +108,35 @@ const Home = () => {
               <Button to="/firm" variant="primary">Explore Our Philosophy</Button>
               <Button to="/strategy" variant="outline">Our Strategies</Button>
             </div>
-            <div className="mt-16 flex items-center gap-3 text-[.6rem] uppercase tracking-[.28em] text-silver/55">
-              <span className="flex h-8 w-5 items-center justify-center rounded-full border border-silver/40"><span className="h-1.5 w-1.5 rounded-full bg-gold" /></span>
+            <div className="hero-scroll">
+              <i aria-hidden />
               Scroll to explore
             </div>
           </motion.div>
-          <div className="hidden lg:block" aria-hidden />
         </div>
+        <motion.aside
+          className="hero-market hidden lg:block"
+          aria-label="Market intelligence snapshot"
+          initial={reduce ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: reduce ? 0 : 0.9 }}
+        >
+          <hr />
+          <h4>{HERO.market.title}</h4>
+          <small>{HERO.market.subtitle}</small>
+          {HERO.market.tickers.map((ticker) => (
+            <p key={ticker.symbol}>
+              <b>{ticker.symbol}<br />{ticker.value}</b>
+              <span className={ticker.up ? "text-graph" : "text-loss"}>{ticker.change}</span>
+            </p>
+          ))}
+        </motion.aside>
       </section>
 
-      <Section className="philosophy-showcase reference-panel overflow-hidden border-b border-gold/15">
+      <Section
+        className="philosophy-showcase reference-panel overflow-hidden border-b border-gold/15 lg:flex lg:h-screen lg:items-center"
+        spacing="py-12 lg:py-8"
+      >
         <div className="grid items-center gap-12 lg:grid-cols-[1fr_18rem]">
           <div>
             <Stagger className="max-w-3xl">
@@ -99,14 +144,32 @@ const Home = () => {
               <StaggerItem><h2 className="mt-5 text-display text-4xl text-ghost lg:text-6xl">The Architecture of Alpha</h2></StaggerItem>
               <StaggerItem><p className="mt-4 max-w-2xl text-sm leading-relaxed text-silver/60">{CORE_PHILOSOPHY.intro}</p></StaggerItem>
             </Stagger>
-            <Stagger className="philosophy-card-grid mt-12 grid gap-6 md:grid-cols-3" gap={0.14}>
+            <Stagger className="philosophy-card-grid mt-8 grid gap-6 md:grid-cols-3" gap={0.14}>
               {CORE_PHILOSOPHY.columns.map((item, index) => (
                 <StaggerItem key={item.label} className="h-full">
                   <article className={`kev-philosophy-card h-full ${index === 1 ? "kev-philosophy-card-active" : ""}`}>
                     <strong>0{index + 1}</strong>
                     <h3>{item.label}</h3>
                     <p>{item.body}</p>
-                    <div className={`kev-graphic ${["kev-brain", "kev-wave", "kev-chart"][index]}`} aria-hidden />
+                    {index === 0 ? (
+                      <div className="kev-graphic kev-card-video" aria-hidden>
+                        <video autoPlay loop muted playsInline preload="metadata">
+                          <source src="/assets/brain_wireframe.mp4" type="video/mp4" />
+                        </video>
+                      </div>
+                    ) : index === 1 ? (
+                      <div className="kev-graphic kev-card-video kev-network-video" aria-hidden>
+                        <video autoPlay loop muted playsInline preload="metadata">
+                          <source src="/assets/network_waves.mp4" type="video/mp4" />
+                        </video>
+                      </div>
+                    ) : (
+                      <div className="kev-graphic kev-card-video kev-cover-video" aria-hidden>
+                        <video autoPlay loop muted playsInline preload="metadata">
+                          <source src="/assets/graph.mp4" type="video/mp4" />
+                        </video>
+                      </div>
+                    )}
                   </article>
                 </StaggerItem>
               ))}
@@ -126,10 +189,12 @@ const Home = () => {
           </Stagger>
           <Reveal>
             <div className="kev-flow" aria-label="Systematic quantitative process">
-              {quantFlow.map(([icon, label], index) => (
+              {quantFlow.map(([, label], index) => (
                 <Fragment key={label}>
-                  <div className="kev-hex">
-                    <span className="kev-hex-icon" aria-hidden>{index === quantFlow.length - 1 ? <img src="/assets/obsidian-gem.webp" alt="" /> : icon}</span>
+                  <div className="kev-stage">
+                    <div className="kev-hex">
+                      <span className="kev-hex-icon" aria-hidden><QuantIcon index={index} /></span>
+                    </div>
                     <span>{label}</span>
                   </div>
                   {index < quantFlow.length - 1 && <b aria-hidden />}
@@ -167,13 +232,13 @@ const Home = () => {
         <div className="facts-orbit" aria-hidden />
         <div className="relative z-10 mb-8 flex flex-wrap items-center justify-between gap-4">
           <Eyebrow>By the Structure</Eyebrow>
-          <span className="text-[.58rem] uppercase tracking-[.22em] text-silver/40">Counts derived from this site’s published structure</span>
+          <span className="text-xs uppercase tracking-[.2em] text-silver/55">Counts derived from this site’s published structure</span>
         </div>
         <Stagger className="facts-grid" gap={.1}>
-          {siteFacts.map(([icon, value, label]) => (
+          {siteFacts.map(([value, label], index) => (
             <StaggerItem key={label}>
               <article>
-                <i aria-hidden>{icon}</i>
+                <i aria-hidden><FactIcon index={index} /></i>
                 <strong><AnimatedCounter value={value} /></strong>
                 <span>{label}</span>
               </article>

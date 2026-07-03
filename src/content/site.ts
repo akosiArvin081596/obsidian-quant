@@ -21,6 +21,16 @@ export const HERO = {
   headlineLead: "Profit from",
   headlineAccent: "Market Dislocation.",
   sub: "Moving beyond passive indexing. We capture alpha by mathematically pricing human emotion and structural market inefficiencies.",
+  market: {
+    title: "Market Intelligence",
+    subtitle: "Live Data Streams",
+    tickers: [
+      { symbol: "VIX", value: "16.23", change: "-1.35%", up: false },
+      { symbol: "SPX", value: "5,127.78", change: "+0.41%", up: true },
+      { symbol: "NDX", value: "18,732.51", change: "+0.62%", up: true },
+      { symbol: "DXY", value: "104.32", change: "-0.21%", up: false },
+    ],
+  },
 } as const;
 
 export const TAGLINES = {

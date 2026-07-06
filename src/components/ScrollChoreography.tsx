@@ -64,8 +64,6 @@ const ScrollChoreography = () => {
   }, []);
 
   useEffect(() => {
-    setActive(0);
-
     let observer: IntersectionObserver | undefined;
     let setupFrame = 0;
     let scrollFrame = 0;
@@ -82,6 +80,7 @@ const ScrollChoreography = () => {
     };
 
     setupFrame = requestAnimationFrame(() => {
+      setActive(0);
       sections = Array.from(document.querySelectorAll<HTMLElement>("main section"));
       sections.forEach((section, index) => {
         section.classList.add("scroll-scene");

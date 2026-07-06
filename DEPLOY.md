@@ -49,6 +49,24 @@ ssh root@76.13.22.110 \
 Certbot rewrites the vhost to add the 443 server block + HTTP→HTTPS redirect
 (same as every other subdomain). Auto-renews via the existing certbot timer.
 
+## Security headers
+
+The repository contains the production header policy at
+`deploy/nginx-security-headers.conf`. Include it inside the HTTPS server block,
+then validate and reload nginx:
+
+```nginx
+include /var/www/obsidian-quant/deploy/nginx-security-headers.conf;
+```
+
+```bash
+nginx -t && systemctl reload nginx
+curl -sI https://obsidian.abedubas.dev/
+```
+
+The application also ships a CSP meta policy as defense in depth. HSTS and
+`frame-ancestors` must be delivered by nginx and cannot be set by HTML.
+
 ## Manual deploy / rollback
 
 ```bash

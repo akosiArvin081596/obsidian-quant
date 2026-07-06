@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { SessionContext } from "./session-context";
 import type { Session } from "./session-context";
+import { readDemoSession, SESSION_STORAGE_KEY, writeDemoSession } from "./session-storage";
 
 /* ============================================================
    Investor session — MOCKUP ONLY.
@@ -11,19 +12,10 @@ import type { Session } from "./session-context";
    Member ID typed at the gateway for the greeting line.
    ============================================================ */
 
-const STORAGE_KEY = "oqg.investor.session";
-
 const read = (): { signedIn: boolean; memberId: string } => {
   if (typeof window === "undefined") return { signedIn: false, memberId: "" };
   try {
-    const raw = window.sessionStorage.getItem(STORAGE_KEY);
-    if (!raw) return { signedIn: false, memberId: "" };
-    const parsed = JSON.parse(raw) as unknown;
-    if (typeof parsed !== "object" || parsed === null) {
-      return { signedIn: false, memberId: "" };
-    }
-    const memberId = (parsed as { memberId?: unknown }).memberId;
-    return { signedIn: true, memberId: typeof memberId === "string" ? memberId : "" };
+    return readDemoSession(window.sessionStorage.getItem(SESSION_STORAGE_KEY));
   } catch {
     return { signedIn: false, memberId: "" };
   }
@@ -35,7 +27,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const signIn = useCallback((memberId: string) => {
     const next = { signedIn: true, memberId };
     try {
-      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ memberId }));
+      window.sessionStorage.setItem(SESSION_STORAGE_KEY, writeDemoSession(memberId));
     } catch {
       /* sessionStorage unavailable — keep the in-memory flag anyway */
     }
@@ -44,7 +36,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = useCallback(() => {
     try {
-      window.sessionStorage.removeItem(STORAGE_KEY);
+      window.sessionStorage.removeItem(SESSION_STORAGE_KEY);
     } catch {
       /* ignore */
     }

@@ -18,7 +18,7 @@ const POSES: GemPose[] = [
   { left: "8vw", top: "48vh", width: 220, rotate: -18, opacity: .82 },
   { left: "84vw", top: "48vh", width: 225, rotate: 18, opacity: .82 },
   { left: "50vw", top: "35vh", width: 150, rotate: 0, opacity: .8 },
-  { left: "70vw", top: "27vh", width: 300, rotate: 0, opacity: .95 },
+  { left: "72vw", top: "31vh", width: 300, rotate: 0, opacity: .95 },
 ];
 
 const MOBILE_POSES: GemPose[] = [

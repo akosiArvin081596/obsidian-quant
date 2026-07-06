@@ -220,7 +220,11 @@ const Home = () => {
                 <article className={i ? "active" : ""}>
                   <h3>{group.title}</h3>
                   {group.rows.map((row) => <p key={row}>{row}</p>)}
-                  <div className={i ? "kev-mini" : "kev-mini kev-redline"} aria-hidden />
+                  <div className={i ? "kev-mini kev-compare-video" : "kev-mini kev-compare-video kev-redline"} aria-hidden>
+                    <video autoPlay loop muted playsInline preload="metadata">
+                      <source src={`/assets/graph_${i + 1}.mp4`} type="video/mp4" />
+                    </video>
+                  </div>
                 </article>
               </Fragment>
             ))}

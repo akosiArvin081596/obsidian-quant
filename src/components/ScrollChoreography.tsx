@@ -11,14 +11,14 @@ type GemPose = {
 };
 
 const POSES: GemPose[] = [
-  { left: "62vw", top: "54vh", width: 480, rotate: -18, opacity: 1 },
+  { left: "72vw", top: "54vh", width: 480, rotate: 0, opacity: 1 },
   { left: "88vw", top: "54vh", width: 300, rotate: -22, opacity: .92 },
   { left: "8vw", top: "46vh", width: 155, rotate: 0, opacity: .7 },
   { left: "88vw", top: "52vh", width: 270, rotate: 20, opacity: .9 },
   { left: "8vw", top: "48vh", width: 220, rotate: -18, opacity: .82 },
   { left: "84vw", top: "48vh", width: 225, rotate: 18, opacity: .82 },
   { left: "50vw", top: "35vh", width: 150, rotate: 0, opacity: .8 },
-  { left: "70vw", top: "15vh", width: 300, rotate: 0, opacity: .95 },
+  { left: "70vw", top: "27vh", width: 300, rotate: 0, opacity: .95 },
 ];
 
 const MOBILE_POSES: GemPose[] = [
@@ -150,19 +150,15 @@ const ScrollChoreography = () => {
             }
       }
     >
-      <div className="scroll-halo absolute" aria-hidden>
-        <motion.img
-          src="/assets/halo.png"
-          alt=""
-          className="h-full w-full object-contain"
-          animate={reduce ? undefined : { rotate: 360 }}
-          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-        />
-      </div>
+      <motion.div
+        className="absolute inset-[8%] rounded-full border border-gold/20"
+        animate={reduce ? undefined : { rotate: 360 }}
+        transition={{ duration: 34, repeat: Infinity, ease: "linear" }}
+      />
       <motion.img
         src="/assets/obsidian-gem.webp"
         alt=""
-        className="relative z-[1] w-full object-contain drop-shadow-[0_0_34px_rgba(184,138,74,.36)]"
+        className="relative w-full object-contain drop-shadow-[0_0_34px_rgba(184,138,74,.36)]"
         animate={reduce ? undefined : { y: [0, -10, 0] }}
         transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
       />

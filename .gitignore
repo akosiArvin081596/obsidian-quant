@@ -26,6 +26,7 @@ dist-ssr
 # Agent / tooling artifacts (keep out of commits)
 .claude/
 .playwright-mcp/
+/invoice-worklog-draft.md
 
 # Stray root-level screenshot left by tooling.
 # Scoped to the exact file so real assets under src/ or public/ are unaffected.

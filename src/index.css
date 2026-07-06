@@ -647,15 +647,6 @@
   background: radial-gradient(ellipse, rgba(212,175,55,.52), rgba(184,138,74,.1) 48%, transparent 72%);
   filter: blur(12px);
 }
-.scroll-halo {
-  inset: -22%;
-  z-index: 0;
-  opacity: .62;
-  transform: perspective(700px) rotateX(64deg) rotateZ(-10deg);
-  transform-origin: center;
-  filter: drop-shadow(0 0 12px rgba(212,175,55,.32));
-}
-
 @media (max-width: 1023px) {
   .reference-hero { background-position: center, center, 58% bottom; }
 }

@@ -25,6 +25,21 @@ const MOBILE_POSES: GemPose[] = [
   { left: "50vw", top: "220px", width: 220, rotate: 0, opacity: .55 },
 ];
 
+const STANDARD_PAGE_HERO_POSE: GemPose = {
+  left: "71vw",
+  top: "16rem",
+  width: 320,
+  rotate: 0,
+  opacity: .92,
+};
+
+const STANDARD_PAGE_HERO_PATHS = new Set([
+  "/firm",
+  "/strategy",
+  "/architecture",
+  "/insights",
+]);
+
 /** Center of the scroll focus band (matches IntersectionObserver rootMargin). */
 const FOCUS_RATIO = 0.45;
 
@@ -120,9 +135,13 @@ const ScrollChoreography = () => {
   }, [pathname, reduce]);
 
   const pose = useMemo(() => {
+    if (!mobile && active === 0 && STANDARD_PAGE_HERO_PATHS.has(pathname)) {
+      return STANDARD_PAGE_HERO_POSE;
+    }
+
     const poses = mobile ? MOBILE_POSES : POSES;
     return poses[active % poses.length];
-  }, [active, mobile]);
+  }, [active, mobile, pathname]);
 
   return (
     <motion.div

@@ -18,6 +18,7 @@ const Architecture = () => (
       index={ARCHITECTURE.index}
       title={ARCHITECTURE.title}
       body={ARCHITECTURE.body}
+      standardHeight
     />
 
     {/* ============ SYSTEM LAYERS ============ */}

@@ -16,6 +16,7 @@ const Firm = () => (
       eyebrow={FIRM.hero.eyebrow}
       title={FIRM.hero.title}
       body={FIRM.hero.body}
+      standardHeight
     />
 
     {/* ============ PHILOSOPHY ============ */}

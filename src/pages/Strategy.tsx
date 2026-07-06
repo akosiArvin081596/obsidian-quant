@@ -30,6 +30,7 @@ const Strategy = () => (
       eyebrow={STRATEGY.hero.eyebrow}
       title={STRATEGY.hero.title}
       body={STRATEGY.hero.body}
+      standardHeight
     />
 
     {/* ============ CAPABILITY PILLARS ============ */}

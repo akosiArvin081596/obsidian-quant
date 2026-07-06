@@ -19,6 +19,7 @@ const Insights = () => {
         eyebrow={INSIGHTS.hero.eyebrow}
         title={INSIGHTS.hero.title}
         body={INSIGHTS.hero.body}
+        standardHeight
       />
 
       {/* ============ ARTICLE GRID ============ */}

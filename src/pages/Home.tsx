@@ -151,25 +151,7 @@ const Home = () => {
                     <strong>0{index + 1}</strong>
                     <h3>{item.label}</h3>
                     <p>{item.body}</p>
-                    {index === 0 ? (
-                      <div className="kev-graphic kev-card-video" aria-hidden>
-                        <video autoPlay loop muted playsInline preload="metadata">
-                          <source src="/assets/brain_wireframe.mp4" type="video/mp4" />
-                        </video>
-                      </div>
-                    ) : index === 1 ? (
-                      <div className="kev-graphic kev-card-video kev-network-video" aria-hidden>
-                        <video autoPlay loop muted playsInline preload="metadata">
-                          <source src="/assets/network_waves.mp4" type="video/mp4" />
-                        </video>
-                      </div>
-                    ) : (
-                      <div className="kev-graphic kev-card-video kev-cover-video" aria-hidden>
-                        <video autoPlay loop muted playsInline preload="metadata">
-                          <source src="/assets/graph.mp4" type="video/mp4" />
-                        </video>
-                      </div>
-                    )}
+                    <div className={`kev-graphic ${["kev-brain", "kev-wave", "kev-chart"][index]}`} aria-hidden />
                   </article>
                 </StaggerItem>
               ))}
@@ -220,11 +202,7 @@ const Home = () => {
                 <article className={i ? "active" : ""}>
                   <h3>{group.title}</h3>
                   {group.rows.map((row) => <p key={row}>{row}</p>)}
-                  <div className={i ? "kev-mini kev-compare-video" : "kev-mini kev-compare-video kev-redline"} aria-hidden>
-                    <video autoPlay loop muted playsInline preload="metadata">
-                      <source src={`/assets/graph_${i + 1}.mp4`} type="video/mp4" />
-                    </video>
-                  </div>
+                  <div className={i ? "kev-mini kev-goldline" : "kev-mini kev-redline"} aria-hidden />
                 </article>
               </Fragment>
             ))}

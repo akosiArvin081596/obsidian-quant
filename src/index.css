@@ -432,9 +432,20 @@
 .kev-compare-grid .active h3 { color:var(--color-gold); }
 .kev-compare-grid p { color:var(--color-silver); font-size:14px; line-height:1.4; margin:7px 0; }
 .kev-vs { width:42px; height:42px; border:1px solid var(--color-gold); border-radius:50%; display:grid; place-items:center; color:var(--color-gold); background:var(--color-obsidian); justify-self:center; z-index:2; }
-.kev-mini { min-height:72px; height:auto; flex:1; margin:9px -30px -30px; border-top:1px solid rgba(201,205,211,.16); position:relative; overflow:hidden; }
-.kev-compare-video video { width:100%; height:100%; display:block; object-fit:cover; object-position:center; transform:scale(1.2); transform-origin:bottom left; }
-.kev-redline { filter:grayscale(1); opacity:.55; }
+.kev-mini {
+  min-height: 72px;
+  height: auto;
+  flex: 1;
+  margin: 9px -30px -30px;
+  border-top: 1px solid rgba(201,205,211,.16);
+  border-bottom: 1px solid rgba(201,205,211,.22);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, transparent 42%, rgba(184,138,74,.8) 44%, transparent 47%);
+  background-size: 80px 80px;
+  animation: kev-chart-move 2s linear infinite;
+}
+.kev-redline { filter: grayscale(1); opacity: .55; }
 
 .facts-section {
   background:
@@ -469,43 +480,6 @@
   .kev-compare-grid h3 { margin-bottom:14px; }
   .kev-compare-grid p { margin:6px 0; }
   .kev-mini { min-height:150px; margin:12px -24px -24px; }
-  .kev-compare-video video { object-position:left center; transform:scale(1.28); transform-origin:center left; }
-  .philosophy-showcase .kev-card-video {
-    height: 220px;
-    min-height: 220px;
-    flex: none;
-    overflow: hidden;
-    isolation: isolate;
-  }
-  .philosophy-showcase .kev-card-video::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    background:
-      linear-gradient(to left, #03070b 0%, rgba(3, 7, 11, .92) 35%, transparent 72%),
-      linear-gradient(to top, #03070b 0%, rgba(3, 7, 11, .88) 40%, transparent 78%);
-  }
-  .philosophy-showcase .kev-card-video video {
-    width: 168%;
-    max-width: none;
-    height: calc(100% + 72px);
-    object-fit: cover;
-    object-position: left center;
-    transform: translate(-6%, -36px);
-    transform-origin: center left;
-  }
-  .philosophy-showcase .kev-network-video video {
-    object-position: 14% center;
-    transform: translate(-8%, -32px) scale(1.08);
-  }
-  .philosophy-showcase .kev-cover-video video {
-    width: 182%;
-    object-position: left bottom;
-    transform: translate(-10%, -4px) scale(1.2);
-    transform-origin: bottom left;
-  }
   .kev-vs { margin:2px auto; }
   .hero-side-dots,.cursor-glow-reference { display:none; }
   .facts-grid { grid-template-columns:1fr; }
@@ -554,21 +528,8 @@
 .kev-philosophy-card strong { color: #d3a75c; font-size: 24px; font-family: var(--font-serif); }
 .kev-philosophy-card h3 { margin-top: 18px; font-size: 26px; line-height: 1.2; }
 .kev-philosophy-card p { color: var(--color-silver); font-size: 15px; line-height: 1.55; }
-.kev-graphic { height: 105px; margin: 12px -26px 0; border-top: 1px solid rgba(184,138,74,.12); position: relative; overflow: hidden; }
-.kev-card-video { height: auto; min-height: 90px; max-height: none; flex: 1; margin-top: 12px; background: #03070b; }
-.kev-card-video video {
-  width: 100%;
-  height: calc(100% + 28px);
-  display: block;
-  object-fit: cover;
-  object-position: center;
-  transform: translateY(-14px);
-}
-.kev-cover-video video {
-  height: 100%;
-  transform: scale(1.15);
-  transform-origin: bottom left;
-}
+.kev-graphic { height: 105px; margin: 18px -26px 0; border-top: 1px solid rgba(184,138,74,.12); position: relative; overflow: hidden; }
+.kev-brain { background: radial-gradient(circle at 50% 50%, rgba(220,30,30,.55), transparent 22%), radial-gradient(circle, rgba(220,30,30,.55) 1px, transparent 2px); background-size: auto, 17px 17px; }
 @media (min-width: 1024px) {
   .kev-philosophy-card { height: 430px; min-height: 0; }
 }

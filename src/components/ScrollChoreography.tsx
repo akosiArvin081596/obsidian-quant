@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useLocation } from "react-router-dom";
+import ObsidianGemImage from "./ObsidianGemImage";
 
 type GemPose = {
   left: string;
@@ -22,7 +23,7 @@ const POSES: GemPose[] = [
 ];
 
 const MOBILE_POSES: GemPose[] = [
-  { left: "50vw", top: "220px", width: 220, rotate: 0, opacity: .55 },
+  { left: "50vw", top: "220px", width: 220, rotate: 0, opacity: 0.78 },
 ];
 
 const STANDARD_PAGE_HERO_POSE: GemPose = {
@@ -39,6 +40,41 @@ const STANDARD_PAGE_HERO_PATHS = new Set([
   "/architecture",
   "/insights",
 ]);
+
+/** Last scene before footer — gem lifted so the base clears the footer edge. */
+const CLOSING_SECTION_POSE: GemPose = {
+  left: "10vw",
+  top: "26vh",
+  width: 190,
+  rotate: -14,
+  opacity: 0.88,
+};
+
+const HOME_CLOSING_POSE: GemPose = {
+  left: "71vw",
+  top: "32vh",
+  width: 280,
+  rotate: 0,
+  opacity: 0.92,
+};
+
+/** Pull pose center upward on the last section (footer follows immediately after). */
+const liftPoseAboveFooter = (pose: GemPose): GemPose => {
+  if (pose.top.endsWith("vh")) {
+    const vh = parseFloat(pose.top);
+    return {
+      ...pose,
+      top: `${Math.min(vh, 30)}vh`,
+      width: Math.round(pose.width * 0.92),
+    };
+  }
+
+  if (pose.top.endsWith("rem")) {
+    return { ...pose, top: "11rem", width: Math.round(pose.width * 0.9) };
+  }
+
+  return pose;
+};
 
 /** Center of the scroll focus band (matches IntersectionObserver rootMargin). */
 const FOCUS_RATIO = 0.45;
@@ -68,8 +104,10 @@ const ScrollChoreography = () => {
   const { pathname } = useLocation();
   const reduce = useReducedMotion();
   const [active, setActive] = useState(0);
-  const [ready, setReady] = useState(false);
-  const [mobile, setMobile] = useState(() => window.matchMedia("(max-width: 1023px)").matches);
+  const [sectionCount, setSectionCount] = useState(0);
+  const [mobile, setMobile] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(max-width: 1023px)").matches : false,
+  );
 
   useEffect(() => {
     const query = window.matchMedia("(max-width: 1023px)");
@@ -80,6 +118,7 @@ const ScrollChoreography = () => {
 
   useEffect(() => {
     let observer: IntersectionObserver | undefined;
+    let mutationObserver: MutationObserver | undefined;
     let setupFrame = 0;
     let scrollFrame = 0;
     let sections: HTMLElement[] = [];
@@ -94,9 +133,15 @@ const ScrollChoreography = () => {
       scrollFrame = requestAnimationFrame(syncActive);
     };
 
-    setupFrame = requestAnimationFrame(() => {
-      setActive(0);
-      sections = Array.from(document.querySelectorAll<HTMLElement>("main section"));
+    const bindSections = () => {
+      const next = Array.from(document.querySelectorAll<HTMLElement>("main section"));
+      const changed =
+        next.length !== sections.length || next.some((section, index) => section !== sections[index]);
+      if (!changed && sections.length > 0) return;
+
+      observer?.disconnect();
+      sections = next;
+      setSectionCount(sections.length);
       sections.forEach((section, index) => {
         section.classList.add("scroll-scene");
         section.style.setProperty("--scene-index", String(index));
@@ -104,7 +149,6 @@ const ScrollChoreography = () => {
 
       if (reduce) {
         sections.forEach((section) => section.classList.add("scene-visible"));
-        setReady(true);
         return;
       }
 
@@ -114,15 +158,31 @@ const ScrollChoreography = () => {
             if (entry.isIntersecting) entry.target.classList.add("scene-visible");
           });
         },
-        { rootMargin: "-28% 0px -38%", threshold: 0 },
+        { rootMargin: "-12% 0px -18%", threshold: 0 },
       );
       sections.forEach((section) => observer?.observe(section));
       sections[0]?.classList.add("scene-visible");
-      setReady(true);
-
       syncActive();
-      window.addEventListener("scroll", onScrollOrResize, { passive: true });
-      window.addEventListener("resize", onScrollOrResize, { passive: true });
+    };
+
+    setupFrame = requestAnimationFrame(() => {
+      setActive(0);
+      bindSections();
+
+      if (!reduce) {
+        window.addEventListener("scroll", onScrollOrResize, { passive: true });
+        window.addEventListener("resize", onScrollOrResize, { passive: true });
+      }
+
+      // Lazy routes / late DOM: rebind when main children change so the gem keeps tracking.
+      const main = document.querySelector("main");
+      if (main && typeof MutationObserver !== "undefined") {
+        mutationObserver = new MutationObserver(() => {
+          cancelAnimationFrame(setupFrame);
+          setupFrame = requestAnimationFrame(bindSections);
+        });
+        mutationObserver.observe(main, { childList: true, subtree: true });
+      }
     });
 
     return () => {
@@ -131,6 +191,7 @@ const ScrollChoreography = () => {
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);
       observer?.disconnect();
+      mutationObserver?.disconnect();
     };
   }, [pathname, reduce]);
 
@@ -140,20 +201,36 @@ const ScrollChoreography = () => {
     }
 
     const poses = mobile ? MOBILE_POSES : POSES;
-    return poses[active % poses.length];
-  }, [active, mobile, pathname]);
+    const base = poses[active % poses.length];
+    const isLastSection = sectionCount > 0 && active === sectionCount - 1;
+
+    if (isLastSection) {
+      if (!mobile) {
+        if (pathname === "/") return HOME_CLOSING_POSE;
+        if (STANDARD_PAGE_HERO_PATHS.has(pathname)) return CLOSING_SECTION_POSE;
+        return liftPoseAboveFooter(base);
+      }
+
+      return { ...base, top: "160px", width: Math.round(base.width * 0.88) };
+    }
+
+    return base;
+  }, [active, mobile, pathname, sectionCount]);
+
+  // Keep the stone visible under prefers-reduced-motion — only skip motion, not the asset.
+  const visibleOpacity = Math.max(pose.opacity, 0.72);
 
   return (
     <motion.div
       aria-hidden
-      className="scroll-gem pointer-events-none fixed z-[4] -translate-x-1/2 -translate-y-1/2"
+      className="scroll-gem pointer-events-none fixed -translate-x-1/2 -translate-y-1/2"
       initial={false}
       animate={{
         left: pose.left,
         top: pose.top,
         width: pose.width,
         rotate: reduce ? 0 : pose.rotate,
-        opacity: ready ? (reduce ? .2 : pose.opacity) : 0,
+        opacity: reduce ? visibleOpacity : pose.opacity,
       }}
       transition={
         reduce
@@ -168,18 +245,23 @@ const ScrollChoreography = () => {
             }
       }
     >
+      {!reduce && (
+        <motion.div
+          className="absolute inset-[8%] rounded-full border border-gold/20"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 34, repeat: Infinity, ease: "linear" }}
+        />
+      )}
       <motion.div
-        className="absolute inset-[8%] rounded-full border border-gold/20"
-        animate={reduce ? undefined : { rotate: 360 }}
-        transition={{ duration: 34, repeat: Infinity, ease: "linear" }}
-      />
-      <motion.img
-        src="/assets/obsidian-gem.webp"
-        alt=""
-        className="relative w-full object-contain drop-shadow-[0_0_34px_rgba(184,138,74,.36)]"
+        className="relative w-full"
         animate={reduce ? undefined : { y: [0, -10, 0] }}
         transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
-      />
+      >
+        <ObsidianGemImage
+          priority
+          className="relative w-full object-contain drop-shadow-[0_0_34px_rgba(184,138,74,.36)]"
+        />
+      </motion.div>
     </motion.div>
   );
 };

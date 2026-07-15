@@ -24,7 +24,7 @@ export const Stagger = ({ children, className, gap = 0.24, delay = 0 }: StaggerP
     }}
     initial="hidden"
     whileInView="show"
-    viewport={{ once: true, margin: "-70px" }}
+    viewport={{ once: true, margin: "-40px" }}
   >
     {children}
   </motion.div>

@@ -90,7 +90,7 @@ const Strategy = () => (
     </Section>
 
     {/* ============ PROCESS — SYSTEMATIC PIPELINE ============ */}
-    <Section className="isolate hex-bg">
+    <Section className="hex-bg">
       {/* ambient gold bloom behind the pipeline — drifts gently on scroll */}
       <div
         aria-hidden
@@ -154,7 +154,7 @@ const Strategy = () => (
           <Stagger
           className="grid grid-cols-1 gap-5 sm:grid-cols-2"
           gap={0.15}
-          delay={1.95}
+          delay={0.25}
         >
           {STRATEGY.classes.map((c, i) => (
             <StaggerItem key={c.title} className="h-full">
@@ -184,8 +184,8 @@ const Strategy = () => (
 
     {/* ============ CLOSING CTA ============ */}
     <section className="relative overflow-hidden border-t border-gold/10 bg-midnight px-6 py-28 text-center lg:py-36">
-      <AuroraRibbon intensity={0.4} className="opacity-60" />
-      <Stagger className="relative z-10 mx-auto max-w-2xl">
+      <AuroraRibbon intensity={0.4} className="scene-behind opacity-60" />
+      <Stagger className="scene-content relative z-10 mx-auto max-w-2xl">
         <StaggerItem>
           <Eyebrow centered>Strategic Allocation</Eyebrow>
         </StaggerItem>

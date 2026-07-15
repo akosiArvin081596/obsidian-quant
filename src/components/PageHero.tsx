@@ -20,16 +20,16 @@ const PageHero = ({ eyebrow, index, title, body, standardHeight = false }: PageH
       standardHeight && "lg:h-[36rem]",
     )}
   >
-    <Parallax className="absolute inset-0" speed={0.25}>
+    <Parallax className="scene-behind absolute inset-0" speed={0.25}>
       <AuroraRibbon intensity={0.4} className="opacity-50" />
     </Parallax>
     {/* ambient gold bloom behind the heading */}
     <div
       aria-hidden
-      className="gold-bloom pointer-events-none absolute left-[10%] top-1/2 h-[26rem] w-[26rem] -translate-y-1/2"
+      className="scene-behind gold-bloom pointer-events-none absolute left-[10%] top-1/2 h-[26rem] w-[26rem] -translate-y-1/2"
     />
-    <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-obsidian/30 to-obsidian" />
-    <div className="relative z-10 mx-auto max-w-7xl">
+    <div className="scene-behind pointer-events-none absolute inset-0 bg-gradient-to-b from-obsidian/30 to-obsidian" />
+    <div className="scene-content relative z-10 mx-auto max-w-7xl">
       <Reveal>
         <Eyebrow index={index}>{eyebrow}</Eyebrow>
         <h1 className="mt-6 max-w-4xl text-display text-5xl text-ghost lg:text-7xl">

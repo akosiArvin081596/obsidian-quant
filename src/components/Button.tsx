@@ -14,6 +14,7 @@ type ButtonProps = {
   onClick?: () => void;
   type?: "button" | "submit";
   full?: boolean;
+  disabled?: boolean;
   className?: string;
 };
 
@@ -38,26 +39,33 @@ const Button = ({
   onClick,
   type = "button",
   full,
+  disabled = false,
   className,
 }: ButtonProps) => {
-  const classes = cn(BASE, VARIANTS[variant], full && "w-full", className);
+  const classes = cn(
+    BASE,
+    VARIANTS[variant],
+    full && "w-full",
+    disabled && "pointer-events-none opacity-50",
+    className,
+  );
 
   if (to) {
     return (
-      <Link to={to} className={classes} onClick={onClick}>
+      <Link to={to} className={classes} onClick={onClick} aria-disabled={disabled}>
         {children}
       </Link>
     );
   }
   if (href) {
     return (
-      <a href={href} className={classes} onClick={onClick}>
+      <a href={href} className={classes} onClick={onClick} aria-disabled={disabled}>
         {children}
       </a>
     );
   }
   return (
-    <button type={type} className={classes} onClick={onClick}>
+    <button type={type} className={classes} onClick={onClick} disabled={disabled}>
       {children}
     </button>
   );

@@ -6,6 +6,8 @@ import Button from "../components/Button";
 import { Stagger, StaggerItem } from "../components/Stagger";
 import Reveal from "../components/Reveal";
 import AnimatedCounter from "../components/AnimatedCounter";
+import MarketIntelligence from "../components/MarketIntelligence";
+import ObsidianGemImage from "../components/ObsidianGemImage";
 import {
   ARCHITECTURE,
   BRAND,
@@ -41,7 +43,7 @@ const quantFlow = [
 ] as const;
 
 const QuantIcon = ({ index }: { index: number }) => {
-  if (index === 5) return <img src="/assets/obsidian-gem.webp" alt="" />;
+  if (index === 5) return <ObsidianGemImage />;
 
   const icons = [
     <><path d="M4 32h8l3-13 5 27 6-36 6 43 5-30 5 18 4-9h10" /><path d="M8 26v12M52 25v14" /></>,
@@ -85,11 +87,14 @@ const Home = () => {
 
   return (
     <>
-      <section ref={heroRef} className="home-reference-hero reference-hero relative flex h-screen flex-col overflow-hidden border-b border-gold/20 px-6 pt-36 pb-8 lg:px-16 lg:pt-24 lg:pb-0">
-        <motion.div className="home-hero-bg absolute inset-0" style={reduce ? undefined : { y: heroY, scale: heroScale }} aria-hidden />
-        <div className="reference-stars absolute inset-0" aria-hidden />
+      <section ref={heroRef} className="home-reference-hero reference-hero relative flex h-screen flex-col border-b border-gold/20 px-6 pt-36 pb-8 lg:px-16 lg:pt-24 lg:pb-0">
+        {/* Clip parallax only; stays behind the traveling gem (scene-behind). */}
+        <div className="scene-behind pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+          <motion.div className="home-hero-bg absolute inset-0" style={reduce ? undefined : { y: heroY, scale: heroScale }} />
+          <div className="reference-stars absolute inset-0" />
+        </div>
         <div className="hero-side-dots hidden lg:grid" aria-hidden><b /><i /><i /><i /><i /></div>
-        <div className="relative z-10 flex flex-1 items-center">
+        <div className="scene-content relative z-10 flex flex-1 items-center">
           <motion.div
             className="hero-copy relative min-w-0 max-w-3xl lg:max-w-[720px]"
             initial={reduce ? false : { opacity: 0, y: 28 }}
@@ -114,23 +119,7 @@ const Home = () => {
             </div>
           </motion.div>
         </div>
-        <motion.aside
-          className="hero-market hidden lg:block"
-          aria-label="Market intelligence snapshot"
-          initial={reduce ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: reduce ? 0 : 0.9 }}
-        >
-          <hr />
-          <h4>{HERO.market.title}</h4>
-          <small>{HERO.market.subtitle}</small>
-          {HERO.market.tickers.map((ticker) => (
-            <p key={ticker.symbol}>
-              <b>{ticker.symbol}<br />{ticker.value}</b>
-              <span className={ticker.up ? "text-graph" : "text-loss"}>{ticker.change}</span>
-            </p>
-          ))}
-        </motion.aside>
+        <MarketIntelligence />
       </section>
 
       <Section
@@ -248,8 +237,8 @@ const Home = () => {
       </Section>
 
       <section className="reference-quote relative grid min-h-[600px] place-items-center overflow-hidden border-b border-gold/15 px-6 py-28 text-center">
-        <div className="quote-stars absolute inset-0" aria-hidden />
-        <Reveal className="relative z-10 mx-auto max-w-5xl">
+        <div className="scene-behind quote-stars absolute inset-0" aria-hidden />
+        <Reveal className="scene-content relative z-10 mx-auto max-w-5xl">
           <Eyebrow centered>Precision, Systematized</Eyebrow>
           <blockquote className="mt-8 font-serif text-4xl font-semibold leading-[1.05] text-ghost sm:text-6xl lg:text-8xl">
             Markets misprice human emotion.<br />
@@ -260,7 +249,7 @@ const Home = () => {
       </section>
 
       <section className="reference-closing relative overflow-hidden px-6 py-28 lg:px-16 lg:py-40">
-        <div className="mx-auto grid max-w-7xl items-center lg:grid-cols-[1fr_.8fr]">
+        <div className="scene-content mx-auto grid max-w-7xl items-center lg:grid-cols-[1fr_.8fr]">
           <Stagger className="relative z-10 max-w-2xl">
             <StaggerItem><Eyebrow>Built Different</Eyebrow></StaggerItem>
             <StaggerItem><h2 className="mt-6 text-display text-5xl text-ghost lg:text-7xl">{ARCHITECTURE.title}</h2></StaggerItem>

@@ -23,7 +23,7 @@ const Section = ({
     id={id}
     className={cn("relative px-6 lg:px-16", spacing, className)}
   >
-    {inner ? <div className={cn("relative z-10 mx-auto w-full", inner)}>{children}</div> : children}
+    {inner ? <div className={cn("scene-content relative z-10 mx-auto w-full", inner)}>{children}</div> : children}
   </section>
 );
 

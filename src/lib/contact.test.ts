@@ -9,7 +9,6 @@ import {
 
 const filledForm = () => {
   const form = new FormData();
-  form.set("entity", "Acme & Partners");
   form.set("name", "Jordan Lee");
   form.set("email", "allocations@example.com");
   form.set("profile", "Family Office");
@@ -20,7 +19,6 @@ const filledForm = () => {
 describe("parseContactForm", () => {
   it("captures name and profile fields", () => {
     expect(parseContactForm(filledForm())).toMatchObject({
-      entity: "Acme & Partners",
       name: "Jordan Lee",
       email: "allocations@example.com",
       profile: "Family Office",
@@ -37,7 +35,7 @@ describe("buildContactMailto", () => {
     expect(url.protocol).toBe("mailto:");
     expect(url.pathname).toBe("access@obsidianquantgroup.com");
     expect(url.searchParams.get("subject")).toBe(
-      "Institutional inquiry — Acme & Partners",
+      "Institutional inquiry — Family Office",
     );
     expect(url.searchParams.get("body")).toContain("Name: Jordan Lee");
     expect(url.searchParams.get("body")).toContain(
@@ -48,7 +46,6 @@ describe("buildContactMailto", () => {
 
   it("uses an explicit placeholder when briefing notes are empty", () => {
     const form = new FormData();
-    form.set("entity", "Northstar");
     form.set("name", "Ava Chen");
     form.set("email", "team@example.com");
     form.set("profile", "Institutional Allocator");
@@ -83,7 +80,7 @@ describe("profile helpers", () => {
     const payload = toCrmPayload(parseContactForm(filledForm()));
     expect(payload).toEqual({
       source: "obsidian-quant-web",
-      companyName: "Acme & Partners",
+      companyName: "Family Office",
       contactName: "Jordan Lee",
       contactEmail: "allocations@example.com",
       notes: expect.stringContaining("Counterparty profile: Family Office"),
@@ -95,10 +92,9 @@ describe("profile helpers", () => {
 
   it("omits optional CRM fields when the form leaves them blank", () => {
     const form = new FormData();
-    form.set("entity", "Northstar");
     form.set("profile", "Institutional Allocator");
     const payload = toCrmPayload(parseContactForm(form));
-    expect(payload.companyName).toBe("Northstar");
+    expect(payload.companyName).toBe("Institutional Allocator");
     expect(payload.contactName).toBeUndefined();
     expect(payload.contactEmail).toBeUndefined();
   });

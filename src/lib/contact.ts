@@ -1,6 +1,5 @@
 /** Parsed strategic-allocation request payload for email + CRM handoff. */
 export type ContactSubmission = {
-  entity: string;
   name: string;
   email: string;
   profile: string;
@@ -50,7 +49,6 @@ export const CONTACT_ENDPOINT =
   `https://formsubmit.co/ajax/${CONTACT_INBOX}`;
 
 export const parseContactForm = (form: FormData): ContactSubmission => {
-  const entity = String(form.get("entity") ?? "").trim();
   const name = String(form.get("name") ?? "").trim();
   const email = String(form.get("email") ?? "").trim();
   const profile = String(form.get("profile") ?? "").trim();
@@ -60,7 +58,6 @@ export const parseContactForm = (form: FormData): ContactSubmission => {
   const honeypot = String(form.get("_honey") ?? "");
 
   return {
-    entity,
     name,
     email,
     profile,
@@ -85,9 +82,8 @@ const mailtoFromSubmission = (
   recipient: string,
   submission: ContactSubmission,
 ): string => {
-  const subject = `Institutional inquiry — ${submission.entity}`;
+  const subject = `Institutional inquiry — ${profileLabel(submission)}`;
   const body = [
-    `Entity: ${submission.entity}`,
     `Name: ${submission.name}`,
     `Reply email: ${submission.email}`,
     `Counterparty profile: ${profileLabel(submission)}`,
@@ -118,10 +114,14 @@ const crmNotes = (submission: ContactSubmission): string => {
  * secret. Blank optional fields are omitted (undefined → dropped by
  * JSON.stringify), which the CRM treats as absent. `submittedAt` is an ISO-8601
  * instant (Date.toISOString → trailing Z), accepted by the CRM's datetime check.
+ *
+ * The Institutional Entity field was removed from the form (it overlapped with
+ * Counterparty Profile), so `companyName` — required by the CRM contract — now
+ * carries the counterparty profile label, which is always present.
  */
 export const toCrmPayload = (submission: ContactSubmission) => ({
   source: submission.source,
-  companyName: submission.entity,
+  companyName: profileLabel(submission),
   contactName: submission.name || undefined,
   contactEmail: submission.email || undefined,
   notes: crmNotes(submission),
@@ -130,12 +130,11 @@ export const toCrmPayload = (submission: ContactSubmission) => ({
 
 /** Email-service payload (FormSubmit-compatible). */
 export const toEmailPayload = (submission: ContactSubmission) => ({
-  _subject: `Institutional inquiry — ${submission.entity}`,
+  _subject: `Institutional inquiry — ${profileLabel(submission)}`,
   _template: "table",
   _captcha: "false",
   // Honeypot passthrough: FormSubmit silently drops any submission where _honey is non-empty.
   _honey: submission.honeypot,
-  entity: submission.entity,
   name: submission.name,
   email: submission.email,
   profile: profileLabel(submission),
@@ -158,7 +157,7 @@ export const submitContactRequest = async (
 ): Promise<SubmitContactResult> => {
   const submission = parseContactForm(form);
 
-  if (!submission.entity || !submission.name || !submission.email || !submission.profile) {
+  if (!submission.name || !submission.email || !submission.profile) {
     return { ok: false, error: "Please complete all required fields." };
   }
   if (isOthersProfile(submission.profile) && !submission.profileOther) {

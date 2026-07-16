@@ -226,8 +226,6 @@ export const CONTACT = {
   title: "Request Strategic Allocation",
   body: "Access to Obsidian Quant asset pools is highly restricted. Complete our secure baseline verification framework to schedule an institutional briefing with our technical committee.",
   fields: {
-    entity: "Institutional Entity",
-    entityPlaceholder: "e.g. Sovereign Wealth Fund / Family Office",
     name: "Name",
     namePlaceholder: "Full name",
     email: "Corporate Email Address",

@@ -1,6 +1,5 @@
 /** Parsed strategic-allocation request payload for email + CRM handoff. */
 export type ContactSubmission = {
-  entity: string;
   name: string;
   email: string;
   profile: string;
@@ -41,7 +40,6 @@ export const CONTACT_ENDPOINT =
   `https://formsubmit.co/ajax/${CONTACT_INBOX}`;
 
 export const parseContactForm = (form: FormData): ContactSubmission => {
-  const entity = String(form.get("entity") ?? "").trim();
   const name = String(form.get("name") ?? "").trim();
   const email = String(form.get("email") ?? "").trim();
   const profile = String(form.get("profile") ?? "").trim();
@@ -49,7 +47,6 @@ export const parseContactForm = (form: FormData): ContactSubmission => {
   const note = String(form.get("note") ?? "").trim();
 
   return {
-    entity,
     name,
     email,
     profile,
@@ -70,9 +67,8 @@ export const profileLabel = (submission: ContactSubmission) => {
 
 export const buildContactMailto = (recipient: string, form: FormData): string => {
   const submission = parseContactForm(form);
-  const subject = `Institutional inquiry — ${submission.entity}`;
+  const subject = `Institutional inquiry — ${profileLabel(submission)}`;
   const body = [
-    `Entity: ${submission.entity}`,
     `Name: ${submission.name}`,
     `Reply email: ${submission.email}`,
     `Counterparty profile: ${profileLabel(submission)}`,
@@ -88,7 +84,6 @@ export const buildContactMailto = (recipient: string, form: FormData): string =>
 export const toCrmPayload = (submission: ContactSubmission) => ({
   lead_source: submission.source,
   submitted_at: submission.submittedAt,
-  institutional_entity: submission.entity,
   name: submission.name,
   corporate_email: submission.email,
   counterparty_profile: submission.profile,
@@ -101,10 +96,9 @@ export const toCrmPayload = (submission: ContactSubmission) => ({
 
 /** Email-service payload (FormSubmit-compatible). */
 export const toEmailPayload = (submission: ContactSubmission) => ({
-  _subject: `Institutional inquiry — ${submission.entity}`,
+  _subject: `Institutional inquiry — ${profileLabel(submission)}`,
   _template: "table",
   _captcha: "false",
-  entity: submission.entity,
   name: submission.name,
   email: submission.email,
   profile: profileLabel(submission),
@@ -127,7 +121,7 @@ export const submitContactRequest = async (
 ): Promise<SubmitContactResult> => {
   const submission = parseContactForm(form);
 
-  if (!submission.entity || !submission.name || !submission.email || !submission.profile) {
+  if (!submission.name || !submission.email || !submission.profile) {
     return { ok: false, error: "Please complete all required fields." };
   }
   if (isOthersProfile(submission.profile) && !submission.profileOther) {

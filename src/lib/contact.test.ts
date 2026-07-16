@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildContactMailto,
   isOthersProfile,
@@ -94,5 +94,42 @@ describe("profile helpers", () => {
     form.set("profile", "Others");
     form.set("profileOther", "Endowment");
     expect(profileLabel(parseContactForm(form))).toBe("Others — Endowment");
+  });
+});
+
+describe("submitContactRequest", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    vi.resetModules();
+  });
+
+  // CRM is documented as an OPTIONAL secondary channel: a webhook failure must
+  // never re-open the mailto draft when the email inbox already accepted the lead.
+  it("resolves ok (no mailto fallback) when the CRM webhook rejects but email succeeds", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubEnv("VITE_CRM_WEBHOOK_URL", "https://crm.example.com/hook");
+    // Re-import so the module re-reads the stubbed env into CRM_WEBHOOK_URL.
+    vi.resetModules();
+
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("crm.example.com")) {
+        return Promise.reject(new Error("CRM webhook down"));
+      }
+      return Promise.resolve(new Response(null, { status: 200 }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { submitContactRequest } = await import("./contact");
+    const result = await submitContactRequest(filledForm());
+
+    // Email is the sole gate → clean ok with no draft, despite the CRM failure.
+    expect(result).toEqual({ ok: true });
+
+    const requested = fetchMock.mock.calls.map((call) => String(call[0]));
+    expect(requested.some((url) => url.includes("formsubmit.co"))).toBe(true);
+    expect(requested.some((url) => url.includes("crm.example.com"))).toBe(true);
   });
 });

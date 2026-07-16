@@ -134,34 +134,36 @@ export const submitContactRequest = async (
     return { ok: false, error: "Please explain your counterparty profile." };
   }
 
-  const crmPromise = CRM_WEBHOOK_URL
-    ? fetch(CRM_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(toCrmPayload(submission)),
-        signal,
-      }).then(async (res) => {
+  // Optional CRM webhook — a best-effort secondary channel. Fire it detached and
+  // self-handle its rejection so a CRM failure can never double-send the lead or
+  // gate the result. The email send below is the sole source of truth.
+  if (CRM_WEBHOOK_URL) {
+    void fetch(CRM_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(toCrmPayload(submission)),
+      signal,
+    })
+      .then((res) => {
         if (!res.ok) throw new Error(`CRM webhook failed (${res.status})`);
       })
-    : Promise.resolve();
+      .catch((err) => console.warn("CRM webhook failed", err));
+  }
 
-  const emailPromise = fetch(CONTACT_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify(toEmailPayload(submission)),
-    signal,
-  }).then(async (res) => {
+  try {
+    const res = await fetch(CONTACT_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(toEmailPayload(submission)),
+      signal,
+    });
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       throw new Error(text || `Inbox delivery failed (${res.status})`);
     }
-  });
-
-  try {
-    await Promise.all([emailPromise, crmPromise]);
     return { ok: true };
   } catch (err) {
-    // Network / service issues → keep the lead path alive via mailto draft.
+    // Email delivery (the gate) failed → keep the lead path alive via mailto draft.
     const mailto = buildContactMailto(CONTACT_INBOX, form);
     console.warn("Contact pipeline fell back to mailto:", err);
     return { ok: true, mailtoFallback: true, mailto };

@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { changePct, formatChangePct, formatPrice } from "./marketQuotes";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { changePct, fetchMarketStream, formatChangePct, formatPrice } from "./marketQuotes";
 
 describe("marketQuotes formatters", () => {
   it("formats prices with grouping", () => {
@@ -17,5 +17,40 @@ describe("marketQuotes formatters", () => {
     expect(changePct(105, 100)).toBeCloseTo(5);
     expect(changePct(99, 100)).toBeCloseTo(-1);
     expect(changePct(100, 0)).toBe(0);
+  });
+});
+
+describe("fetchMarketStream partial failure", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  const chartResponse = () =>
+    new Response(
+      JSON.stringify({
+        chart: { result: [{ meta: { regularMarketPrice: 100, chartPreviousClose: 99 } }] },
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+
+  // One flaky symbol (DXY / DX-Y.NYB) must not blank the whole stream: the
+  // symbols that resolved still render, and the call does not reject/error.
+  it("renders the symbols that resolve when one symbol fails", async () => {
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("DX-Y.NYB")) {
+        return Promise.resolve(new Response("upstream error", { status: 500 }));
+      }
+      return Promise.resolve(chartResponse());
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const stream = await fetchMarketStream();
+    const symbols = stream.map((ticker) => ticker.symbol);
+
+    expect(symbols).toEqual(expect.arrayContaining(["VIX", "SPX", "NDX"]));
+    expect(symbols).not.toContain("DXY");
+    expect(stream).toHaveLength(3);
   });
 });

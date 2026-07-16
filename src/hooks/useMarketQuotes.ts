@@ -22,15 +22,16 @@ type Options = {
 export const useMarketQuotes = ({ seed, enabled = true }: Options): MarketStream => {
   const [tickers, setTickers] = useState<MarketTicker[]>(() => cachedMarketTickers() ?? [...seed]);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
-  const [status, setStatus] = useState<MarketStream["status"]>("loading");
+  const [status, setStatus] = useState<MarketStream["status"]>(() =>
+    enabled ? "loading" : "stale",
+  );
   const alive = useRef(true);
 
   useEffect(() => {
     alive.current = true;
-    if (!enabled) {
-      setStatus("stale");
-      return;
-    }
+    // Disabled → status is already seeded to "stale" in useState, so just bail.
+    // (Setting state here would trip react-hooks/set-state-in-effect on React 19.)
+    if (!enabled) return;
 
     let timer = 0;
     const controller = new AbortController();

@@ -111,6 +111,8 @@ VITE_CONTACT_ENDPOINT=https://formsubmit.co/ajax/access@obsidianquantgroup.com
 VITE_CRM_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/...
 ```
 
+> **CSP note:** if you set `VITE_CRM_WEBHOOK_URL`, add that webhook's origin (e.g. `https://hooks.zapier.com`) to `connect-src` in both `deploy/nginx-security-headers.conf` and the `index.html` meta CSP, or the CRM fetch is blocked.
+
 Mailbox **passwords must never** be stored in the repo or frontend env.
 
 ## Manual deploy / rollback

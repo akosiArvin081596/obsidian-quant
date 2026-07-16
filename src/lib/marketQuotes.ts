@@ -116,11 +116,30 @@ export const fetchYahooTicker = async (
 
 /** Parallel refresh of the Market Intelligence stream. */
 export const fetchMarketStream = async (signal?: AbortSignal): Promise<MarketTicker[]> => {
-  const results = await Promise.all(
+  const settled = await Promise.allSettled(
     MARKET_SYMBOLS.map(({ label, yahoo, digits }) => fetchYahooTicker(label, yahoo, digits, signal)),
   );
-  writeCache(results);
-  return results;
+
+  // Only a total wipe-out is fatal. A single flaky symbol (DXY on Yahoo is a
+  // frequent offender) must not blank the whole panel — let the caller fall
+  // back to cache/seed and surface stale/error only when everything failed.
+  if (settled.every((result) => result.status === "rejected")) {
+    throw new Error("Market stream refresh failed for all symbols.");
+  }
+
+  // For any symbol that failed, keep its last-good value from the cache.
+  const lastGood = new Map((readCache() ?? []).map((ticker) => [ticker.symbol, ticker]));
+
+  const tickers = settled
+    .map((result, i) =>
+      result.status === "fulfilled"
+        ? result.value
+        : lastGood.get(MARKET_SYMBOLS[i].label) ?? null,
+    )
+    .filter((ticker): ticker is MarketTicker => ticker !== null);
+
+  writeCache(tickers);
+  return tickers;
 };
 
 export const cachedMarketTickers = () => readCache();

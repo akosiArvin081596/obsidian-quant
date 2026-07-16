@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0B0D12" />
     <!--
-      CSP connect-src is a strict allowlist ('self' + FormSubmit) — the bare `https:`
-      wildcard (which permitted exfil to ANY https origin) has been removed.
+      CSP connect-src is a strict allowlist ('self' + FormSubmit + Google Analytics)
+      — the bare `https:` wildcard (which permitted exfil to ANY https origin) has been removed.
       ws:/wss: are retained solely for the Vite dev-server HMR socket; production is
       further locked down by deploy/nginx-security-headers.conf (which omits ws:/wss:)
       — that header intersects with this meta, so websockets stay blocked in prod.
@@ -17,7 +17,7 @@
     -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self' https://formsubmit.co; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self' ws: wss: https://formsubmit.co"
+      content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self' https://formsubmit.co; script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com; media-src 'self'; connect-src 'self' ws: wss: https://formsubmit.co https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com"
     />
     <meta
       name="description"

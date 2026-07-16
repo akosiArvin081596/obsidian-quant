@@ -43,9 +43,6 @@ const Firm = () => (
       <div className="mt-12 grid items-start gap-12 lg:mt-16 lg:grid-cols-12">
         <div className="relative mt-4 hidden lg:col-span-5 lg:block" aria-hidden>
           <HexField className="max-w-xs opacity-70" />
-          <span className="pointer-events-none absolute -left-2 top-2 select-none font-serif text-[7rem] leading-none text-gold/[0.06]">
-            OQ
-          </span>
         </div>
 
         <Stagger
@@ -55,7 +52,7 @@ const Firm = () => (
         >
           {FIRM.philosophy.blocks.map((block, i) => (
             <StaggerItem key={block.title} className="h-full">
-              <div className="group h-full bg-obsidian/70 p-8 transition-colors duration-500 hover:bg-obsidian lg:p-10">
+              <div className="group relative z-10 h-full bg-obsidian/80 p-8 transition-colors duration-500 hover:bg-[#05080c] active:bg-[#05080c] lg:bg-obsidian/70 lg:p-10 lg:hover:bg-obsidian">
                 <div className="flex items-baseline gap-3">
                   <span className="font-mono text-[0.66rem] tracking-[0.2em] text-gold/70">
                     0{i + 1}
@@ -65,7 +62,7 @@ const Firm = () => (
                 <h3 className="mt-6 font-serif text-2xl text-ghost lg:text-3xl">
                   {block.title}
                 </h3>
-                <p className="mt-4 text-xs font-light leading-relaxed text-silver/65 lg:text-sm">
+                <p className="mt-4 text-xs font-light leading-relaxed text-silver/75 lg:text-sm lg:text-silver/65">
                   {block.body}
                 </p>
               </div>
@@ -139,7 +136,7 @@ const Firm = () => (
       >
         {FIRM.governance.pillars.map((pillar, i) => (
           <StaggerItem key={pillar.title} className="h-full">
-            <div className="group flex h-full flex-col justify-between border-t-2 border-gold bg-obsidian/50 p-8 transition-colors duration-500 hover:bg-obsidian">
+            <div className="group relative z-10 flex h-full flex-col justify-between border-t-2 border-gold bg-obsidian/80 p-6 transition-colors duration-500 hover:bg-[#05080c] active:bg-[#05080c] sm:p-8 lg:bg-obsidian/50 lg:hover:bg-obsidian">
               <div>
                 <div className="font-mono text-[0.62rem] uppercase tracking-[0.24em] text-gold/70">
                   {`0${i + 1}`} / Authority
@@ -147,7 +144,7 @@ const Firm = () => (
                 <h4 className="mt-5 font-serif text-xl text-ghost lg:text-2xl">
                   {pillar.title}
                 </h4>
-                <p className="mt-3 text-xs font-light leading-relaxed text-silver/60">
+                <p className="mt-3 text-xs font-light leading-relaxed text-silver/70 lg:text-silver/60">
                   {pillar.body}
                 </p>
               </div>

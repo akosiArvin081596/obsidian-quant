@@ -1,5 +1,5 @@
 import { lazy, memo, Suspense } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 
 import RootLayout from "./layouts/RootLayout";
 import InvestorLayout from "./layouts/InvestorLayout";
@@ -10,8 +10,8 @@ const Home = lazy(() => import("./pages/Home"));
 const Firm = lazy(() => import("./pages/Firm"));
 const Strategy = lazy(() => import("./pages/Strategy"));
 const Architecture = lazy(() => import("./pages/Architecture"));
-const Insights = lazy(() => import("./pages/Insights"));
 const Contact = lazy(() => import("./pages/Contact"));
+const Legal = lazy(() => import("./pages/Legal"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const InvestorLogin = lazy(() => import("./pages/investor/Login"));
 const InvestorDashboard = lazy(() => import("./pages/investor/Dashboard"));
@@ -26,8 +26,9 @@ const router = createBrowserRouter([
       { path: "/firm", element: <Firm /> },
       { path: "/strategy", element: <Strategy /> },
       { path: "/architecture", element: <Architecture /> },
-      { path: "/insights", element: <Insights /> },
+      { path: "/insights", element: <Navigate to="/" replace /> },
       { path: "/contact", element: <Contact /> },
+      { path: "/legal/:slug", element: <Legal /> },
       { path: "*", element: <NotFound /> },
     ],
   },

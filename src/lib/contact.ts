@@ -6,6 +6,8 @@ export type ContactSubmission = {
   profile: string;
   profileOther: string;
   note: string;
+  /** FormSubmit honeypot — empty for humans; bots fill it and FormSubmit drops the send. */
+  honeypot: string;
   submittedAt: string;
   source: "obsidian-quant-web";
   inbox: string;
@@ -47,6 +49,8 @@ export const parseContactForm = (form: FormData): ContactSubmission => {
   const profile = String(form.get("profile") ?? "").trim();
   const profileOther = String(form.get("profileOther") ?? "").trim();
   const note = String(form.get("note") ?? "").trim();
+  // Preserve the raw honeypot value (no trim) so any bot input still trips FormSubmit's drop.
+  const honeypot = String(form.get("_honey") ?? "");
 
   return {
     entity,
@@ -55,6 +59,7 @@ export const parseContactForm = (form: FormData): ContactSubmission => {
     profile,
     profileOther,
     note,
+    honeypot,
     submittedAt: new Date().toISOString(),
     source: "obsidian-quant-web",
     inbox: CONTACT_INBOX,
@@ -68,8 +73,11 @@ export const profileLabel = (submission: ContactSubmission) => {
   return submission.profile;
 };
 
-export const buildContactMailto = (recipient: string, form: FormData): string => {
-  const submission = parseContactForm(form);
+/** Render a mailto: draft from an already-parsed submission (single source of truth). */
+const mailtoFromSubmission = (
+  recipient: string,
+  submission: ContactSubmission,
+): string => {
   const subject = `Institutional inquiry — ${submission.entity}`;
   const body = [
     `Entity: ${submission.entity}`,
@@ -83,6 +91,9 @@ export const buildContactMailto = (recipient: string, form: FormData): string =>
 
   return `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 };
+
+export const buildContactMailto = (recipient: string, form: FormData): string =>
+  mailtoFromSubmission(recipient, parseContactForm(form));
 
 /** CRM-oriented JSON payload (flat fields for Zapier / Make / sheets). */
 export const toCrmPayload = (submission: ContactSubmission) => ({
@@ -104,6 +115,8 @@ export const toEmailPayload = (submission: ContactSubmission) => ({
   _subject: `Institutional inquiry — ${submission.entity}`,
   _template: "table",
   _captcha: "false",
+  // Honeypot passthrough: FormSubmit silently drops any submission where _honey is non-empty.
+  _honey: submission.honeypot,
   entity: submission.entity,
   name: submission.name,
   email: submission.email,
@@ -163,8 +176,9 @@ export const submitContactRequest = async (
     }
     return { ok: true };
   } catch (err) {
-    // Email delivery (the gate) failed → keep the lead path alive via mailto draft.
-    const mailto = buildContactMailto(CONTACT_INBOX, form);
+    // Email delivery (the gate) failed → keep the lead path alive via mailto draft,
+    // reusing the single parsed submission so there's no re-parse / timestamp drift.
+    const mailto = mailtoFromSubmission(CONTACT_INBOX, submission);
     console.warn("Contact pipeline fell back to mailto:", err);
     return { ok: true, mailtoFallback: true, mailto };
   }

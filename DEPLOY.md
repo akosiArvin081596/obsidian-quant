@@ -79,10 +79,26 @@ include /var/www/obsidian-quant/deploy/nginx-security-headers.conf;
 include /var/www/obsidian-quant/deploy/nginx-yahoo-proxy.conf;
 ```
 
+**One-time: install the rate-limit zone.** The proxy rate-limits per client IP
+(`limit_req zone=yahoo_proxy burst=10 nodelay;`). `limit_req_zone` is only valid
+in the `http{}` context, so it lives in `deploy/nginx-ratelimit.conf` rather than
+the vhost snippet. Copy or symlink it into `/etc/nginx/conf.d/`, which the stock
+`nginx.conf` auto-includes inside `http{}`:
+
+```bash
+ln -s /var/www/obsidian-quant/deploy/nginx-ratelimit.conf \
+      /etc/nginx/conf.d/obsidian-ratelimit.conf          # or: cp
+```
+
+The vhost `include` of `nginx-yahoo-proxy.conf` now **depends** on this zone: if
+`nginx-ratelimit.conf` is not in `conf.d/`, `nginx -t` fails with
+`unknown limit_req_zone "yahoo_proxy"`. Install it before (or together with) the
+reload below.
+
 Then validate, reload, and smoke-test the proxy:
 
 ```bash
-# After git pull so the new include file is on disk
+# After git pull so the new include files are on disk
 nginx -t && systemctl reload nginx
 
 curl -sS "https://obsidian.abedubas.dev/api/yahoo/v8/finance/chart/%5EVIX?range=5d&interval=1d" \

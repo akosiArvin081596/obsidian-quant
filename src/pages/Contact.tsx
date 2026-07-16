@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import PageHero from "../components/PageHero";
 import Section from "../components/Section";
@@ -26,6 +26,16 @@ const Contact = () => {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
 
+  // Tie async submit results to the component lifecycle so a mid-submit route change
+  // can't setState or navigate (mailto) on an unmounted component.
+  const isMounted = useRef(true);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   const showOther = isOthersProfile(profile);
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -37,6 +47,9 @@ const Contact = () => {
     setMessage("");
 
     const result = await submitContactRequest(new FormData(formEl));
+
+    // Bail out if the user routed away mid-submit — no setState / mailto on unmount.
+    if (!isMounted.current) return;
 
     if (!result.ok) {
       setStatus("error");
@@ -77,7 +90,17 @@ const Contact = () => {
           <Reveal className="lg:col-span-7">
             <Spotlight size={360} strength={0.1}>
               <div className="relative z-10 border border-gold/15 bg-obsidian/50 p-8 backdrop-blur-sm lg:p-10 gold-grid">
-                <form className="space-y-6" onSubmit={onSubmit} noValidate={false}>
+                <form className="space-y-6" onSubmit={onSubmit}>
+                  {/* Anti-spam honeypot: invisible to people, filled by bots. FormSubmit
+                      silently drops any submission where _honey is non-empty. */}
+                  <input
+                    type="text"
+                    name="_honey"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    hidden
+                  />
                   <div>
                     <label className={labelClass} htmlFor="entity">
                       {CONTACT.fields.entity}
@@ -176,6 +199,10 @@ const Contact = () => {
                   <Button type="submit" variant="primary" full disabled={status === "submitting"}>
                     {status === "submitting" ? "Submitting…" : CONTACT.submit}
                   </Button>
+
+                  <p className="text-center text-xs font-light leading-relaxed text-silver/40">
+                    Your details are sent securely to our team and are never shared.
+                  </p>
 
                   <p className="text-center text-[0.62rem] uppercase tracking-[0.2em] text-silver/35">
                     Secure intake · {CONTACT_INBOX}

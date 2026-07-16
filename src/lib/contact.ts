@@ -5,6 +5,8 @@ export type ContactSubmission = {
   profile: string;
   profileOther: string;
   note: string;
+  /** FormSubmit honeypot — empty for humans; bots fill it and FormSubmit drops the send. */
+  honeypot: string;
   submittedAt: string;
   source: "obsidian-quant-web";
   inbox: string;
@@ -27,9 +29,16 @@ export const CONTACT_INBOX =
   (import.meta.env.VITE_CONTACT_INBOX as string | undefined)?.trim() ||
   "access@obsidianquantgroup.com";
 
-/** Optional CRM webhook — only when the deploy owner sets VITE_CRM_WEBHOOK_URL. */
+/**
+ * CRM lead webhook. Defaults to the SAME-ORIGIN `/api/lead` proxy
+ * (deploy/nginx-lead-proxy.conf), which injects the bearer secret server-side so
+ * it's never in the client bundle — `connect-src 'self'` already allows it.
+ * Override with VITE_CRM_WEBHOOK_URL only to point at a different collector (then
+ * add that origin to the CSP connect-src).
+ */
 export const CRM_WEBHOOK_URL =
-  (import.meta.env.VITE_CRM_WEBHOOK_URL as string | undefined)?.trim() || "";
+  (import.meta.env.VITE_CRM_WEBHOOK_URL as string | undefined)?.trim() ||
+  "/api/lead";
 
 /**
  * Email delivery endpoint. Default FormSubmit AJAX — no .env / Vercel secrets needed.
@@ -45,6 +54,8 @@ export const parseContactForm = (form: FormData): ContactSubmission => {
   const profile = String(form.get("profile") ?? "").trim();
   const profileOther = String(form.get("profileOther") ?? "").trim();
   const note = String(form.get("note") ?? "").trim();
+  // Preserve the raw honeypot value (no trim) so any bot input still trips FormSubmit's drop.
+  const honeypot = String(form.get("_honey") ?? "");
 
   return {
     name,
@@ -52,6 +63,7 @@ export const parseContactForm = (form: FormData): ContactSubmission => {
     profile,
     profileOther,
     note,
+    honeypot,
     submittedAt: new Date().toISOString(),
     source: "obsidian-quant-web",
     inbox: CONTACT_INBOX,
@@ -65,8 +77,11 @@ export const profileLabel = (submission: ContactSubmission) => {
   return submission.profile;
 };
 
-export const buildContactMailto = (recipient: string, form: FormData): string => {
-  const submission = parseContactForm(form);
+/** Render a mailto: draft from an already-parsed submission (single source of truth). */
+const mailtoFromSubmission = (
+  recipient: string,
+  submission: ContactSubmission,
+): string => {
   const subject = `Institutional inquiry — ${profileLabel(submission)}`;
   const body = [
     `Name: ${submission.name}`,
@@ -80,18 +95,37 @@ export const buildContactMailto = (recipient: string, form: FormData): string =>
   return `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 };
 
-/** CRM-oriented JSON payload (flat fields for Zapier / Make / sheets). */
+export const buildContactMailto = (recipient: string, form: FormData): string =>
+  mailtoFromSubmission(recipient, parseContactForm(form));
+
+/** Combined free-text "notes" for the CRM lead: the counterparty profile plus the
+ *  briefing note (the CRM stores a single notes field). Capped to the CRM's
+ *  5000-char limit so an overlong note can't trip its validation (a 400). */
+const crmNotes = (submission: ContactSubmission): string => {
+  const parts = [`Counterparty profile: ${profileLabel(submission)}`];
+  if (submission.note) parts.push(`Briefing notes: ${submission.note}`);
+  return parts.join("\n\n").slice(0, 5000);
+};
+
+/**
+ * CRM ProjectLead payload — matches the alchemydev-crm `POST /api/webhooks/leads`
+ * contract EXACTLY: source, companyName, contactName?, contactEmail?, notes?,
+ * submittedAt?. Posted same-origin to /api/lead, where nginx injects the bearer
+ * secret. Blank optional fields are omitted (undefined → dropped by
+ * JSON.stringify), which the CRM treats as absent. `submittedAt` is an ISO-8601
+ * instant (Date.toISOString → trailing Z), accepted by the CRM's datetime check.
+ *
+ * The Institutional Entity field was removed from the form (it overlapped with
+ * Counterparty Profile), so `companyName` — required by the CRM contract — now
+ * carries the counterparty profile label, which is always present.
+ */
 export const toCrmPayload = (submission: ContactSubmission) => ({
-  lead_source: submission.source,
-  submitted_at: submission.submittedAt,
-  name: submission.name,
-  corporate_email: submission.email,
-  counterparty_profile: submission.profile,
-  counterparty_profile_other: submission.profileOther || null,
-  counterparty_profile_display: profileLabel(submission),
-  briefing_notes: submission.note || null,
-  notify_inbox: submission.inbox,
-  status: "new",
+  source: submission.source,
+  companyName: profileLabel(submission),
+  contactName: submission.name || undefined,
+  contactEmail: submission.email || undefined,
+  notes: crmNotes(submission),
+  submittedAt: submission.submittedAt,
 });
 
 /** Email-service payload (FormSubmit-compatible). */
@@ -99,6 +133,8 @@ export const toEmailPayload = (submission: ContactSubmission) => ({
   _subject: `Institutional inquiry — ${profileLabel(submission)}`,
   _template: "table",
   _captcha: "false",
+  // Honeypot passthrough: FormSubmit silently drops any submission where _honey is non-empty.
+  _honey: submission.honeypot,
   name: submission.name,
   email: submission.email,
   profile: profileLabel(submission),
@@ -128,35 +164,39 @@ export const submitContactRequest = async (
     return { ok: false, error: "Please explain your counterparty profile." };
   }
 
-  const crmPromise = CRM_WEBHOOK_URL
-    ? fetch(CRM_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(toCrmPayload(submission)),
-        signal,
-      }).then(async (res) => {
+  // CRM lead webhook (same-origin /api/lead by default) — a best-effort secondary
+  // channel. Fire it detached and self-handle its rejection so a CRM failure can
+  // never double-send the lead or gate the result. The email send below is the
+  // sole source of truth.
+  if (CRM_WEBHOOK_URL) {
+    void fetch(CRM_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(toCrmPayload(submission)),
+      signal,
+    })
+      .then((res) => {
         if (!res.ok) throw new Error(`CRM webhook failed (${res.status})`);
       })
-    : Promise.resolve();
+      .catch((err) => console.warn("CRM webhook failed", err));
+  }
 
-  const emailPromise = fetch(CONTACT_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify(toEmailPayload(submission)),
-    signal,
-  }).then(async (res) => {
+  try {
+    const res = await fetch(CONTACT_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(toEmailPayload(submission)),
+      signal,
+    });
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       throw new Error(text || `Inbox delivery failed (${res.status})`);
     }
-  });
-
-  try {
-    await Promise.all([emailPromise, crmPromise]);
     return { ok: true };
   } catch (err) {
-    // Network / service issues → keep the lead path alive via mailto draft.
-    const mailto = buildContactMailto(CONTACT_INBOX, form);
+    // Email delivery (the gate) failed → keep the lead path alive via mailto draft,
+    // reusing the single parsed submission so there's no re-parse / timestamp drift.
+    const mailto = mailtoFromSubmission(CONTACT_INBOX, submission);
     console.warn("Contact pipeline fell back to mailto:", err);
     return { ok: true, mailtoFallback: true, mailto };
   }

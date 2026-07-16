@@ -176,6 +176,16 @@ const Contact = () => {
                   </div>
                 ) : (
                   <form className="space-y-6" onSubmit={onSubmit} noValidate={false}>
+                    {/* Anti-spam honeypot: invisible to people, filled by bots. FormSubmit
+                        silently drops any submission where _honey is non-empty. */}
+                    <input
+                      type="text"
+                      name="_honey"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      aria-hidden="true"
+                      hidden
+                    />
                     <div>
                       <label className={labelClass} htmlFor="name">
                         {CONTACT.fields.name}

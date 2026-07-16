@@ -22,24 +22,44 @@ type Options = {
 export const useMarketQuotes = ({ seed, enabled = true }: Options): MarketStream => {
   const [tickers, setTickers] = useState<MarketTicker[]>(() => cachedMarketTickers() ?? [...seed]);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
-  const [status, setStatus] = useState<MarketStream["status"]>("loading");
+  const [status, setStatus] = useState<MarketStream["status"]>(() =>
+    enabled ? "loading" : "stale",
+  );
   const alive = useRef(true);
+  // Hold `seed` in a ref so the polling effect can read the latest value
+  // without depending on it. A caller passing an unstable inline
+  // `seed={[...]}` would otherwise tear down + recreate the interval and
+  // AbortController on every render (a refresh storm). The lazy `useState`
+  // initializer above still reads `seed` directly — that's init-only and fine.
+  const seedRef = useRef(seed);
+  useEffect(() => {
+    seedRef.current = seed;
+  }, [seed]);
 
   useEffect(() => {
     alive.current = true;
-    if (!enabled) {
-      setStatus("stale");
-      return;
-    }
+    // Disabled → status is already seeded to "stale" in useState, so just bail.
+    // (Setting state here would trip react-hooks/set-state-in-effect on React 19.)
+    if (!enabled) return;
 
     let timer = 0;
-    const controller = new AbortController();
+    // Each refresh runs under its own controller and aborts the previous
+    // in-flight one, so overlapping interval + visibility refreshes can't
+    // resolve out of order: a superseded fetch aborts out and its
+    // `signal.aborted` guard bails before applying state, so only the latest
+    // refresh ever wins. (`fetchMarketStream` uses `Promise.allSettled`, so an
+    // aborted refresh can still *resolve* with a partial result — hence the
+    // guard on the success path too, not just the catch.)
+    let activeController: AbortController | null = null;
 
     const refresh = async (isInitial: boolean) => {
+      activeController?.abort();
+      const controller = new AbortController();
+      activeController = controller;
       if (!isInitial) setStatus((prev) => (prev === "live" ? "live" : "loading"));
       try {
         const next = await fetchMarketStream(controller.signal);
-        if (!alive.current) return;
+        if (!alive.current || controller.signal.aborted) return;
         setTickers(next);
         setUpdatedAt(Date.now());
         setStatus("live");
@@ -50,7 +70,7 @@ export const useMarketQuotes = ({ seed, enabled = true }: Options): MarketStream
           setTickers(cache);
           setStatus("stale");
         } else {
-          setTickers([...seed]);
+          setTickers([...seedRef.current]);
           setStatus("error");
         }
       }
@@ -66,11 +86,11 @@ export const useMarketQuotes = ({ seed, enabled = true }: Options): MarketStream
 
     return () => {
       alive.current = false;
-      controller.abort();
+      activeController?.abort();
       window.clearInterval(timer);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [enabled, seed]);
+  }, [enabled]);
 
   return { tickers, updatedAt, status };
 };

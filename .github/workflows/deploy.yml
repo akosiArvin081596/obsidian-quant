@@ -36,8 +36,14 @@ jobs:
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/deploy_key
           printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/deploy_key
+          # Force IPv4 (-4). The VPS hostname resolves to BOTH an A and an AAAA
+          # record; GitHub's dual-stack Azure runners otherwise sometimes try the
+          # IPv6 address first, which Azure->Hostinger does not route, black-holing
+          # the connection for the full ConnectTimeout on every attempt. The box's
+          # IPv4 is the known-good path (host key is per-host, so StrictHostKey
+          # checking against VPS_KNOWN_HOSTS is unaffected).
           for attempt in 1 2 3 4 5; do
-            ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            ssh -4 -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
               -o ConnectTimeout=25 -o ServerAliveInterval=15 -o ServerAliveCountMax=4 \
               "$VPS_USER@$VPS_HOST" "deploy" && exit 0
             echo "::warning::deploy attempt $attempt failed; retrying in 15s"

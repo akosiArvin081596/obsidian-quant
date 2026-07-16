@@ -121,6 +121,8 @@ const ScrollChoreography = () => {
     let mutationObserver: MutationObserver | undefined;
     let setupFrame = 0;
     let scrollFrame = 0;
+    let rebindFrame = 0;
+    let rebindTimer = 0;
     let sections: HTMLElement[] = [];
 
     const syncActive = () => {
@@ -177,10 +179,17 @@ const ScrollChoreography = () => {
       // Lazy routes / late DOM: rebind when main children change so the gem keeps tracking.
       const main = document.querySelector("main");
       if (main && typeof MutationObserver !== "undefined") {
-        mutationObserver = new MutationObserver(() => {
-          cancelAnimationFrame(setupFrame);
-          setupFrame = requestAnimationFrame(bindSections);
-        });
+        // Framer-motion / AnimatePresence mount-unmounts fire bursts of childList
+        // mutations under <main>; coalesce a burst into a single trailing rebind
+        // instead of scheduling a bindSections rAF per mutation batch.
+        const scheduleRebind = () => {
+          window.clearTimeout(rebindTimer);
+          rebindTimer = window.setTimeout(() => {
+            cancelAnimationFrame(rebindFrame);
+            rebindFrame = requestAnimationFrame(bindSections);
+          }, 120);
+        };
+        mutationObserver = new MutationObserver(scheduleRebind);
         mutationObserver.observe(main, { childList: true, subtree: true });
       }
     });
@@ -188,6 +197,8 @@ const ScrollChoreography = () => {
     return () => {
       cancelAnimationFrame(setupFrame);
       cancelAnimationFrame(scrollFrame);
+      cancelAnimationFrame(rebindFrame);
+      window.clearTimeout(rebindTimer);
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);
       observer?.disconnect();

@@ -1,5 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { changePct, fetchMarketStream, formatChangePct, formatPrice } from "./marketQuotes";
+import {
+  changePct,
+  fetchMarketStream,
+  formatChangePct,
+  formatPrice,
+  parseYahooChart,
+  readCache,
+  writeCache,
+  type MarketTicker,
+} from "./marketQuotes";
 
 describe("marketQuotes formatters", () => {
   it("formats prices with grouping", () => {
@@ -52,5 +61,84 @@ describe("fetchMarketStream partial failure", () => {
     expect(symbols).toEqual(expect.arrayContaining(["VIX", "SPX", "NDX"]));
     expect(symbols).not.toContain("DXY");
     expect(stream).toHaveLength(3);
+  });
+});
+
+describe("parseYahooChart", () => {
+  it("parses a well-formed chart payload", () => {
+    const ticker = parseYahooChart(
+      { chart: { result: [{ meta: { regularMarketPrice: 100, chartPreviousClose: 99 } }] } },
+      "VIX",
+      2,
+    );
+    expect(ticker).toEqual({ symbol: "VIX", value: "100.00", change: "+1.01%", up: true });
+  });
+
+  it("returns null when meta or regularMarketPrice is missing", () => {
+    // Result present but no `meta`.
+    expect(parseYahooChart({ chart: { result: [{}] } }, "VIX", 2)).toBeNull();
+    // `meta` present but no `regularMarketPrice`.
+    expect(
+      parseYahooChart({ chart: { result: [{ meta: { chartPreviousClose: 99 } }] } }, "VIX", 2),
+    ).toBeNull();
+    // Empty payload — no `chart` at all.
+    expect(parseYahooChart({}, "VIX", 2)).toBeNull();
+  });
+
+  it("resolves the chartPreviousClose ?? previousClose fallback", () => {
+    // `chartPreviousClose` absent → falls back to `previousClose` (100).
+    expect(
+      parseYahooChart(
+        { chart: { result: [{ meta: { regularMarketPrice: 105, previousClose: 100 } }] } },
+        "SPX",
+        2,
+      ),
+    ).toMatchObject({ change: "+5.00%", up: true });
+
+    // Both present → `chartPreviousClose` (100) wins over `previousClose` (50);
+    // had the fallback leaked, the change would read "+110.00%".
+    expect(
+      parseYahooChart(
+        {
+          chart: {
+            result: [
+              { meta: { regularMarketPrice: 105, chartPreviousClose: 100, previousClose: 50 } },
+            ],
+          },
+        },
+        "SPX",
+        2,
+      ),
+    ).toMatchObject({ change: "+5.00%" });
+  });
+});
+
+describe("market quote cache round-trip", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  // vitest runs in the default `node` environment (no DOM), so provide a
+  // minimal in-memory localStorage for the cache helpers to hit.
+  const memoryStorage = () => {
+    const store = new Map<string, string>();
+    return {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        store.set(key, value);
+      },
+    };
+  };
+
+  it("preserves tickers through a writeCache → readCache round-trip", () => {
+    vi.stubGlobal("localStorage", memoryStorage());
+
+    const tickers: MarketTicker[] = [
+      { symbol: "VIX", value: "16.20", change: "+0.41%", up: true },
+      { symbol: "SPX", value: "5,127.78", change: "-1.35%", up: false },
+    ];
+
+    writeCache(tickers);
+    expect(readCache()).toEqual(tickers);
   });
 });

@@ -30,14 +30,13 @@ const MarketIntelligence = () => {
     <motion.aside
       className="hero-market scene-content relative z-20 hidden lg:block"
       aria-label="Market intelligence snapshot"
-      aria-live="polite"
       initial={reduce ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1, delay: reduce ? 0 : 0.9 }}
     >
       <hr />
       <h4>{HERO.market.title}</h4>
-      <small className="hero-market-status">
+      <small className="hero-market-status" aria-live="polite">
         <i
           className={cn(
             "hero-market-dot",

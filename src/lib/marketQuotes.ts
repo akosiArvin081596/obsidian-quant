@@ -61,7 +61,11 @@ const yahooChartUrl = (symbol: string) => {
   return `/api/yahoo/v8/finance/chart/${encoded}?range=5d&interval=1d`;
 };
 
-const parseYahooChart = (data: YahooChartPayload, label: string, digits: number): MarketTicker | null => {
+export const parseYahooChart = (
+  data: YahooChartPayload,
+  label: string,
+  digits: number,
+): MarketTicker | null => {
   const meta = data.chart?.result?.[0]?.meta;
   const price = meta?.regularMarketPrice;
   const previous = meta?.chartPreviousClose ?? meta?.previousClose;
@@ -76,7 +80,7 @@ const parseYahooChart = (data: YahooChartPayload, label: string, digits: number)
   };
 };
 
-const readCache = (): MarketTicker[] | null => {
+export const readCache = (): MarketTicker[] | null => {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
@@ -88,7 +92,7 @@ const readCache = (): MarketTicker[] | null => {
   }
 };
 
-const writeCache = (tickers: MarketTicker[]) => {
+export const writeCache = (tickers: MarketTicker[]) => {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ tickers, savedAt: Date.now() }));
   } catch {

@@ -4,8 +4,8 @@ import AuroraRibbon from "../components/AuroraRibbon";
 
 const NotFound = () => (
   <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 hex-bg gold-grid">
-    <AuroraRibbon intensity={0.4} className="opacity-50" />
-    <div className="relative z-10 text-center">
+    <AuroraRibbon intensity={0.4} className="scene-behind opacity-50" />
+    <div className="scene-content relative z-10 text-center">
       <div className="text-display text-8xl text-gold-gradient lg:text-9xl">404</div>
       <h1 className="mt-4 text-display text-3xl text-ghost lg:text-4xl">
         This coordinate lies outside the model.

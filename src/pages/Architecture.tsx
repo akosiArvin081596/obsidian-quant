@@ -22,7 +22,7 @@ const Architecture = () => (
     />
 
     {/* ============ SYSTEM LAYERS ============ */}
-    <Section className="isolate border-y border-gold/10 bg-midnight">
+    <Section className="border-y border-gold/10 bg-midnight">
       {/* ambient gold bloom behind the layer diagram — subtle scroll parallax */}
       <div
         aria-hidden
@@ -54,7 +54,7 @@ const Architecture = () => (
         </div>
 
         <div className="lg:col-span-8">
-          <ArchitectureLayers delay={1.7} />
+          <ArchitectureLayers delay={0.2} />
         </div>
       </div>
     </Section>
@@ -112,8 +112,8 @@ const Architecture = () => (
 
     {/* ============ CLOSING CTA ============ */}
     <section className="relative overflow-hidden border-t border-gold/10 bg-obsidian px-6 py-28 text-center lg:py-36">
-      <AuroraRibbon intensity={0.4} className="opacity-60" />
-      <Stagger className="relative z-10 mx-auto max-w-2xl">
+      <AuroraRibbon intensity={0.4} className="scene-behind opacity-60" />
+      <Stagger className="scene-content relative z-10 mx-auto max-w-2xl">
         <StaggerItem>
           <Eyebrow centered>Limited Capacity</Eyebrow>
         </StaggerItem>

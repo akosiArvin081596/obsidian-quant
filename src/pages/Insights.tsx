@@ -71,9 +71,9 @@ const Insights = () => {
 
       {/* ============ RESTRICTED DISTRIBUTION + CTA ============ */}
       <section className="relative overflow-hidden border-t border-gold/10 bg-obsidian px-6 py-28 hex-bg lg:py-36">
-        <AuroraRibbon intensity={0.4} className="opacity-50" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-obsidian/40 via-transparent to-obsidian" />
-        <Stagger className="relative z-10 mx-auto max-w-3xl text-center">
+        <AuroraRibbon intensity={0.4} className="scene-behind opacity-50" />
+        <div className="scene-behind pointer-events-none absolute inset-0 bg-gradient-to-b from-obsidian/40 via-transparent to-obsidian" />
+        <Stagger className="scene-content relative z-10 mx-auto max-w-3xl text-center">
           <StaggerItem>
             <Eyebrow centered>Restricted Distribution</Eyebrow>
           </StaggerItem>

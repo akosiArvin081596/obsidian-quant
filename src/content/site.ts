@@ -11,7 +11,7 @@ export const BRAND = {
   badge: "Institutional Quantitative Asset Management",
   intro:
     "A quantitative investment architecture combining multi-layer systematic trading, institutional infrastructure, and absolute risk discipline.",
-  email: "access@obsidianquant.group",
+  email: "access@obsidianquantgroup.com",
   presence: ["Zurich", "Singapore", "New York"],
   established: "MMXXVI",
 } as const;
@@ -228,8 +228,14 @@ export const CONTACT = {
   fields: {
     entity: "Institutional Entity",
     entityPlaceholder: "e.g. Sovereign Wealth Fund / Family Office",
+    name: "Name",
+    namePlaceholder: "Full name",
     email: "Corporate Email Address",
     emailPlaceholder: "secure@entity.com",
+    profile: "Counterparty Profile",
+    profileOther: "Please explain",
+    profileOtherPlaceholder: "Describe your counterparty type…",
+    note: "Briefing Notes",
   },
   submit: "Submit Credentials",
 } as const;

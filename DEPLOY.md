@@ -67,6 +67,54 @@ curl -sI https://obsidian.abedubas.dev/
 The application also ships a CSP meta policy as defense in depth. HSTS and
 `frame-ancestors` must be delivered by nginx and cannot be set by HTML.
 
+## Market Intelligence proxy (Yahoo quotes)
+
+The hero Market Intelligence panel fetches live index quotes through
+same-origin `/api/yahoo/...`. Vite proxies that path in `npm run dev` /
+`npm run preview`. On the VPS, nginx must do the same — include the snippet
+inside the HTTPS server block (alongside the security headers):
+
+```nginx
+include /var/www/obsidian-quant/deploy/nginx-security-headers.conf;
+include /var/www/obsidian-quant/deploy/nginx-yahoo-proxy.conf;
+```
+
+Then validate, reload, and smoke-test the proxy:
+
+```bash
+# After git pull so the new include file is on disk
+nginx -t && systemctl reload nginx
+
+curl -sS "https://obsidian.abedubas.dev/api/yahoo/v8/finance/chart/%5EVIX?range=5d&interval=1d" \
+  | head -c 200
+```
+
+You should see Yahoo JSON (`{"chart":...}`). Without this include, production
+falls back to cached/seed ticker values. CSP already allows `connect-src 'self'`,
+so no header change is required for the proxy.
+
+## Contact / CRM pipeline
+
+**No `.env` required for the form to work.** Built-in defaults already route
+submissions to `access@obsidianquantgroup.com` via FormSubmit.
+
+| Who | Action |
+|-----|--------|
+| Anyone testing locally | Submit the form; confirm FormSubmit’s first-time activation email to the inbox |
+| Repo / VPS owner (optional) | Set `VITE_CRM_WEBHOOK_URL` at build time to push leads into Zapier / Make / HubSpot |
+
+Optional overrides (owner only — CI / VPS env, not needed by contributors):
+
+```bash
+VITE_CONTACT_INBOX=access@obsidianquantgroup.com
+VITE_CONTACT_ENDPOINT=https://formsubmit.co/ajax/access@obsidianquantgroup.com
+VITE_CRM_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/...
+```
+
+> **CSP note:** if you set `VITE_CRM_WEBHOOK_URL`, add that webhook's origin (e.g. `https://hooks.zapier.com`) to `connect-src` in both `deploy/nginx-security-headers.conf` and the `index.html` meta CSP, or the CRM fetch is blocked.
+
+Mailbox **passwords must never** be stored in the repo or frontend env.
+
 ## Manual deploy / rollback
 
 ```bash

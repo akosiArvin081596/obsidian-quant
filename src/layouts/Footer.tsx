@@ -18,8 +18,8 @@ const groups = [
 ] as const;
 
 const Footer = () => (
-  <footer className="relative z-10 border-t border-gold/10 bg-[#05080c]">
-    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-6 py-14 sm:grid-cols-2 lg:grid-cols-[1.5fr_repeat(4,1fr)] lg:gap-10 lg:px-16">
+  <footer className="site-footer relative z-10 border-t border-gold/10 bg-[#05080c]">
+    <div className="scene-content mx-auto grid max-w-7xl grid-cols-1 gap-12 px-6 py-14 sm:grid-cols-2 lg:grid-cols-[1.5fr_repeat(4,1fr)] lg:gap-10 lg:px-16">
       <div>
         <Logo size={40} />
         <p className="mt-6 max-w-sm text-xs font-light leading-relaxed text-silver/55">{BRAND.intro}</p>

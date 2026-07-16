@@ -83,6 +83,10 @@ snippet is a superset — same four headers plus CSP + HSTS):
 ```nginx
 include /var/www/obsidian-quant/deploy/nginx-security-headers.conf;
 include /var/www/obsidian-quant/deploy/nginx-yahoo-proxy.conf;
+# Lead intake → CRM (see "Contact / CRM pipeline"). The secret include is
+# root-only and NOT in the repo; it MUST precede the lead-proxy include.
+include /etc/nginx/snippets/obsidian-lead-secret.conf;
+include /var/www/obsidian-quant/deploy/nginx-lead-proxy.conf;
 ```
 
 The app ships a CSP `<meta>` policy too, as defense in depth. HSTS and
@@ -101,10 +105,11 @@ ln -s /var/www/obsidian-quant/deploy/nginx-ratelimit.conf \
       /etc/nginx/conf.d/obsidian-ratelimit.conf          # or: cp
 ```
 
-Each vhost `include` of `nginx-yahoo-proxy.conf` **depends** on this zone: if
-`nginx-ratelimit.conf` is not in `conf.d/`, `nginx -t` fails with
-`unknown limit_req_zone "yahoo_proxy"`. Install it before (or together with) the
-reload.
+Each vhost `include` of `nginx-yahoo-proxy.conf` and `nginx-lead-proxy.conf`
+**depends** on this file — it declares BOTH the `yahoo_proxy` and `lead_proxy`
+zones. If `nginx-ratelimit.conf` is not in `conf.d/`, `nginx -t` fails with
+`unknown limit_req_zone "yahoo_proxy"` (or `"lead_proxy"`). Install it before (or
+together with) the reload.
 
 ### Validate, reload, and smoke-test
 
@@ -141,7 +146,46 @@ VITE_CONTACT_ENDPOINT=https://formsubmit.co/ajax/access@obsidianquantgroup.com
 VITE_CRM_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/...
 ```
 
-> **CSP note:** if you set `VITE_CRM_WEBHOOK_URL`, add that webhook's origin (e.g. `https://hooks.zapier.com`) to `connect-src` in both `deploy/nginx-security-headers.conf` and the `index.html` meta CSP, or the CRM fetch is blocked.
+> **CSP note:** the default lead intake is same-origin (`/api/lead`) — **no CSP change needed.** Only if you override `VITE_CRM_WEBHOOK_URL` to a DIFFERENT origin (e.g. `https://hooks.zapier.com`) must you add that origin to `connect-src` in both `deploy/nginx-security-headers.conf` and the `index.html` meta CSP, or the CRM fetch is blocked.
+
+### Lead intake → alchemydev-crm ("Leads" tab)
+
+Every submission is also POSTed to the CRM as a **project-scoped lead**, shown on
+the project's **Leads** tab in alchemydev-crm — a structured store alongside the
+FormSubmit email. The browser posts **same-origin** `/api/lead` (the default
+`CRM_WEBHOOK_URL`); nginx forwards it to the CRM and **injects the shared bearer
+secret server-side**, so the secret is never in the client bundle. Best-effort: a
+CRM failure never blocks or double-sends the email (the sole source of truth).
+
+One-time wire-up on the VPS (both vhosts):
+
+1. **Secret file** — root-only, NOT committed. Defines the nginx variable the
+   lead-proxy reads (`$lead_intake_secret`). Its value is `LEAD_INTAKE_SECRET`,
+   shared out-of-band with the CRM:
+   ```bash
+   printf 'set $lead_intake_secret "%s";\n' "$LEAD_INTAKE_SECRET" \
+     > /etc/nginx/snippets/obsidian-lead-secret.conf
+   chmod 600 /etc/nginx/snippets/obsidian-lead-secret.conf
+   ```
+2. **Includes** — already in the vhost block above (secret include first, then
+   `nginx-lead-proxy.conf`), plus the `lead_proxy` zone via `nginx-ratelimit.conf`
+   in `conf.d/`. If `$lead_intake_secret` is undefined, `nginx -t` fails loudly
+   (fail-closed — no empty bearer is ever sent).
+3. **CRM host** — `nginx-lead-proxy.conf` proxies to
+   `https://ups.alchemydev.io/api/webhooks/leads`; change it there if the CRM
+   moves. On the CRM side, set the same `LEAD_INTAKE_SECRET` and the target
+   project's `leadSourceKey = "obsidian-quant-web"`.
+
+Smoke-test the wiring WITHOUT creating a lead — an unknown `source` returns `422`
+after passing the secret check, proving the proxy + bearer work end-to-end:
+```bash
+curl -sS -o /dev/null -w '%{http_code}\n' -X POST \
+  https://obsidianquantgroup.com/api/lead \
+  -H 'content-type: application/json' \
+  -d '{"source":"__wiring_probe__","companyName":"Wiring Probe"}'
+# 422 = proxy + secret OK (source just doesn't map to a project — no lead created)
+# 401 = secret mismatch · 503 = CRM's LEAD_INTAKE_SECRET unset · 000 = proxy not wired
+```
 
 Mailbox **passwords must never** be stored in the repo or frontend env.
 

@@ -30,9 +30,16 @@ export const CONTACT_INBOX =
   (import.meta.env.VITE_CONTACT_INBOX as string | undefined)?.trim() ||
   "access@obsidianquantgroup.com";
 
-/** Optional CRM webhook — only when the deploy owner sets VITE_CRM_WEBHOOK_URL. */
+/**
+ * CRM lead webhook. Defaults to the SAME-ORIGIN `/api/lead` proxy
+ * (deploy/nginx-lead-proxy.conf), which injects the bearer secret server-side so
+ * it's never in the client bundle — `connect-src 'self'` already allows it.
+ * Override with VITE_CRM_WEBHOOK_URL only to point at a different collector (then
+ * add that origin to the CSP connect-src).
+ */
 export const CRM_WEBHOOK_URL =
-  (import.meta.env.VITE_CRM_WEBHOOK_URL as string | undefined)?.trim() || "";
+  (import.meta.env.VITE_CRM_WEBHOOK_URL as string | undefined)?.trim() ||
+  "/api/lead";
 
 /**
  * Email delivery endpoint. Default FormSubmit AJAX — no .env / Vercel secrets needed.
@@ -95,19 +102,30 @@ const mailtoFromSubmission = (
 export const buildContactMailto = (recipient: string, form: FormData): string =>
   mailtoFromSubmission(recipient, parseContactForm(form));
 
-/** CRM-oriented JSON payload (flat fields for Zapier / Make / sheets). */
+/** Combined free-text "notes" for the CRM lead: the counterparty profile plus the
+ *  briefing note (the CRM stores a single notes field). Capped to the CRM's
+ *  5000-char limit so an overlong note can't trip its validation (a 400). */
+const crmNotes = (submission: ContactSubmission): string => {
+  const parts = [`Counterparty profile: ${profileLabel(submission)}`];
+  if (submission.note) parts.push(`Briefing notes: ${submission.note}`);
+  return parts.join("\n\n").slice(0, 5000);
+};
+
+/**
+ * CRM ProjectLead payload — matches the alchemydev-crm `POST /api/webhooks/leads`
+ * contract EXACTLY: source, companyName, contactName?, contactEmail?, notes?,
+ * submittedAt?. Posted same-origin to /api/lead, where nginx injects the bearer
+ * secret. Blank optional fields are omitted (undefined → dropped by
+ * JSON.stringify), which the CRM treats as absent. `submittedAt` is an ISO-8601
+ * instant (Date.toISOString → trailing Z), accepted by the CRM's datetime check.
+ */
 export const toCrmPayload = (submission: ContactSubmission) => ({
-  lead_source: submission.source,
-  submitted_at: submission.submittedAt,
-  institutional_entity: submission.entity,
-  name: submission.name,
-  corporate_email: submission.email,
-  counterparty_profile: submission.profile,
-  counterparty_profile_other: submission.profileOther || null,
-  counterparty_profile_display: profileLabel(submission),
-  briefing_notes: submission.note || null,
-  notify_inbox: submission.inbox,
-  status: "new",
+  source: submission.source,
+  companyName: submission.entity,
+  contactName: submission.name || undefined,
+  contactEmail: submission.email || undefined,
+  notes: crmNotes(submission),
+  submittedAt: submission.submittedAt,
 });
 
 /** Email-service payload (FormSubmit-compatible). */
@@ -147,9 +165,10 @@ export const submitContactRequest = async (
     return { ok: false, error: "Please explain your counterparty profile." };
   }
 
-  // Optional CRM webhook — a best-effort secondary channel. Fire it detached and
-  // self-handle its rejection so a CRM failure can never double-send the lead or
-  // gate the result. The email send below is the sole source of truth.
+  // CRM lead webhook (same-origin /api/lead by default) — a best-effort secondary
+  // channel. Fire it detached and self-handle its rejection so a CRM failure can
+  // never double-send the lead or gate the result. The email send below is the
+  // sole source of truth.
   if (CRM_WEBHOOK_URL) {
     void fetch(CRM_WEBHOOK_URL, {
       method: "POST",

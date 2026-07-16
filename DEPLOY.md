@@ -131,7 +131,7 @@ submissions to `access@obsidianquantgroup.com` via FormSubmit.
 | Who | Action |
 |-----|--------|
 | First-time setup | Submit the form once, then click FormSubmit's **"Activate Form"** email in the `access@obsidianquantgroup.com` inbox — required once before any submission is delivered |
-| Repo / VPS owner (optional) | Set `VITE_CRM_WEBHOOK_URL` at build time to push leads into Zapier / Make / HubSpot |
+| Repo / VPS owner | Leads also flow **best-effort** to the CRM via the same-origin `/api/lead` proxy — see [CRM lead intake](#crm-lead-intake--same-origin-apilead-proxy-draft) below. `VITE_CRM_WEBHOOK_URL` optionally **overrides** that target (e.g. a Zapier / Make webhook) |
 
 Optional overrides (owner only — CI / VPS env, not needed by contributors):
 
@@ -144,6 +144,64 @@ VITE_CRM_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/...
 > **CSP note:** if you set `VITE_CRM_WEBHOOK_URL`, add that webhook's origin (e.g. `https://hooks.zapier.com`) to `connect-src` in both `deploy/nginx-security-headers.conf` and the `index.html` meta CSP, or the CRM fetch is blocked.
 
 Mailbox **passwords must never** be stored in the repo or frontend env.
+
+## CRM lead intake — same-origin `/api/lead` proxy (draft)
+
+> **⚠️ DRAFT — do NOT wire into a vhost yet.** `deploy/nginx-lead-proxy.conf`
+> forwards to `https://CRM_HOST_TBD/api/webhooks/leads` — a `TODO(crm-contract)`
+> placeholder. Wire it in **only after** the alchemydev-crm engineer hands back the
+> confirmed CRM host + final path + request contract (see
+> `docs/crm-lead-intake-brief.md`).
+
+Leads are delivered to the inbox by FormSubmit (above) and, **best-effort**, pushed
+to the CRM. The site is a static SPA, so the CRM bearer secret must not live in the
+browser bundle — nginx injects it server-side, exactly like the Yahoo proxy:
+
+```
+browser POST  ->  same-origin /api/lead on obsidianquantgroup.com
+                  (nginx adds  Authorization: Bearer <LEAD_INTAKE_SECRET>)
+                  ->  proxies to CRM   POST /api/webhooks/leads
+```
+
+`src/lib/contact.ts` posts the lead to same-origin `/api/lead` (`CRM_WEBHOOK_URL`,
+default) — fire-and-forget: a non-2xx, or the proxy simply not being deployed yet, is
+swallowed and never gates the email-confirmed submission. `connect-src` stays
+`'self'`, so **no CSP change is needed**.
+
+### One-time: the server-only secret file (never committed)
+
+The repo-managed `deploy/nginx-lead-proxy.conf` references an nginx variable
+`$lead_intake_bearer` but **never contains the secret value**. Define it in a
+server-only file that is not in the repo, in the `http{}` context (`map` is
+http-only), then lock it down:
+
+```bash
+# /etc/nginx/conf.d/obsidian-lead-secret.conf   (root:root, chmod 600, NOT in git)
+map "" $lead_intake_bearer { default "<LEAD_INTAKE_SECRET>"; }
+```
+
+`conf.d/` is auto-included inside `http{}` by the stock `nginx.conf`, so the variable
+is defined once and visible to every vhost. Replace `<LEAD_INTAKE_SECRET>` with the
+value shared out-of-band by the CRM owner — it lives **only** on the VPS, never in git.
+
+### Wire the include into BOTH vhosts (after the CRM host is confirmed)
+
+Like the other snippets, add to each vhost's HTTPS `server { … }` block:
+
+```nginx
+include /var/www/obsidian-quant/deploy/nginx-lead-proxy.conf;
+```
+
+The proxy's `limit_req zone=lead_intake …` depends on the `lead_intake` zone in
+`deploy/nginx-ratelimit.conf` — already installed in `conf.d/` for the Yahoo proxy, so
+one install covers both zones and both vhosts. Then `nginx -t && systemctl reload
+nginx`. Smoke test once the CRM endpoint is live:
+
+```bash
+# 405 on a GET (POST-only); a POST relays to the CRM (expect the CRM's 2xx/4xx, not SPA HTML):
+curl -sI  https://obsidianquantgroup.com/api/lead | head -1
+curl -sS -X POST https://obsidianquantgroup.com/api/lead -H 'Content-Type: application/json' -d '{}' | head -c 200
+```
 
 ## Manual deploy / rollback
 

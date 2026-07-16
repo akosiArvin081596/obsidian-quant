@@ -79,21 +79,64 @@ describe("profile helpers", () => {
     expect(isOthersProfile("Family Office")).toBe(false);
   });
 
-  it("builds CRM payload with flat lead fields", () => {
-    const payload = toCrmPayload(parseContactForm(filledForm()));
-    expect(payload).toMatchObject({
-      institutional_entity: "Acme & Partners",
-      name: "Jordan Lee",
-      corporate_email: "allocations@example.com",
-      status: "new",
-    });
-  });
-
   it("formats Others for CRM display", () => {
     const form = filledForm();
     form.set("profile", "Others");
     form.set("profileOther", "Endowment");
     expect(profileLabel(parseContactForm(form))).toBe("Others — Endowment");
+  });
+});
+
+// Proposed CRM ProjectLead contract (docs/crm-lead-intake-brief.md field table).
+// TODO(crm-contract): these field names are pending the CRM engineer's hand-back.
+describe("toCrmPayload", () => {
+  it("maps entity/name/email to the ProjectLead field names", () => {
+    const payload = toCrmPayload(parseContactForm(filledForm()));
+    expect(payload).toMatchObject({
+      companyName: "Acme & Partners", // entity -> companyName (required)
+      contactName: "Jordan Lee", // name -> contactName
+      contactEmail: "allocations@example.com", // email -> contactEmail
+    });
+  });
+
+  it("passes source and submittedAt through untouched", () => {
+    const submission = parseContactForm(filledForm());
+    const payload = toCrmPayload(submission);
+    expect(payload.source).toBe("obsidian-quant-web");
+    expect(payload.submittedAt).toBe(submission.submittedAt);
+  });
+
+  it("combines the counterparty profile and briefing note into notes", () => {
+    const payload = toCrmPayload(parseContactForm(filledForm()));
+    expect(payload.notes).toContain("Counterparty profile: Family Office");
+    expect(payload.notes).toContain("Please send terms.");
+    expect(payload.notes).toContain("Singapore mandate.");
+  });
+
+  it("folds the Others explanation into notes", () => {
+    const form = filledForm();
+    form.set("profile", "Others");
+    form.set("profileOther", "Pension consultant");
+    const payload = toCrmPayload(parseContactForm(form));
+    expect(payload.notes).toContain("Counterparty profile: Others — Pension consultant");
+  });
+
+  it("keeps notes to just the profile line when no briefing note is given", () => {
+    const form = new FormData();
+    form.set("entity", "Northstar");
+    form.set("name", "Ava Chen");
+    form.set("email", "team@example.com");
+    form.set("profile", "Institutional Allocator");
+
+    const payload = toCrmPayload(parseContactForm(form));
+    expect(payload.notes).toBe("Counterparty profile: Institutional Allocator");
+  });
+
+  it("does not emit the retired flat-lead fields", () => {
+    const payload = toCrmPayload(parseContactForm(filledForm()));
+    expect(payload).not.toHaveProperty("institutional_entity");
+    expect(payload).not.toHaveProperty("status");
+    expect(payload).not.toHaveProperty("notify_inbox");
   });
 });
 
@@ -131,5 +174,32 @@ describe("submitContactRequest", () => {
     const requested = fetchMock.mock.calls.map((call) => String(call[0]));
     expect(requested.some((url) => url.includes("formsubmit.co"))).toBe(true);
     expect(requested.some((url) => url.includes("crm.example.com"))).toBe(true);
+  });
+
+  // Default path with no override: the lead posts to same-origin /api/lead. While
+  // this is a draft the nginx proxy may not be deployed yet, so that fetch can
+  // reject — it must stay best-effort and never gate the email-confirmed lead.
+  it("resolves ok when the default /api/lead push rejects but email succeeds", async () => {
+    // No VITE_CRM_WEBHOOK_URL stub → CRM_WEBHOOK_URL defaults to "/api/lead".
+    vi.resetModules();
+
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/api/lead")) {
+        return Promise.reject(new Error("proxy not deployed (404)"));
+      }
+      return Promise.resolve(new Response(null, { status: 200 }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { submitContactRequest } = await import("./contact");
+    const result = await submitContactRequest(filledForm());
+
+    // Email is the sole gate → clean ok, no draft, despite the proxy rejection.
+    expect(result).toEqual({ ok: true });
+
+    const requested = fetchMock.mock.calls.map((call) => String(call[0]));
+    expect(requested.some((url) => url.includes("/api/lead"))).toBe(true);
+    expect(requested.some((url) => url.includes("formsubmit.co"))).toBe(true);
   });
 });

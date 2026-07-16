@@ -30,9 +30,17 @@ export const CONTACT_INBOX =
   (import.meta.env.VITE_CONTACT_INBOX as string | undefined)?.trim() ||
   "access@obsidianquantgroup.com";
 
-/** Optional CRM webhook — only when the deploy owner sets VITE_CRM_WEBHOOK_URL. */
+/**
+ * Best-effort CRM lead endpoint. Defaults to same-origin `/api/lead` — the nginx
+ * proxy (deploy/nginx-lead-proxy.conf) injects the bearer secret server-side and
+ * forwards to the CRM webhook, so no secret or cross-origin call ships in the
+ * client bundle and connect-src stays 'self'. The deploy owner may override with
+ * VITE_CRM_WEBHOOK_URL (if that override is cross-origin, its origin must be added
+ * to connect-src in both CSPs — see DEPLOY.md).
+ */
 export const CRM_WEBHOOK_URL =
-  (import.meta.env.VITE_CRM_WEBHOOK_URL as string | undefined)?.trim() || "";
+  (import.meta.env.VITE_CRM_WEBHOOK_URL as string | undefined)?.trim() ||
+  "/api/lead";
 
 /**
  * Email delivery endpoint. Default FormSubmit AJAX — no .env / Vercel secrets needed.
@@ -95,19 +103,34 @@ const mailtoFromSubmission = (
 export const buildContactMailto = (recipient: string, form: FormData): string =>
   mailtoFromSubmission(recipient, parseContactForm(form));
 
-/** CRM-oriented JSON payload (flat fields for Zapier / Make / sheets). */
+/**
+ * Fold the counterparty profile (incl. the "Others — …" explanation) and the
+ * freeform briefing into the CRM's single `notes` field — the ProjectLead model
+ * has no dedicated profile column, so this preserves that context inline.
+ */
+const crmNotes = (submission: ContactSubmission): string => {
+  const profileLine = `Counterparty profile: ${profileLabel(submission)}`;
+  return submission.note ? `${profileLine}\n\n${submission.note}` : profileLine;
+};
+
+/**
+ * CRM ProjectLead payload — the proposed webhook contract from
+ * docs/crm-lead-intake-brief.md (Part 2 field-mapping table). Posted to the
+ * same-origin /api/lead proxy, which forwards to CRM POST /api/webhooks/leads.
+ *
+ * TODO(crm-contract): these field NAMES (source/companyName/contactName/
+ * contactEmail/notes/submittedAt) are the alchemydev-crm engineer's *proposed*
+ * Zod shape and may shift on hand-back — reconcile with the CRM's confirmed
+ * request contract before go-live. `status` is intentionally omitted: the CRM
+ * sets ProjectLead.status = NEW server-side.
+ */
 export const toCrmPayload = (submission: ContactSubmission) => ({
-  lead_source: submission.source,
-  submitted_at: submission.submittedAt,
-  institutional_entity: submission.entity,
-  name: submission.name,
-  corporate_email: submission.email,
-  counterparty_profile: submission.profile,
-  counterparty_profile_other: submission.profileOther || null,
-  counterparty_profile_display: profileLabel(submission),
-  briefing_notes: submission.note || null,
-  notify_inbox: submission.inbox,
-  status: "new",
+  source: submission.source, // "obsidian-quant-web" — CRM maps this to the Obsidian project
+  companyName: submission.entity, // required (institutional entity)
+  contactName: submission.name,
+  contactEmail: submission.email,
+  notes: crmNotes(submission),
+  submittedAt: submission.submittedAt,
 });
 
 /** Email-service payload (FormSubmit-compatible). */
@@ -147,20 +170,22 @@ export const submitContactRequest = async (
     return { ok: false, error: "Please explain your counterparty profile." };
   }
 
-  // Optional CRM webhook — a best-effort secondary channel. Fire it detached and
-  // self-handle its rejection so a CRM failure can never double-send the lead or
-  // gate the result. The email send below is the sole source of truth.
+  // Best-effort CRM push through the same-origin /api/lead proxy, which injects
+  // the bearer secret server-side and forwards to the CRM webhook. Fire it
+  // detached and swallow EVERY outcome: the proxy may not be deployed yet
+  // (→ same-origin 404, an expected state while this is a draft) or the CRM may
+  // be down, and neither may gate the result, double-send the lead, or surface a
+  // noisy console error. fetch only rejects on network/abort — a non-2xx resolves
+  // and is ignored the same way. The email send below is the sole source of truth.
   if (CRM_WEBHOOK_URL) {
     void fetch(CRM_WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify(toCrmPayload(submission)),
       signal,
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error(`CRM webhook failed (${res.status})`);
-      })
-      .catch((err) => console.warn("CRM webhook failed", err));
+    }).catch(() => {
+      // Swallowed by design — see above. No-op.
+    });
   }
 
   try {

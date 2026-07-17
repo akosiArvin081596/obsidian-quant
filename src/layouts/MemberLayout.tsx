@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import Logo from "../components/Logo";
 import { cn } from "../lib/cn";
 import { EASE_LUX } from "../lib/motion";
+import { isActivePath } from "../lib/routes";
 import { useSession } from "../views/investor/session-context";
 
 const MEMBER_NAV = [
@@ -23,13 +24,16 @@ const MEMBER_NAV = [
 const MemberLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const { signedIn, memberId, signOut } = useSession();
+  const { signedIn, memberId, signOut, hydrated } = useSession();
 
+  // Gate on hydration: the exported HTML is signed-out, and the session is only
+  // read from sessionStorage after mount — redirecting before that would bounce
+  // legitimately signed-in members to the login page on every hard refresh.
   useEffect(() => {
-    if (!signedIn) router.replace("/investor/login");
-  }, [signedIn, router]);
+    if (hydrated && !signedIn) router.replace("/investor/login");
+  }, [hydrated, signedIn, router]);
 
-  if (!signedIn) return null;
+  if (!hydrated || !signedIn) return null;
 
   const onSignOut = () => {
     signOut();
@@ -48,7 +52,7 @@ const MemberLayout = ({ children }: { children: React.ReactNode }) => {
 
           <nav className="hidden items-center gap-8 md:flex" aria-label="Member area">
             {MEMBER_NAV.map((item) => {
-              const isActive = pathname === item.to;
+              const isActive = isActivePath(pathname, item.to);
               return (
                 <Link
                   key={item.to}
@@ -90,7 +94,7 @@ const MemberLayout = ({ children }: { children: React.ReactNode }) => {
           aria-label="Member area"
         >
           {MEMBER_NAV.map((item) => {
-            const isActive = pathname === item.to;
+            const isActive = isActivePath(pathname, item.to);
             return (
               <Link
                 key={item.to}

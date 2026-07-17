@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Logo from "../components/Logo";
 import Button from "../components/Button";
 import { cn } from "../lib/cn";
+import { isActivePath } from "../lib/routes";
 import { NAV } from "../content/site";
 import { EASE_LUX } from "../lib/motion";
 
@@ -47,7 +48,7 @@ const Header = () => {
 
         <nav className="hidden items-center gap-9 lg:flex">
           {NAV.map((item) => {
-            const isActive = pathname === item.to || pathname === `${item.to}/`;
+            const isActive = isActivePath(pathname, item.to);
             return (
               <Link
                 key={item.to}
@@ -138,7 +139,7 @@ const Header = () => {
                     onClick={() => setOpen(false)}
                     className={cn(
                       "block border-b border-gold/10 py-4 font-serif text-3xl text-ghost transition-colors sm:text-4xl",
-                      pathname === item.to || pathname === `${item.to}/` ? "text-gold" : undefined,
+                      isActivePath(pathname, item.to) ? "text-gold" : undefined,
                     )}
                   >
                     {item.label}

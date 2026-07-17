@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { SessionContext } from "./session-context";
 import type { Session } from "./session-context";
@@ -22,16 +22,27 @@ const read = (): { signedIn: boolean; memberId: string } => {
 };
 
 export const SessionProvider = ({ children }: { children: ReactNode }) => {
-  const [state, setState] = useState(read);
+  // Deterministic signed-out initial state: the static export prerenders
+  // signed-out, so reading sessionStorage during render would make a returning
+  // member's first client render diverge from the server HTML (hydration
+  // error + flash). Sync from storage after mount instead; `hydrated` tells
+  // layout guards when the real session is known.
+  const [state, setState] = useState({ signedIn: false, memberId: "", hydrated: false });
+
+  useEffect(() => {
+    // One-shot post-mount sync from the external store (sessionStorage) —
+    // intentionally a render-triggering set; see the hydration note above.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setState({ ...read(), hydrated: true });
+  }, []);
 
   const signIn = useCallback((memberId: string) => {
-    const next = { signedIn: true, memberId };
     try {
       window.sessionStorage.setItem(SESSION_STORAGE_KEY, writeDemoSession(memberId));
     } catch {
       /* sessionStorage unavailable — keep the in-memory flag anyway */
     }
-    setState(next);
+    setState({ signedIn: true, memberId, hydrated: true });
   }, []);
 
   const signOut = useCallback(() => {
@@ -40,7 +51,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     } catch {
       /* ignore */
     }
-    setState({ signedIn: false, memberId: "" });
+    setState({ signedIn: false, memberId: "", hydrated: true });
   }, []);
 
   const value = useMemo<Session>(

@@ -255,3 +255,14 @@ cd /var/www/obsidian-quant && git reset --hard <sha> && npm ci && npm run build
 ```bash
 curl -sI --resolve obsidianquantgroup.com:443:76.13.22.110 https://obsidianquantgroup.com/ | head
 ```
+
+## 404 page
+
+The export writes `404.html`, but nginx `try_files $uri $uri/ /index.html` serves the HOMEPAGE for unknown URLs (a soft-404). To serve the real 404 page, change the vhost fallback to:
+
+```nginx
+try_files $uri $uri/ =404;
+error_page 404 /404.html;
+```
+
+(Every real route is a physical `<route>/index.html` in the export, so the SPA-style `/index.html` fallback is no longer needed.)

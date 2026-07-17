@@ -70,9 +70,10 @@ export const changePct = (price: number, previous: number) => {
 
 const yahooChartUrl = (symbol: string) => {
   const encoded = encodeURIComponent(symbol);
-  // Trailing slash before `?` matches Next `trailingSlash: true` so the browser
-  // doesn't 308-redirect and double-hit Yahoo.
-  return `/api/yahoo/v8/finance/chart/${encoded}/?range=5d&interval=1d`;
+  // No trailing slash: nginx forwards this suffix to Yahoo byte-for-byte and
+  // Yahoo's chart endpoint 500s on `/chart/<sym>/`. Next's own 308 redirect on
+  // slash-less /api/* paths is already disabled via skipTrailingSlashRedirect.
+  return `/api/yahoo/v8/finance/chart/${encoded}?range=5d&interval=1d`;
 };
 
 const delay = (ms: number, signal?: AbortSignal) =>

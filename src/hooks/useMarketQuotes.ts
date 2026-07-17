@@ -59,8 +59,11 @@ export const useMarketQuotes = ({ seed, enabled = true }: Options): MarketStream
         return;
       }
 
-      // Skip network when cache is still fresh (survives HMR / remounts).
-      if (hasFreshCache()) {
+      // Skip network when cache is still fresh — but only on mount (its job is
+      // surviving HMR / remounts). Mid-session ticks must fall through to a
+      // real refresh: FRESH_CACHE_MS exceeds the poll interval, so gating every
+      // tick here would flap the badge live→stale on alternating polls.
+      if (isInitial && hasFreshCache()) {
         const cache = cachedMarketTickers();
         if (cache && alive.current) {
           setTickers(cache);
@@ -86,7 +89,11 @@ export const useMarketQuotes = ({ seed, enabled = true }: Options): MarketStream
     };
 
     void refresh(true);
-    timer = window.setInterval(() => void refresh(false), MARKET_POLL_MS);
+    timer = window.setInterval(() => {
+      // Hidden tabs skip the poll; the visibilitychange handler catches up.
+      if (document.hidden) return;
+      void refresh(false);
+    }, MARKET_POLL_MS);
 
     const onVisibility = () => {
       if (document.visibilityState === "visible") void refresh(false);

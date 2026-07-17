@@ -11,12 +11,14 @@ import { useSession } from "../views/investor/session-context";
  * Already signed in? Skip the form and drop straight into the member area.
  */
 const GatewayLayout = ({ children }: { children: React.ReactNode }) => {
-  const { signedIn } = useSession();
+  const { signedIn, hydrated } = useSession();
   const router = useRouter();
 
+  // hydrated gate: the session is read from sessionStorage post-mount; before
+  // that, signedIn is always false and this effect must not (non-)fire early.
   useEffect(() => {
-    if (signedIn) router.replace("/investor/dashboard");
-  }, [signedIn, router]);
+    if (hydrated && signedIn) router.replace("/investor/dashboard");
+  }, [hydrated, signedIn, router]);
 
   if (signedIn) return null;
 

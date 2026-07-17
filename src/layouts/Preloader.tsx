@@ -61,19 +61,26 @@ const Preloader = () => {
         >
           <div className="relative flex flex-col items-center">
             <div className="relative flex items-center justify-center">
-              <motion.div
-                className="pointer-events-none absolute h-72 w-72 rounded-full"
-                style={{
-                  background:
-                    "radial-gradient(closest-side, rgba(255,130,30,0.5), rgba(255,90,20,0.12) 50%, transparent 72%)",
-                  filter: "blur(22px)",
-                }}
-                initial={{ opacity: 0, scale: 0.7 }}
-                animate={{ opacity: [0, 0.6, 0.9, 0.4, 0], scale: [0.7, 1, 1.12, 1, 0.9] }}
-                transition={{ duration: 2.1, times: [0, 0.25, 0.55, 0.82, 1], ease: "easeOut" }}
-              />
+              {/* Flash/glow sequences are opacity+filter animations, which
+                  MotionConfig reducedMotion="user" does NOT suppress — they
+                  must be render-gated for prefers-reduced-motion users. The
+                  server snapshot for `reduce` is false, so gating only prunes
+                  after mount (no hydration mismatch). */}
+              {!reduce && (
+                <motion.div
+                  className="pointer-events-none absolute h-72 w-72 rounded-full"
+                  style={{
+                    background:
+                      "radial-gradient(closest-side, rgba(255,130,30,0.5), rgba(255,90,20,0.12) 50%, transparent 72%)",
+                    filter: "blur(22px)",
+                  }}
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: [0, 0.6, 0.9, 0.4, 0], scale: [0.7, 1, 1.12, 1, 0.9] }}
+                  transition={{ duration: 2.1, times: [0, 0.25, 0.55, 0.82, 1], ease: "easeOut" }}
+                />
+              )}
 
-              {STRIKES.map((tStrike, i) => (
+              {!reduce && STRIKES.map((tStrike, i) => (
                 <motion.span
                   key={`f${i}`}
                   aria-hidden
@@ -88,6 +95,7 @@ const Preloader = () => {
                 />
               ))}
 
+              {!reduce && (
               <span aria-hidden className="pointer-events-none absolute left-1/2 top-1/2">
                 {SPARKS.map((s, i) => (
                   <motion.span
@@ -110,10 +118,11 @@ const Preloader = () => {
                   />
                 ))}
               </span>
+              )}
 
               <motion.div
-                initial={{ opacity: 0.2, scale: 0.6 }}
-                animate={{
+                initial={reduce ? { opacity: 1, scale: 1 } : { opacity: 0.2, scale: 0.6 }}
+                animate={reduce ? { opacity: 1, scale: 1 } : {
                   opacity: [0.2, 0.6, 1, 1, 1],
                   scale: [0.6, 0.72, 0.98, 1.07, 1],
                   filter: [
@@ -129,6 +138,7 @@ const Preloader = () => {
                 <Logo size={GEM} withWordmark={false} ring={false} />
               </motion.div>
 
+              {!reduce && (
               <motion.svg
                 viewBox="0 0 100 100"
                 width={GEM * 1.6}
@@ -156,6 +166,7 @@ const Preloader = () => {
                   transition={{ delay: 1.45, duration: 0.95, ease: EASE_LUX }}
                 />
               </motion.svg>
+              )}
             </div>
 
             <div className="mt-14 flex flex-col items-center">
@@ -163,25 +174,27 @@ const Preloader = () => {
                 <motion.div
                   className="h-full"
                   style={{ background: "linear-gradient(to right, #ff8a1f, #b88a4a)" }}
-                  initial={{ width: "0%" }}
+                  initial={reduce ? { width: "100%" } : { width: "0%" }}
                   animate={{ width: "100%" }}
-                  transition={{ duration: 2.0, ease: EASE_LUX }}
+                  transition={{ duration: reduce ? 0 : 2.0, ease: EASE_LUX }}
                 />
               </div>
               <div className="relative mt-5 h-3 w-48 text-center">
-                <motion.span
-                  className="absolute inset-0 text-[0.6rem] uppercase tracking-[0.42em] text-silver/45"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: [0, 1, 1, 0] }}
-                  transition={{ duration: 2, times: [0, 0.12, 0.82, 1] }}
-                >
-                  Forging
-                </motion.span>
+                {!reduce && (
+                  <motion.span
+                    className="absolute inset-0 text-[0.6rem] uppercase tracking-[0.42em] text-silver/45"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0, 1, 1, 0] }}
+                    transition={{ duration: 2, times: [0, 0.12, 0.82, 1] }}
+                  >
+                    Forging
+                  </motion.span>
+                )}
                 <motion.span
                   className="absolute inset-0 text-[0.6rem] uppercase tracking-[0.42em] text-gold"
-                  initial={{ opacity: 0 }}
+                  initial={{ opacity: reduce ? 1 : 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 1.95, duration: 0.5 }}
+                  transition={reduce ? { duration: 0 } : { delay: 1.95, duration: 0.5 }}
                 >
                   Forged
                 </motion.span>

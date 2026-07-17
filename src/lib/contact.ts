@@ -24,12 +24,15 @@ export type ContactProfile = (typeof CONTACT_PROFILES)[number];
 export const isOthersProfile = (profile: string) =>
   profile.trim().toLowerCase() === "others";
 
-const env = (key: string) =>
-  (typeof process !== "undefined" ? process.env[key] : undefined)?.trim() || undefined;
+// NEXT_PUBLIC_* vars are inlined by Next only when referenced statically as
+// `process.env.NEXT_PUBLIC_X`; a dynamic `process.env[key]` lookup is left
+// as-is and reads an empty stub in the browser bundle, so overrides would
+// silently never apply client-side.
+const cleaned = (value: string | undefined) => value?.trim() || undefined;
 
 /** Inbox for strategic allocation requests — works with zero env config. */
 export const CONTACT_INBOX =
-  env("NEXT_PUBLIC_CONTACT_INBOX") ||
+  cleaned(process.env.NEXT_PUBLIC_CONTACT_INBOX) ||
   "access@obsidianquantgroup.com";
 
 /**
@@ -40,7 +43,7 @@ export const CONTACT_INBOX =
  * add that origin to the CSP connect-src).
  */
 export const CRM_WEBHOOK_URL =
-  env("NEXT_PUBLIC_CRM_WEBHOOK_URL") ||
+  cleaned(process.env.NEXT_PUBLIC_CRM_WEBHOOK_URL) ||
   "/api/lead";
 
 /**
@@ -48,7 +51,7 @@ export const CRM_WEBHOOK_URL =
  * Owner may override with NEXT_PUBLIC_CONTACT_ENDPOINT.
  */
 export const CONTACT_ENDPOINT =
-  env("NEXT_PUBLIC_CONTACT_ENDPOINT") ||
+  cleaned(process.env.NEXT_PUBLIC_CONTACT_ENDPOINT) ||
   `https://formsubmit.co/ajax/${CONTACT_INBOX}`;
 
 export const parseContactForm = (form: FormData): ContactSubmission => {

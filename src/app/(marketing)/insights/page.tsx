@@ -1,23 +1,14 @@
-"use client";
+import InsightsRedirect from "@/views/InsightsRedirect";
+import { pageMetadata } from "@/lib/seo";
 
-import { useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+// noIndex: the paused hub exports a thin 200 redirect page — without noindex,
+// crawlers would index it as a competing document for the homepage.
+export const metadata = pageMetadata({
+  title: "Insights",
+  path: "/insights",
+  noIndex: true,
+});
 
-/** Insights hub is paused — keep the old URL discoverable, then send visitors home. */
-export default function InsightsRedirect() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace("/");
-  }, [router]);
-
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-obsidian px-6 text-center text-silver">
-      <p className="text-sm font-light text-silver/65">Insights is paused. Redirecting home…</p>
-      <Link href="/" className="text-[0.7rem] uppercase tracking-[0.2em] text-gold">
-        Continue to Obsidian Quant
-      </Link>
-    </main>
-  );
+export default function InsightsPage() {
+  return <InsightsRedirect />;
 }

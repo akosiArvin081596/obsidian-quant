@@ -4,7 +4,7 @@ import { ensureGoogleAnalytics, trackPageview } from "../lib/analytics";
 
 /**
  * Loads GA4 (once) and records SPA navigations.
- * Mounted from Header and Footer per integration request.
+ * Mounted exactly once per router tree: RootLayout (public) and InvestorLayout.
  */
 const GoogleAnalytics = () => {
   const { pathname, search } = useLocation();

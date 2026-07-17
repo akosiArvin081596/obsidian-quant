@@ -6,7 +6,6 @@ import Button from "../components/Button";
 import { cn } from "../lib/cn";
 import { NAV } from "../content/site";
 import { EASE_LUX } from "../lib/motion";
-import GoogleAnalytics from "../components/GoogleAnalytics";
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -38,7 +37,6 @@ const Header = () => {
             : "border-b border-transparent bg-transparent py-5",
       )}
     >
-      <GoogleAnalytics />
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-16">
         <Link to="/" aria-label="Obsidian Quant Group — home">
           <Logo size={scrolled || open ? 34 : 38} />

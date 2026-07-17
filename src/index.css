@@ -22,6 +22,7 @@
   --color-midnight-soft: #0f1722;
   --color-midnight-line: #1d2735;
   --color-slate: #4a525a;
+  --color-ink: #05080c; /* Pressed/hover card fill; footer base */
 
   /* Type */
   --font-serif: "Cormorant Garamond", ui-serif, Georgia, "Times New Roman", serif;
@@ -666,7 +667,7 @@
   line-height: 1.35;
   text-align: center;
 }
-.reference-quote { background:#05080c; }
+.reference-quote { background: var(--color-ink); }
 .quote-line {
   display: block;
 }

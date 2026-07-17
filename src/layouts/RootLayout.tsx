@@ -7,6 +7,7 @@ import ScrollToTop from "./ScrollToTop";
 import GrainVignette from "../components/GrainVignette";
 import ScrollChoreography from "../components/ScrollChoreography";
 import CursorGlow from "../components/CursorGlow";
+import GoogleAnalytics from "../components/GoogleAnalytics";
 
 const RootLayout = () => (
   <>
@@ -14,6 +15,7 @@ const RootLayout = () => (
     <GrainVignette />
     <CursorGlow />
     <ScrollToTop />
+    <GoogleAnalytics />
     <Header />
     <main className="relative isolate min-h-screen">
       <ScrollChoreography />

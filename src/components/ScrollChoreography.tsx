@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import ObsidianGemImage from "./ObsidianGemImage";
@@ -173,6 +173,33 @@ const ScrollChoreography = () => {
     return () => query.removeEventListener("change", onChange);
   }, []);
 
+  /**
+   * Clamp the gem's center above the footer. Reads pose/mobile through refs so
+   * the persistent scroll listener and the pose-change effect share the one
+   * definition — the clamp math must never fork between those two paths.
+   */
+  const syncFooterClearance = useCallback(() => {
+    const current = poseRef.current;
+    const isMobile = mobileRef.current;
+    const footer = document.querySelector<HTMLElement>("footer.site-footer");
+    const viewportH = window.innerHeight;
+    const desiredCenter = resolveLengthPx(current.top, viewportH);
+    const measuredH = gemRef.current?.offsetHeight;
+    const gemHeight = measuredH && measuredH > 0 ? measuredH : current.width * GEM_HEIGHT_RATIO;
+    const footerTop = footer ? footer.getBoundingClientRect().top : Number.POSITIVE_INFINITY;
+    const gap = isMobile ? FOOTER_GAP_MOBILE : FOOTER_GAP_DESKTOP;
+
+    // Footer still well below the viewport — keep authored units (vh/rem/%).
+    if (footerTop > viewportH + gemHeight * 0.35) {
+      setSafeTopPx(null);
+      return;
+    }
+
+    // Epsilon keeps sub-pixel churn while the footer scrolls from re-rendering every frame.
+    const clamped = clampCenterAboveFooter(desiredCenter, gemHeight, footerTop, gap);
+    setSafeTopPx((prev) => (prev !== null && Math.abs(prev - clamped) < 0.5 ? prev : clamped));
+  }, []);
+
   const pose = useMemo(() => {
     // Contact: keep the stone seated in the hero for the whole page.
     if (pathname === "/contact") {
@@ -234,27 +261,6 @@ const ScrollChoreography = () => {
     const syncActive = () => {
       if (reduce || sections.length === 0) return;
       setActive(pickActiveSection(sections));
-    };
-
-    const syncFooterClearance = () => {
-      const current = poseRef.current;
-      const isMobile = mobileRef.current;
-      const footer = document.querySelector<HTMLElement>("footer.site-footer");
-      const viewportH = window.innerHeight;
-      const desiredCenter = resolveLengthPx(current.top, viewportH);
-      const measuredH = gemRef.current?.offsetHeight;
-      const gemHeight = measuredH && measuredH > 0 ? measuredH : current.width * GEM_HEIGHT_RATIO;
-      const footerTop = footer ? footer.getBoundingClientRect().top : Number.POSITIVE_INFINITY;
-      const gap = isMobile ? FOOTER_GAP_MOBILE : FOOTER_GAP_DESKTOP;
-
-      // Footer still well below the viewport — keep authored units (vh/rem/%).
-      if (footerTop > viewportH + gemHeight * 0.35) {
-        setSafeTopPx((prev) => (prev === null ? prev : null));
-        return;
-      }
-
-      const clamped = clampCenterAboveFooter(desiredCenter, gemHeight, footerTop, gap);
-      setSafeTopPx((prev) => (prev !== null && Math.abs(prev - clamped) < 0.5 ? prev : clamped));
     };
 
     const onScrollOrResize = () => {
@@ -337,25 +343,13 @@ const ScrollChoreography = () => {
       observer?.disconnect();
       mutationObserver?.disconnect();
     };
-  }, [pathname, reduce]);
+  }, [pathname, reduce, syncFooterClearance]);
 
   // Re-clamp when the authored pose changes (section / breakpoint), even without scroll.
+  // poseRef/mobileRef are assigned during render, so they are current by effect time.
   useEffect(() => {
-    const footer = document.querySelector<HTMLElement>("footer.site-footer");
-    const viewportH = window.innerHeight;
-    const desiredCenter = resolveLengthPx(pose.top, viewportH);
-    const measuredH = gemRef.current?.offsetHeight;
-    const gemHeight = measuredH && measuredH > 0 ? measuredH : pose.width * GEM_HEIGHT_RATIO;
-    const footerTop = footer ? footer.getBoundingClientRect().top : Number.POSITIVE_INFINITY;
-    const gap = mobile ? FOOTER_GAP_MOBILE : FOOTER_GAP_DESKTOP;
-
-    if (footerTop > viewportH + gemHeight * 0.35) {
-      setSafeTopPx(null);
-      return;
-    }
-
-    setSafeTopPx(clampCenterAboveFooter(desiredCenter, gemHeight, footerTop, gap));
-  }, [pose.top, pose.width, mobile, active, pathname]);
+    syncFooterClearance();
+  }, [pose, mobile, syncFooterClearance]);
 
   // Keep the stone visible under prefers-reduced-motion — only skip motion, not the asset.
   const visibleOpacity = Math.max(pose.opacity, 0.72);

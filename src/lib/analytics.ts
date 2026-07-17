@@ -13,7 +13,7 @@ declare global {
 
 /**
  * Installs gtag.js once and configures the measurement ID.
- * Safe to call from both Header and Footer — subsequent calls are no-ops.
+ * Idempotent — StrictMode double-effects and repeat calls are no-ops.
  */
 export const ensureGoogleAnalytics = () => {
   if (typeof window === "undefined") return;
@@ -41,7 +41,7 @@ export const ensureGoogleAnalytics = () => {
   document.head.appendChild(script);
 };
 
-/** SPA route change → GA4 page_view (deduped across Header + Footer mounts). */
+/** SPA route change → GA4 page_view (guard absorbs StrictMode double-effects). */
 export const trackPageview = (path: string) => {
   if (typeof window.gtag !== "function") return;
   if (lastTrackedPath === path) return;

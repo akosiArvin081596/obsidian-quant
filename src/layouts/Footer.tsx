@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import Logo from "../components/Logo";
-import GoogleAnalytics from "../components/GoogleAnalytics";
 import { BRAND, LEGAL } from "../content/site";
 
 const groups = [
@@ -19,8 +18,7 @@ const groups = [
 ] as const;
 
 const Footer = () => (
-  <footer className="site-footer relative z-10 border-t border-gold/10 bg-[#05080c]">
-    <GoogleAnalytics />
+  <footer className="site-footer relative z-10 border-t border-gold/10 bg-ink">
     <div className="scene-content mx-auto grid max-w-7xl grid-cols-1 gap-10 px-5 py-14 sm:grid-cols-2 sm:gap-12 sm:px-6 lg:grid-cols-[1.5fr_repeat(4,1fr)] lg:gap-10 lg:px-16">
       <div>
         <Logo size={40} />

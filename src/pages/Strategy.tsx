@@ -54,7 +54,7 @@ const Strategy = () => (
       <Stagger className="mt-16 space-y-px lg:mt-20" gap={0.18} delay={0.3}>
         {POSITIONING.pillars.map((p) => (
           <StaggerItem key={p.no}>
-            <div className="group relative z-10 grid grid-cols-1 items-center gap-6 border-t border-gold/10 bg-obsidian/80 px-6 py-10 transition-colors duration-500 hover:bg-[#05080c] hover:shadow-[inset_0_0_0_1px_rgba(184,138,74,0.12)] sm:gap-8 sm:px-8 sm:py-12 lg:grid-cols-12 lg:gap-12 lg:bg-obsidian/30 lg:px-12 lg:py-14 lg:hover:bg-obsidian xl:px-14">
+            <div className="group relative z-10 grid grid-cols-1 items-center gap-6 border-t border-gold/10 bg-obsidian/80 px-6 py-10 transition-colors duration-500 hover:bg-ink hover:shadow-[inset_0_0_0_1px_rgba(184,138,74,0.12)] sm:gap-8 sm:px-8 sm:py-12 lg:grid-cols-12 lg:gap-12 lg:bg-obsidian/30 lg:px-12 lg:py-14 lg:hover:bg-obsidian xl:px-14">
               {/* Big serif index */}
               <div className="lg:col-span-2">
                 <div className="font-serif text-5xl leading-none text-gold-gradient sm:text-6xl lg:text-7xl">
@@ -158,7 +158,7 @@ const Strategy = () => (
         >
           {STRATEGY.classes.map((c, i) => (
             <StaggerItem key={c.title} className="h-full">
-              <div className="group relative z-10 flex h-full flex-col justify-between overflow-hidden border border-gold/10 bg-obsidian/80 p-6 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-gold/35 hover:bg-[#05080c] hover:shadow-[inset_0_0_0_1px_rgba(184,138,74,0.1),0_18px_40px_-20px_rgba(0,0,0,0.85)] active:bg-[#05080c] sm:p-8 lg:bg-obsidian/45 lg:hover:bg-[#05080c]">
+              <div className="group relative z-10 flex h-full flex-col justify-between overflow-hidden border border-gold/10 bg-obsidian/80 p-6 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-gold/35 hover:bg-ink hover:shadow-[inset_0_0_0_1px_rgba(184,138,74,0.1),0_18px_40px_-20px_rgba(0,0,0,0.85)] active:bg-ink sm:p-8 lg:bg-obsidian/45 lg:hover:bg-ink">
                 <div className="relative z-10">
                   <div className="flex items-center justify-between">
                     <span className="h-2 w-2 rotate-45 bg-gold transition-transform duration-500 group-hover:scale-150" />

@@ -52,7 +52,7 @@ const Firm = () => (
         >
           {FIRM.philosophy.blocks.map((block, i) => (
             <StaggerItem key={block.title} className="h-full">
-              <div className="group relative z-10 h-full bg-obsidian/80 p-8 transition-colors duration-500 hover:bg-[#05080c] active:bg-[#05080c] lg:bg-obsidian/70 lg:p-10 lg:hover:bg-obsidian">
+              <div className="group relative z-10 h-full bg-obsidian/80 p-8 transition-colors duration-500 hover:bg-ink active:bg-ink lg:bg-obsidian/70 lg:p-10 lg:hover:bg-obsidian">
                 <div className="flex items-baseline gap-3">
                   <span className="font-mono text-[0.66rem] tracking-[0.2em] text-gold/70">
                     0{i + 1}
@@ -136,7 +136,7 @@ const Firm = () => (
       >
         {FIRM.governance.pillars.map((pillar, i) => (
           <StaggerItem key={pillar.title} className="h-full">
-            <div className="group relative z-10 flex h-full flex-col justify-between border-t-2 border-gold bg-obsidian/80 p-6 transition-colors duration-500 hover:bg-[#05080c] active:bg-[#05080c] sm:p-8 lg:bg-obsidian/50 lg:hover:bg-obsidian">
+            <div className="group relative z-10 flex h-full flex-col justify-between border-t-2 border-gold bg-obsidian/80 p-6 transition-colors duration-500 hover:bg-ink active:bg-ink sm:p-8 lg:bg-obsidian/50 lg:hover:bg-obsidian">
               <div>
                 <div className="font-mono text-[0.62rem] uppercase tracking-[0.24em] text-gold/70">
                   {`0${i + 1}`} / Authority

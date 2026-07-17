@@ -22,7 +22,7 @@ type InsightCardProps = {
 const InsightCard = ({ article, featured = false }: InsightCardProps) => (
   <article
     className={cn(
-      "group relative z-10 flex h-full flex-col justify-between border border-gold/10 bg-obsidian/80 p-8 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-gold/30 hover:bg-[#05080c] active:bg-[#05080c] lg:bg-obsidian/40 lg:hover:bg-obsidian/70",
+      "group relative z-10 flex h-full flex-col justify-between border border-gold/10 bg-obsidian/80 p-8 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-gold/30 hover:bg-ink active:bg-ink lg:bg-obsidian/40 lg:hover:bg-obsidian/70",
       featured && "lg:p-10",
     )}
   >

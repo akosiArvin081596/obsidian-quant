@@ -80,7 +80,7 @@ const Architecture = () => (
       >
         {ARCHITECTURE.checklist.map((item, i) => (
           <StaggerItem key={item} className="h-full">
-            <div className="group relative z-10 flex h-full items-start gap-5 bg-obsidian/85 p-8 transition-colors duration-500 hover:bg-[#05080c] active:bg-[#05080c] lg:bg-obsidian/70 lg:p-10 lg:hover:bg-obsidian">
+            <div className="group relative z-10 flex h-full items-start gap-5 bg-obsidian/85 p-8 transition-colors duration-500 hover:bg-ink active:bg-ink lg:bg-obsidian/70 lg:p-10 lg:hover:bg-obsidian">
               <svg
                 className="mt-0.5 h-6 w-6 flex-shrink-0 text-gold transition-transform duration-500 group-hover:scale-110"
                 fill="none"

@@ -91,10 +91,14 @@ const Home = () => {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // Hide once the hero is mostly gone so the cue never sits on the next section.
-        setScrollCueVisible(entry.isIntersecting && entry.intersectionRatio >= 0.62);
+        // Hide once the hero has scrolled ~38% of the viewport away so the cue
+        // never sits on the next section. Keyed to the viewport, not the hero's
+        // own height: the hero can exceed 100svh on small screens, where an
+        // intersectionRatio test could never pass and the cue would never show.
+        const viewportH = entry.rootBounds?.height ?? window.innerHeight;
+        setScrollCueVisible(entry.isIntersecting && entry.boundingClientRect.top >= viewportH * -0.38);
       },
-      { threshold: [0.62, 0.75, 1] },
+      { threshold: Array.from({ length: 21 }, (_, i) => i / 20) },
     );
 
     observer.observe(hero);

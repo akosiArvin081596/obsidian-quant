@@ -20,11 +20,16 @@ export const ensureGoogleAnalytics = () => {
 
   window.dataLayer = window.dataLayer || [];
   if (typeof window.gtag !== "function") {
-    window.gtag = function gtag(...args: unknown[]) {
-      window.dataLayer.push(args);
+    // gtag.js only executes dataLayer entries that are `arguments` objects —
+    // a rest-param array is silently ignored, so no hits would ever be sent.
+    window.gtag = function gtag() {
+      // eslint-disable-next-line prefer-rest-params
+      window.dataLayer.push(arguments);
     };
     window.gtag("js", new Date());
-    window.gtag("config", GA_MEASUREMENT_ID);
+    // send_page_view off: trackPageview() below owns every page_view,
+    // including the landing page — otherwise the first page is double-counted.
+    window.gtag("config", GA_MEASUREMENT_ID, { send_page_view: false });
   }
 
   if (document.getElementById(SCRIPT_ID)) return;

@@ -108,7 +108,7 @@ const Contact = () => {
 
           <Reveal className="lg:col-span-7">
             <Spotlight size={360} strength={0.1}>
-              <div className="relative z-10 border border-gold/15 bg-obsidian/50 p-8 backdrop-blur-sm lg:p-10 gold-grid">
+              <div className="relative z-10 border border-gold/15 bg-obsidian/80 p-8 backdrop-blur-sm lg:bg-obsidian/50 lg:p-10 gold-grid">
                 {showConfirmation ? (
                   <div
                     aria-live="polite"
@@ -142,7 +142,7 @@ const Contact = () => {
                         </div>
                         <div>
                           <div className="text-[0.62rem] uppercase tracking-[0.2em] text-silver/40">
-                            Counterparty Profile
+                            Institutional Entity
                           </div>
                           <div className="mt-1 text-ghost">{submitted.profile}</div>
                         </div>

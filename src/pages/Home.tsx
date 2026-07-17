@@ -1,4 +1,4 @@
-import { Fragment, memo, useRef } from "react";
+import { Fragment, memo, useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import Section from "../components/Section";
 import Eyebrow from "../components/Eyebrow";
@@ -7,7 +7,7 @@ import { Stagger, StaggerItem } from "../components/Stagger";
 import Reveal from "../components/Reveal";
 import AnimatedCounter from "../components/AnimatedCounter";
 import MarketIntelligence from "../components/MarketIntelligence";
-import ObsidianGemImage from "../components/ObsidianGemImage";
+import { cn } from "../lib/cn";
 import {
   ARCHITECTURE,
   BRAND,
@@ -43,14 +43,13 @@ const quantFlow = [
 ] as const;
 
 const QuantIcon = ({ index }: { index: number }) => {
-  if (index === 5) return <ObsidianGemImage />;
-
   const icons = [
     <><path d="M4 32h8l3-13 5 27 6-36 6 43 5-30 5 18 4-9h10" /><path d="M8 26v12M52 25v14" /></>,
     <><path d="M32 11c-7-6-15 0-13 7-8 0-10 11-4 15-4 8 5 15 12 10 2 8 12 8 13 0 8 5 16-3 12-10 7-5 3-15-5-15 2-8-7-14-13-8Z" /><path d="M32 12v36M21 20c7 1 8 5 7 10M43 20c-7 1-8 5-7 10M18 34c5-2 9 0 10 5M46 34c-5-2-9 0-10 5" /></>,
     <><path d="M10 51V13M10 51h45" /><path d="m16 43 8-10 8 5 9-16 7 5 8-14M48 13h8v8" /><path d="M19 47v-6M28 47V36M37 47V29M46 47V23" /></>,
     <><path d="m32 9 23 42H9L32 9Z" /><circle cx="32" cy="25" r="3" /><path d="m32 28-11 16M32 28l11 16M21 44h22" /></>,
     <><circle cx="32" cy="32" r="23" /><path d="M32 9v23h23M32 32 17 49M32 32 12 21" /><path d="M37 10a23 23 0 0 1 17 17H37V10Z" /></>,
+    <><path d="M32 8 48 22 32 56 16 22 32 8Z" /><path d="M16 22h32M32 8v48M22 22l10 34M42 22 32 56" /></>,
   ];
 
   return <svg viewBox="0 0 64 64" aria-hidden>{icons[index]}</svg>;
@@ -81,20 +80,41 @@ const siteFacts = [
 const Home = () => {
   const reduce = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
+  const [scrollCueVisible, setScrollCueVisible] = useState(true);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "8%"]);
   const heroScale = useTransform(scrollYProgress, [0, 1], [1.03, 1.065]);
 
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Hide once the hero has scrolled ~38% of the viewport away so the cue
+        // never sits on the next section. Keyed to the viewport, not the hero's
+        // own height: the hero can exceed 100svh on small screens, where an
+        // intersectionRatio test could never pass and the cue would never show.
+        const viewportH = entry.rootBounds?.height ?? window.innerHeight;
+        setScrollCueVisible(entry.isIntersecting && entry.boundingClientRect.top >= viewportH * -0.38);
+      },
+      { threshold: Array.from({ length: 21 }, (_, i) => i / 20) },
+    );
+
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
-      <section ref={heroRef} className="home-reference-hero reference-hero relative flex h-screen flex-col border-b border-gold/20 px-6 pt-36 pb-8 lg:px-16 lg:pt-24 lg:pb-0">
+      <section ref={heroRef} className="home-reference-hero reference-hero relative flex min-h-[100svh] flex-col overflow-hidden border-b border-gold/20 px-5 pt-28 sm:px-6 sm:pt-32 lg:h-screen lg:min-h-0 lg:px-16 lg:pt-24">
         {/* Clip parallax only; stays behind the traveling gem (scene-behind). */}
         <div className="scene-behind pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
           <motion.div className="home-hero-bg absolute inset-0" style={reduce ? undefined : { y: heroY, scale: heroScale }} />
           <div className="reference-stars absolute inset-0" />
         </div>
         <div className="hero-side-dots hidden lg:grid" aria-hidden><b /><i /><i /><i /><i /></div>
-        <div className="scene-content relative z-10 flex flex-1 items-center">
+        <div className="scene-content relative z-10 flex min-h-0 flex-1 items-start lg:items-center py-2 pb-14 sm:py-4 sm:pb-16 lg:py-0 lg:pb-20">
           <motion.div
             className="hero-copy relative min-w-0 max-w-3xl lg:max-w-[720px]"
             initial={reduce ? false : { opacity: 0, y: 28 }}
@@ -102,22 +122,25 @@ const Home = () => {
             transition={{ duration: 1, delay: reduce ? 0 : 0.7 }}
           >
             <Eyebrow>{BRAND.badge}</Eyebrow>
-            <h1 className="mt-7 text-display text-6xl leading-[.98] text-ghost sm:text-7xl lg:text-[6.5rem]">
+            <h1 className="mt-5 text-display text-5xl leading-[.98] text-ghost sm:mt-7 sm:text-7xl lg:text-[6.5rem]">
               {HERO.headlineLead}<br />
               <span className="text-gold-gradient">{HERO.headlineAccent}</span>
             </h1>
-            <p className="mt-7 max-w-xl text-base font-light leading-relaxed text-silver/80 lg:text-lg">
+            <p className="mt-5 max-w-xl text-sm font-light leading-relaxed text-silver/80 sm:mt-7 sm:text-base lg:text-lg">
               {HERO.sub}
             </p>
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:gap-4">
               <Button to="/firm" variant="primary">Explore Our Philosophy</Button>
               <Button to="/strategy" variant="outline">Our Strategies</Button>
             </div>
-            <div className="hero-scroll">
-              <i aria-hidden />
-              Scroll to explore
-            </div>
           </motion.div>
+        </div>
+        <div
+          className={cn("hero-scroll", !scrollCueVisible && "hero-scroll-away")}
+          aria-hidden={!scrollCueVisible}
+        >
+          <i aria-hidden />
+          Scroll to explore
         </div>
         <MarketIntelligence />
       </section>
@@ -133,7 +156,7 @@ const Home = () => {
               <StaggerItem><h2 className="mt-5 text-display text-4xl text-ghost lg:text-6xl">The Architecture of Alpha</h2></StaggerItem>
               <StaggerItem><p className="mt-4 max-w-2xl text-sm leading-relaxed text-silver/60">{CORE_PHILOSOPHY.intro}</p></StaggerItem>
             </Stagger>
-            <Stagger className="philosophy-card-grid mt-8 grid gap-6 md:grid-cols-3" gap={0.14}>
+            <Stagger className="philosophy-card-grid mt-6 grid gap-4 sm:mt-8 sm:gap-6 md:grid-cols-3" gap={0.14}>
               {CORE_PHILOSOPHY.columns.map((item, index) => (
                 <StaggerItem key={item.label} className="h-full">
                   <article className={`kev-philosophy-card h-full ${index === 1 ? "kev-philosophy-card-active" : ""}`}>
@@ -150,8 +173,8 @@ const Home = () => {
         </div>
       </Section>
 
-      <Section className="kev-engine reference-engine overflow-hidden border-b border-gold/15">
-        <div className="kev-engine-layout grid items-center gap-14 lg:grid-cols-[310px_1fr]">
+      <Section className="kev-engine reference-engine border-b border-gold/15 lg:overflow-hidden">
+        <div className="kev-engine-layout grid items-center gap-10 sm:gap-12 lg:grid-cols-[310px_1fr] lg:gap-14">
           <Stagger>
             <StaggerItem><Eyebrow>The Quant Engine</Eyebrow></StaggerItem>
             <StaggerItem><h2 className="mt-5 text-display text-4xl text-ghost lg:text-6xl">Turning Complexity<br />Into Conviction</h2></StaggerItem>
@@ -200,10 +223,11 @@ const Home = () => {
       </Section>
 
       <Section className="facts-section overflow-hidden border-b border-gold/15" spacing="py-14 lg:py-16">
-        <div className="facts-orbit" aria-hidden />
-        <div className="relative z-10 mb-8 flex flex-wrap items-center justify-between gap-4">
+        <div className="facts-heading relative z-10 mb-6 flex flex-col gap-2 sm:mb-8 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
           <Eyebrow>By the Structure</Eyebrow>
-          <span className="text-xs uppercase tracking-[.2em] text-silver/55">Counts derived from this site’s published structure</span>
+          <span className="max-w-sm text-[10px] uppercase leading-relaxed tracking-[.16em] text-silver/55 sm:max-w-md sm:text-right sm:text-xs sm:tracking-[.2em]">
+            Counts derived from this site’s published structure
+          </span>
         </div>
         <Stagger className="facts-grid" gap={.1}>
           {siteFacts.map(([value, label], index) => (
@@ -236,25 +260,26 @@ const Home = () => {
         </Stagger>
       </Section>
 
-      <section className="reference-quote relative grid min-h-[600px] place-items-center overflow-hidden border-b border-gold/15 px-6 py-28 text-center">
+      <section className="reference-quote relative grid min-h-[600px] place-items-center overflow-hidden border-b border-gold/15 px-5 py-28 text-center sm:px-6">
         <div className="scene-behind quote-stars absolute inset-0" aria-hidden />
-        <Reveal className="scene-content relative z-10 mx-auto max-w-5xl">
+        <Reveal className="scene-content relative z-10 mx-auto w-full max-w-5xl">
           <Eyebrow centered>Precision, Systematized</Eyebrow>
-          <blockquote className="mt-8 font-serif text-4xl font-semibold leading-[1.05] text-ghost sm:text-6xl lg:text-8xl">
-            Markets misprice human emotion.<br />
-            We express it <span className="text-gold-gradient">mathematically.</span>
+          <blockquote className="quote-statement mt-6 font-serif text-[1.85rem] font-semibold leading-[1.08] text-ghost sm:mt-8 sm:text-6xl sm:leading-[1.05] lg:text-8xl">
+            <span className="quote-line">Markets misprice human</span>
+            <span className="quote-line">emotion. We express it</span>
+            <span className="quote-line text-gold-gradient">mathematically.</span>
           </blockquote>
-          <div className="mt-10"><Button to="/contact" variant="primary">Contact Obsidian Quant</Button></div>
+          <div className="mt-8 sm:mt-10"><Button to="/contact" variant="primary">Contact Obsidian Quant</Button></div>
         </Reveal>
       </section>
 
-      <section className="reference-closing relative overflow-hidden px-6 py-28 lg:px-16 lg:py-40">
+      <section className="reference-closing relative overflow-hidden px-5 py-28 sm:px-6 lg:px-16 lg:py-40">
         <div className="scene-content mx-auto grid max-w-7xl items-center lg:grid-cols-[1fr_.8fr]">
           <Stagger className="relative z-10 max-w-2xl">
             <StaggerItem><Eyebrow>Built Different</Eyebrow></StaggerItem>
-            <StaggerItem><h2 className="mt-6 text-display text-5xl text-ghost lg:text-7xl">{ARCHITECTURE.title}</h2></StaggerItem>
-            <StaggerItem><p className="mt-6 max-w-lg text-sm leading-relaxed text-silver/70">{ARCHITECTURE.body}</p></StaggerItem>
-            <StaggerItem><div className="mt-9"><Button to="/contact" variant="primary">Partner With Obsidian</Button></div></StaggerItem>
+            <StaggerItem><h2 className="mt-5 text-display text-4xl text-ghost sm:mt-6 sm:text-5xl lg:text-7xl">{ARCHITECTURE.title}</h2></StaggerItem>
+            <StaggerItem><p className="mt-5 max-w-lg text-sm leading-relaxed text-silver/70 sm:mt-6">{ARCHITECTURE.body}</p></StaggerItem>
+            <StaggerItem><div className="mt-8 sm:mt-9"><Button to="/contact" variant="primary">Partner With Obsidian</Button></div></StaggerItem>
           </Stagger>
           <div className="hidden lg:block" aria-hidden />
         </div>

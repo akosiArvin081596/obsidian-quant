@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import ScrollToTop from "./ScrollToTop";
 import { SessionProvider } from "../pages/investor/session";
 import GrainVignette from "../components/GrainVignette";
+import GoogleAnalytics from "../components/GoogleAnalytics";
 
 /**
  * Root of the investor experience (mockup). Owns the mock session so both the
@@ -12,6 +13,7 @@ const InvestorLayout = () => (
   <SessionProvider>
     <GrainVignette />
     <ScrollToTop />
+    <GoogleAnalytics />
     <Outlet />
   </SessionProvider>
 );

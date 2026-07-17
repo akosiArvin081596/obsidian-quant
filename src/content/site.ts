@@ -46,13 +46,60 @@ export const NAV = [
   { to: "/firm", label: "The Firm" },
   { to: "/strategy", label: "Strategy" },
   { to: "/architecture", label: "Architecture" },
-  { to: "/insights", label: "Insights" },
+  // Insights restored when articles are ready
 ] as const;
 
 export const LEGAL = [
-  "Regulatory Disclosure",
-  "Data Cryptography",
+  {
+    label: "Regulatory Disclosure",
+    to: "/legal/regulatory-disclosure",
+  },
+  {
+    label: "Data Cryptography",
+    to: "/legal/data-cryptography",
+  },
 ] as const;
+
+export const LEGAL_PAGES = {
+  "regulatory-disclosure": {
+    eyebrow: "Legal",
+    title: "Regulatory Disclosure",
+    body: "Obsidian Quant Group operates under institutional compliance standards across its Zurich, Singapore, and New York presence. Strategy materials on this site are informational and do not constitute an offer, solicitation, or recommendation to invest.",
+    sections: [
+      {
+        heading: "Marketing communication",
+        copy: "Content published here is intended for qualified counterparties and professional investors. Access to live mandates is subject to eligibility review, regional regulation, and completed onboarding.",
+      },
+      {
+        heading: "Risk notice",
+        copy: "Systematic strategies can lose capital. Past structural behaviour does not guarantee future results. Capacity, liquidity, and drawdown controls may change without notice as market regimes evolve.",
+      },
+      {
+        heading: "Jurisdiction",
+        copy: "Nothing on this site is directed at persons in any jurisdiction where such distribution would be contrary to local law. Prospective partners should seek independent legal and tax advice.",
+      },
+    ],
+  },
+  "data-cryptography": {
+    eyebrow: "Legal",
+    title: "Data Cryptography",
+    body: "Obsidian Quant Group treats research telemetry, investor communications, and execution directives as sensitive institutional assets. Cryptographic controls protect data in transit and at rest across our digital environments.",
+    sections: [
+      {
+        heading: "Transport security",
+        copy: "Public site sessions and member-area gateways are served over encrypted channels. Credential exchange and access requests are never transmitted in clear text.",
+      },
+      {
+        heading: "Integrity of records",
+        copy: "Operational logs and mandate communications are retained under controlled access policies so provenance remains auditable without exposing proprietary model detail.",
+      },
+      {
+        heading: "Investor diligence",
+        copy: "Additional technical controls for allocated partners are shared during onboarding. Contact access@obsidianquantgroup.com for cryptographic assurance documentation.",
+      },
+    ],
+  },
+} as const;
 
 /* ---------- Core Philosophy (Home — three-column feature) ---------- */
 export const CORE_PHILOSOPHY = {
@@ -230,9 +277,9 @@ export const CONTACT = {
     namePlaceholder: "Full name",
     email: "Corporate Email Address",
     emailPlaceholder: "secure@entity.com",
-    profile: "Counterparty Profile",
+    profile: "Institutional Entity",
     profileOther: "Please explain",
-    profileOtherPlaceholder: "Describe your counterparty type…",
+    profileOtherPlaceholder: "Describe your institutional entity…",
     note: "Briefing Notes",
   },
   submit: "Submit Credentials",

@@ -22,7 +22,7 @@ type InsightCardProps = {
 const InsightCard = ({ article, featured = false }: InsightCardProps) => (
   <article
     className={cn(
-      "group flex h-full flex-col justify-between border border-gold/10 bg-obsidian/40 p-8 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-gold/30",
+      "group relative z-10 flex h-full flex-col justify-between border border-gold/10 bg-obsidian/80 p-8 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-gold/30 hover:bg-[#05080c] active:bg-[#05080c] lg:bg-obsidian/40 lg:hover:bg-obsidian/70",
       featured && "lg:p-10",
     )}
   >
@@ -48,7 +48,7 @@ const InsightCard = ({ article, featured = false }: InsightCardProps) => (
       </h3>
       <p
         className={cn(
-          "mt-4 font-light leading-relaxed text-silver/65",
+          "mt-4 font-light leading-relaxed text-silver/75 lg:text-silver/65",
           featured ? "max-w-xl text-sm lg:text-base" : "text-xs",
         )}
       >

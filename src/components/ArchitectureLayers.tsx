@@ -62,17 +62,17 @@ const ArchitectureLayers = ({ delay = 0 }: { delay?: number }) => (
             </span>
           </div>
 
-          {/* layer card */}
-          <div className="flex-1 border border-gold/10 bg-midnight/40 p-6 backdrop-blur-sm transition-colors duration-500 group-hover:border-gold/25 md:p-8">
+          {/* layer card — denser on small screens (no hover); ~60%+ on desktop */}
+          <div className="relative z-10 flex-1 border border-gold/10 bg-obsidian/80 p-5 backdrop-blur-sm transition-colors duration-500 group-hover:border-gold/30 group-hover:bg-obsidian/95 active:bg-obsidian/95 sm:p-6 md:p-8 lg:bg-obsidian/60 lg:group-hover:bg-obsidian/90">
             <div className="flex flex-col gap-1.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
               <h3 className="font-serif text-2xl text-ghost lg:text-3xl">
                 {layer.title}
               </h3>
-              <span className="font-mono text-[0.62rem] uppercase tracking-[0.22em] text-silver/40">
+              <span className="font-mono text-[0.62rem] uppercase tracking-[0.22em] text-silver/45">
                 {layer.node}_
               </span>
             </div>
-            <p className="mt-4 max-w-2xl text-xs font-light leading-relaxed text-silver/65 lg:text-sm">
+            <p className="mt-4 max-w-2xl text-xs font-light leading-relaxed text-silver/75 lg:text-sm lg:text-silver/65">
               {layer.body}
             </p>
           </div>

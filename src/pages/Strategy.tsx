@@ -54,10 +54,10 @@ const Strategy = () => (
       <Stagger className="mt-16 space-y-px lg:mt-20" gap={0.18} delay={0.3}>
         {POSITIONING.pillars.map((p) => (
           <StaggerItem key={p.no}>
-            <div className="group grid grid-cols-1 items-center gap-8 border-t border-gold/10 bg-obsidian/30 py-12 transition-colors duration-500 hover:bg-obsidian/60 lg:grid-cols-12 lg:gap-12 lg:py-14">
+            <div className="group relative z-10 grid grid-cols-1 items-center gap-6 border-t border-gold/10 bg-obsidian/80 px-6 py-10 transition-colors duration-500 hover:bg-[#05080c] hover:shadow-[inset_0_0_0_1px_rgba(184,138,74,0.12)] sm:gap-8 sm:px-8 sm:py-12 lg:grid-cols-12 lg:gap-12 lg:bg-obsidian/30 lg:px-12 lg:py-14 lg:hover:bg-obsidian xl:px-14">
               {/* Big serif index */}
               <div className="lg:col-span-2">
-                <div className="font-serif text-6xl leading-none text-gold-gradient lg:text-7xl">
+                <div className="font-serif text-5xl leading-none text-gold-gradient sm:text-6xl lg:text-7xl">
                   {p.no}
                 </div>
                 <div className="mt-4 flex items-center gap-3 text-[0.6rem] uppercase tracking-[0.24em] text-gold">
@@ -68,13 +68,13 @@ const Strategy = () => (
 
               {/* Title */}
               <div className="lg:col-span-4">
-                <h3 className="text-display text-3xl text-ghost lg:text-4xl">
+                <h3 className="text-display text-2xl text-ghost sm:text-3xl lg:text-4xl">
                   {p.title}
                 </h3>
               </div>
 
               {/* Body + elaboration */}
-              <div className="lg:col-span-6">
+              <div className="min-w-0 lg:col-span-6">
                 <p className="text-sm font-light leading-relaxed text-silver/75">
                   {p.body}
                 </p>
@@ -158,8 +158,8 @@ const Strategy = () => (
         >
           {STRATEGY.classes.map((c, i) => (
             <StaggerItem key={c.title} className="h-full">
-              <div className="group relative flex h-full flex-col justify-between overflow-hidden border border-gold/10 bg-obsidian/40 p-8 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-gold/30">
-                <div>
+              <div className="group relative z-10 flex h-full flex-col justify-between overflow-hidden border border-gold/10 bg-obsidian/80 p-6 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-gold/35 hover:bg-[#05080c] hover:shadow-[inset_0_0_0_1px_rgba(184,138,74,0.1),0_18px_40px_-20px_rgba(0,0,0,0.85)] active:bg-[#05080c] sm:p-8 lg:bg-obsidian/45 lg:hover:bg-[#05080c]">
+                <div className="relative z-10">
                   <div className="flex items-center justify-between">
                     <span className="h-2 w-2 rotate-45 bg-gold transition-transform duration-500 group-hover:scale-150" />
                     <span className="font-mono text-[0.7rem] tracking-[0.2em] text-silver/35">
@@ -169,11 +169,11 @@ const Strategy = () => (
                   <h3 className="mt-6 font-serif text-2xl text-ghost">
                     {c.title}
                   </h3>
-                  <p className="mt-3 text-xs font-light leading-relaxed text-silver/60">
+                  <p className="mt-3 text-xs font-light leading-relaxed text-silver/75 sm:text-sm lg:text-silver/60 lg:group-hover:text-silver/80">
                     {c.body}
                   </p>
                 </div>
-                <div className="mt-8 h-px w-full bg-gradient-to-r from-gold/30 to-transparent transition-all duration-500 group-hover:from-gold/60" />
+                <div className="relative z-10 mt-8 h-px w-full bg-gradient-to-r from-gold/30 to-transparent transition-all duration-500 group-hover:from-gold/60" />
               </div>
             </StaggerItem>
           ))}

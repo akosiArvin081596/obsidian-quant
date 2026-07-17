@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+Disallow: /investor
+
+Sitemap: https://obsidianquantgroup.com/sitemap.xml

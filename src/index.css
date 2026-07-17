@@ -24,9 +24,9 @@
   --color-slate: #4a525a;
   --color-ink: #05080c; /* Pressed/hover card fill; footer base */
 
-  /* Type */
-  --font-serif: "Cormorant Garamond", ui-serif, Georgia, "Times New Roman", serif;
-  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  /* Type — next/font injects --font-cormorant / --font-montserrat on <html> */
+  --font-serif: var(--font-cormorant), ui-serif, Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
   --font-mono: "SFMono-Regular", "JetBrains Mono", "Roboto Mono", ui-monospace, monospace;
 
   /* Motion */
@@ -384,35 +384,67 @@
   100% { transform: translate(-50%, 12px); opacity: 0; }
 }
 .hero-market {
+  /* Mobile / tablet: bottom strip inside the hero (section is the containing block). */
   position: absolute;
-  right: clamp(48px, 6.5vw, 96px);
-  top: 36%;
-  /* Always above the traveling gem (z-index: 1). */
+  left: 1.25rem;
+  right: 1.25rem;
+  top: auto;
+  bottom: 3.75rem;
   z-index: 20;
   isolation: isolate;
-  width: 178px;
+  width: auto;
+  max-width: 28rem;
   color: #e4e7eb;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 1.25rem;
+  row-gap: 0;
+}
+
+.hero-market > hr,
+.hero-market > h4,
+.hero-market > small {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 640px) {
+  .hero-market {
+    left: 1.5rem;
+    right: auto;
+    bottom: 4.25rem;
+  }
+}
+
+/* Wide desktop: absolute right rail beside the gem. */
+@media (min-width: 1181px) {
+  .hero-market {
+    left: auto;
+    right: clamp(48px, 6.5vw, 96px);
+    top: 36%;
+    bottom: auto;
+    width: 178px;
+    max-width: none;
+    display: block;
+  }
 }
 
 /* Tighter right gutter when zoom / mid-width would otherwise crowd the gem. */
-@media (max-width: 1360px) {
+@media (min-width: 1181px) and (max-width: 1360px) {
   .hero-market {
     right: clamp(28px, 3.5vw, 56px);
     width: 168px;
   }
 }
-
-@media (max-width: 1180px) {
-  .hero-market {
-    /* Prefer clear copy over a squeezed panel while zoomed. */
-    display: none;
-  }
-}
 .hero-market hr {
   border: 0;
   height: 1px;
-  margin: 0 0 18px;
+  margin: 0 0 14px;
   background: linear-gradient(90deg, var(--color-gold), transparent);
+}
+@media (min-width: 1181px) {
+  .hero-market hr {
+    margin: 0 0 18px;
+  }
 }
 .hero-market h4 {
   margin: 0;
@@ -425,11 +457,16 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 6px 0 18px;
+  margin: 6px 0 14px;
   font-size: 10px;
   color: rgba(228, 231, 235, .78);
   letter-spacing: .04em;
   text-transform: none;
+}
+@media (min-width: 1181px) {
+  .hero-market small {
+    margin: 6px 0 18px;
+  }
 }
 .hero-market-dot {
   width: 6px;
@@ -456,8 +493,15 @@
 .hero-market p {
   display: flex;
   justify-content: space-between;
-  margin: 13px 0;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 10px 0;
   font-size: 11px;
+}
+@media (min-width: 1181px) {
+  .hero-market p {
+    margin: 13px 0;
+  }
 }
 .hero-market b {
   font-weight: 600;
@@ -761,8 +805,8 @@
   }
   .kev-compare-grid article {
     width: 100%;
-    height: 420px;
-    min-height: 420px;
+    height: auto;
+    min-height: 0;
     padding: 24px 24px 0;
   }
   .kev-compare-grid h3 {
@@ -772,12 +816,12 @@
     margin: 6px 0;
   }
   .kev-mini {
-    flex-basis: 150px;
-    height: 150px;
-    min-height: 150px;
-    max-height: 150px;
-    margin-left: -24px;
-    margin-right: -24px;
+    flex-basis: 96px;
+    height: 96px;
+    min-height: 96px;
+    max-height: 96px;
+    margin-left: 0;
+    margin-right: 0;
   }
   .kev-vs {
     margin: 2px auto;
@@ -793,6 +837,11 @@
   .facts-grid strong { font-size: 40px; }
   .facts-grid article > span { font-size: 13px; }
   .facts-section .eyebrow { font-size: .75rem; }
+}
+
+@media (max-width: 400px) {
+  .facts-grid { grid-template-columns: 1fr; }
+  .facts-grid strong { font-size: 36px; }
 }
 
 .reference-card {
@@ -1044,6 +1093,25 @@ footer.site-footer > .scene-content {
       rgba(4, 10, 18, .62) 55%,
       transparent 82%
     );
+}
+
+@media (max-width: 1023px) {
+  .hero-market::before {
+    inset: -14px -12px -16px -12px;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(4, 10, 18, .55) 0%,
+        rgba(4, 10, 18, .88) 45%,
+        rgba(4, 10, 18, .72) 100%
+      ),
+      radial-gradient(
+        closest-side at 30% 40%,
+        rgba(4, 10, 18, .92),
+        rgba(4, 10, 18, .5) 60%,
+        transparent 82%
+      );
+  }
 }
 
 /* Headlines and pull quotes lead the visual hierarchy. */
@@ -1314,7 +1382,6 @@ footer.site-footer h4 {
 
 .scroll-scene > .hero-market,
 .home-reference-hero .hero-market {
-  position: absolute;
   z-index: 20;
   isolation: isolate;
 }

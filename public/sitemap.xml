@@ -6,32 +6,32 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://obsidianquantgroup.com/firm</loc>
+    <loc>https://obsidianquantgroup.com/firm/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://obsidianquantgroup.com/strategy</loc>
+    <loc>https://obsidianquantgroup.com/strategy/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://obsidianquantgroup.com/architecture</loc>
+    <loc>https://obsidianquantgroup.com/architecture/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://obsidianquantgroup.com/contact</loc>
+    <loc>https://obsidianquantgroup.com/contact/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://obsidianquantgroup.com/legal/regulatory-disclosure</loc>
+    <loc>https://obsidianquantgroup.com/legal/regulatory-disclosure/</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://obsidianquantgroup.com/legal/data-cryptography</loc>
+    <loc>https://obsidianquantgroup.com/legal/data-cryptography/</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

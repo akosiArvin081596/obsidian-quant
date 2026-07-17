@@ -1,6 +1,8 @@
+"use client";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { useLocation } from "react-router-dom";
+import { usePathname } from "next/navigation";
 import ObsidianGemImage from "./ObsidianGemImage";
 
 type GemPose = {
@@ -23,6 +25,7 @@ const POSES: GemPose[] = [
 ];
 
 const MOBILE_POSES: GemPose[] = [
+  // Matches production (obsidianquantgroup.com): centered under the hero, pinned until closing.
   { left: "50vw", top: "190px", width: 168, rotate: 0, opacity: 0.72 },
 ];
 
@@ -153,22 +156,25 @@ const clampCenterAboveFooter = (
  * scene, while one persistent gem travels between section-specific poses.
  */
 const ScrollChoreography = () => {
-  const { pathname } = useLocation();
+  const pathname = usePathname();
+  /** TrailingSlash export uses `/firm/`; pose maps key off the bare path. */
+  const path = pathname.replace(/\/$/, "") || "/";
   const reduce = useReducedMotion();
   const gemRef = useRef<HTMLDivElement>(null);
   const poseRef = useRef<GemPose>(POSES[0]);
   const mobileRef = useRef(false);
   const [active, setActive] = useState(0);
   const [sectionCount, setSectionCount] = useState(0);
-  const [mobile, setMobile] = useState(() =>
-    typeof window !== "undefined" ? window.matchMedia("(max-width: 1023px)").matches : false,
-  );
+  // Always start desktop on server + first client paint, then sync in an effect
+  // — reading matchMedia in useState breaks hydration on narrow viewports.
+  const [mobile, setMobile] = useState(false);
   /** Pixel center Y after footer collision clamp (null = use pose.top as-is). */
   const [safeTopPx, setSafeTopPx] = useState<number | null>(null);
 
   useEffect(() => {
     const query = window.matchMedia("(max-width: 1023px)");
     const onChange = () => setMobile(query.matches);
+    onChange();
     query.addEventListener("change", onChange);
     return () => query.removeEventListener("change", onChange);
   }, []);
@@ -202,16 +208,16 @@ const ScrollChoreography = () => {
 
   const pose = useMemo(() => {
     // Contact: keep the stone seated in the hero for the whole page.
-    if (pathname === "/contact") {
+    if (path === "/contact") {
       return mobile ? CONTACT_HERO_MOBILE_POSE : STANDARD_PAGE_HERO_POSE;
     }
 
-    if (!mobile && active === 0 && STANDARD_PAGE_HERO_PATHS.has(pathname)) {
+    if (!mobile && active === 0 && STANDARD_PAGE_HERO_PATHS.has(path)) {
       return STANDARD_PAGE_HERO_POSE;
     }
 
     // Firm principles section: vacant right rail (not the left pose shared by other pages).
-    if (pathname === "/firm" && active === 2) {
+    if (path === "/firm" && active === 2) {
       return mobile ? FIRM_PRINCIPLES_MOBILE_POSE : FIRM_PRINCIPLES_POSE;
     }
 
@@ -221,12 +227,12 @@ const ScrollChoreography = () => {
 
     if (isLastSection) {
       if (!mobile) {
-        if (pathname === "/") return HOME_CLOSING_POSE;
-        if (STANDARD_PAGE_HERO_PATHS.has(pathname)) return CLOSING_SECTION_POSE;
+        if (path === "/") return HOME_CLOSING_POSE;
+        if (STANDARD_PAGE_HERO_PATHS.has(path)) return CLOSING_SECTION_POSE;
         return { ...base, top: "46vh", width: Math.round(base.width * 0.94) };
       }
 
-      if (pathname === "/") return HOME_CLOSING_MOBILE_POSE;
+      if (path === "/") return HOME_CLOSING_MOBILE_POSE;
       return {
         ...base,
         left: "78vw",
@@ -244,10 +250,12 @@ const ScrollChoreography = () => {
     }
 
     return base;
-  }, [active, mobile, pathname, sectionCount]);
+  }, [active, mobile, path, sectionCount]);
 
-  poseRef.current = pose;
-  mobileRef.current = mobile;
+  useEffect(() => {
+    poseRef.current = pose;
+    mobileRef.current = mobile;
+  }, [pose, mobile]);
 
   useEffect(() => {
     let observer: IntersectionObserver | undefined;

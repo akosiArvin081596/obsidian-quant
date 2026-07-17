@@ -24,28 +24,34 @@ export type ContactProfile = (typeof CONTACT_PROFILES)[number];
 export const isOthersProfile = (profile: string) =>
   profile.trim().toLowerCase() === "others";
 
+// NEXT_PUBLIC_* vars are inlined by Next only when referenced statically as
+// `process.env.NEXT_PUBLIC_X`; a dynamic `process.env[key]` lookup is left
+// as-is and reads an empty stub in the browser bundle, so overrides would
+// silently never apply client-side.
+const cleaned = (value: string | undefined) => value?.trim() || undefined;
+
 /** Inbox for strategic allocation requests — works with zero env config. */
 export const CONTACT_INBOX =
-  (import.meta.env.VITE_CONTACT_INBOX as string | undefined)?.trim() ||
+  cleaned(process.env.NEXT_PUBLIC_CONTACT_INBOX) ||
   "access@obsidianquantgroup.com";
 
 /**
  * CRM lead webhook. Defaults to the SAME-ORIGIN `/api/lead` proxy
  * (deploy/nginx-lead-proxy.conf), which injects the bearer secret server-side so
  * it's never in the client bundle — `connect-src 'self'` already allows it.
- * Override with VITE_CRM_WEBHOOK_URL only to point at a different collector (then
+ * Override with NEXT_PUBLIC_CRM_WEBHOOK_URL only to point at a different collector (then
  * add that origin to the CSP connect-src).
  */
 export const CRM_WEBHOOK_URL =
-  (import.meta.env.VITE_CRM_WEBHOOK_URL as string | undefined)?.trim() ||
+  cleaned(process.env.NEXT_PUBLIC_CRM_WEBHOOK_URL) ||
   "/api/lead";
 
 /**
  * Email delivery endpoint. Default FormSubmit AJAX — no .env / Vercel secrets needed.
- * Owner may override with VITE_CONTACT_ENDPOINT.
+ * Owner may override with NEXT_PUBLIC_CONTACT_ENDPOINT.
  */
 export const CONTACT_ENDPOINT =
-  (import.meta.env.VITE_CONTACT_ENDPOINT as string | undefined)?.trim() ||
+  cleaned(process.env.NEXT_PUBLIC_CONTACT_ENDPOINT) ||
   `https://formsubmit.co/ajax/${CONTACT_INBOX}`;
 
 export const parseContactForm = (form: FormData): ContactSubmission => {

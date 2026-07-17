@@ -34,16 +34,15 @@ const Logo = ({
       />
 
       {withWordmark && (
-        <span className="flex flex-col leading-none">
-          <span className="font-serif text-[1.15rem] font-semibold tracking-[0.22em] text-ghost">
+        <span className="flex min-w-0 flex-col leading-none">
+          <span className="font-serif text-[1rem] font-semibold tracking-[0.14em] text-ghost sm:text-[1.15rem] sm:tracking-[0.22em]">
             OBSIDIAN
           </span>
-          <span className="text-[0.6rem] font-medium tracking-[0.42em] text-gold">
+          <span className="text-[0.55rem] font-medium tracking-[0.28em] text-gold sm:text-[0.6rem] sm:tracking-[0.42em]">
             QUANT&nbsp;GROUP
           </span>
         </span>
-      )}
-    </span>
+      )}    </span>
   );
 };
 

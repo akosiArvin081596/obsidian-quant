@@ -1,13 +1,18 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import Logo from "../components/Logo";
 import Button from "../components/Button";
 import { cn } from "../lib/cn";
+import { isActivePath } from "../lib/routes";
 import { NAV } from "../content/site";
 import { EASE_LUX } from "../lib/motion";
 
 const Header = () => {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -18,7 +23,6 @@ const Header = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Lock body scroll while the mobile menu is open.
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
@@ -38,27 +42,27 @@ const Header = () => {
       )}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-16">
-        <Link to="/" aria-label="Obsidian Quant Group — home">
+        <Link href="/" aria-label="Obsidian Quant Group — home">
           <Logo size={scrolled || open ? 34 : 38} />
         </Link>
 
-        {/* Desktop nav */}
         <nav className="hidden items-center gap-9 lg:flex">
-          {NAV.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                cn(
+          {NAV.map((item) => {
+            const isActive = isActivePath(pathname, item.to);
+            return (
+              <Link
+                key={item.to}
+                href={item.to}
+                className={cn(
                   "group relative text-[0.7rem] font-medium uppercase tracking-[0.2em] transition-colors duration-300",
                   isActive ? "text-ghost" : "text-silver/70 hover:text-ghost",
-                )
-              }
-            >
-              {item.label}
-              <span className="absolute -bottom-1.5 left-0 h-px w-0 bg-gold transition-all duration-300 group-hover:w-full" />
-            </NavLink>
-          ))}
+                )}
+              >
+                {item.label}
+                <span className="absolute -bottom-1.5 left-0 h-px w-0 bg-gold transition-all duration-300 group-hover:w-full" />
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-4">
@@ -68,13 +72,12 @@ const Header = () => {
             </Button>
           </span>
 
-          {/* Mobile toggle */}
           <button
             type="button"
             aria-label="Open menu"
             aria-expanded={open}
             onClick={() => setOpen(true)}
-            className="flex h-9 w-9 flex-col items-center justify-center gap-1.5 lg:hidden"
+            className="flex h-11 w-11 flex-col items-center justify-center gap-1.5 lg:hidden"
           >
             <span className="h-px w-6 bg-silver" />
             <span className="h-px w-6 bg-silver" />
@@ -83,7 +86,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile menu — opaque sheet so page content never shows through */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -111,7 +113,7 @@ const Header = () => {
                 type="button"
                 aria-label="Close menu"
                 onClick={() => setOpen(false)}
-                className="relative h-10 w-10"
+                className="relative flex h-11 w-11 items-center justify-center"
               >
                 <span className="absolute left-1/2 top-1/2 h-px w-6 -translate-x-1/2 rotate-45 bg-gold" />
                 <span className="absolute left-1/2 top-1/2 h-px w-6 -translate-x-1/2 -rotate-45 bg-gold" />
@@ -132,18 +134,16 @@ const Header = () => {
                     show: { opacity: 1, y: 0, transition: { ease: EASE_LUX } },
                   }}
                 >
-                  <NavLink
-                    to={item.to}
+                  <Link
+                    href={item.to}
                     onClick={() => setOpen(false)}
-                    className={({ isActive }) =>
-                      cn(
-                        "block border-b border-gold/10 py-4 font-serif text-3xl text-ghost transition-colors sm:text-4xl",
-                        isActive && "text-gold",
-                      )
-                    }
+                    className={cn(
+                      "block border-b border-gold/10 py-4 font-serif text-3xl text-ghost transition-colors sm:text-4xl",
+                      isActivePath(pathname, item.to) ? "text-gold" : undefined,
+                    )}
                   >
                     {item.label}
-                  </NavLink>
+                  </Link>
                 </motion.div>
               ))}
               <motion.div

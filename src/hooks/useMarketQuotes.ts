@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import {
   cachedMarketTickers,
   fetchMarketStream,
+  hasFreshCache,
+  isRateLimited,
   MARKET_POLL_MS,
   type MarketStream,
   type MarketTicker,
@@ -15,22 +17,18 @@ type Options = {
 };
 
 /**
- * Live Market Intelligence quotes — seeds instantly, then polls Yahoo (via
- * the Vite `/api/yahoo` proxy) every ~45s. Falls back to localStorage cache
- * when a refresh fails.
+ * Live Market Intelligence quotes — seeds identically on server + client
+ * (hydration-safe), then polls Yahoo via `/api/yahoo` every ~60s. Falls back
+ * to localStorage / seed when rate-limited or refresh fails.
  */
 export const useMarketQuotes = ({ seed, enabled = true }: Options): MarketStream => {
-  const [tickers, setTickers] = useState<MarketTicker[]>(() => cachedMarketTickers() ?? [...seed]);
+  // Always seed first — never read localStorage during render/init (SSR mismatch).
+  const [tickers, setTickers] = useState<MarketTicker[]>(() => [...seed]);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const [status, setStatus] = useState<MarketStream["status"]>(() =>
     enabled ? "loading" : "stale",
   );
   const alive = useRef(true);
-  // Hold `seed` in a ref so the polling effect can read the latest value
-  // without depending on it. A caller passing an unstable inline
-  // `seed={[...]}` would otherwise tear down + recreate the interval and
-  // AbortController on every render (a refresh storm). The lazy `useState`
-  // initializer above still reads `seed` directly — that's init-only and fine.
   const seedRef = useRef(seed);
   useEffect(() => {
     seedRef.current = seed;
@@ -38,21 +36,42 @@ export const useMarketQuotes = ({ seed, enabled = true }: Options): MarketStream
 
   useEffect(() => {
     alive.current = true;
-    // Disabled → status is already seeded to "stale" in useState, so just bail.
-    // (Setting state here would trip react-hooks/set-state-in-effect on React 19.)
     if (!enabled) return;
 
     let timer = 0;
-    // Each refresh runs under its own controller and aborts the previous
-    // in-flight one, so overlapping interval + visibility refreshes can't
-    // resolve out of order: a superseded fetch aborts out and its
-    // `signal.aborted` guard bails before applying state, so only the latest
-    // refresh ever wins. (`fetchMarketStream` uses `Promise.allSettled`, so an
-    // aborted refresh can still *resolve* with a partial result — hence the
-    // guard on the success path too, not just the catch.)
     let activeController: AbortController | null = null;
 
+    const applyFallback = () => {
+      const cache = cachedMarketTickers();
+      if (cache) {
+        setTickers(cache);
+        setStatus("stale");
+      } else {
+        setTickers([...seedRef.current]);
+        setStatus(isRateLimited() ? "stale" : "error");
+      }
+    };
+
     const refresh = async (isInitial: boolean) => {
+      // Don't poke Yahoo while we're still in a 429 cooldown (persisted).
+      if (isRateLimited()) {
+        if (alive.current) applyFallback();
+        return;
+      }
+
+      // Skip network when cache is still fresh — but only on mount (its job is
+      // surviving HMR / remounts). Mid-session ticks must fall through to a
+      // real refresh: FRESH_CACHE_MS exceeds the poll interval, so gating every
+      // tick here would flap the badge live→stale on alternating polls.
+      if (isInitial && hasFreshCache()) {
+        const cache = cachedMarketTickers();
+        if (cache && alive.current) {
+          setTickers(cache);
+          setStatus("stale");
+        }
+        return;
+      }
+
       activeController?.abort();
       const controller = new AbortController();
       activeController = controller;
@@ -65,19 +84,16 @@ export const useMarketQuotes = ({ seed, enabled = true }: Options): MarketStream
         setStatus("live");
       } catch {
         if (!alive.current || controller.signal.aborted) return;
-        const cache = cachedMarketTickers();
-        if (cache) {
-          setTickers(cache);
-          setStatus("stale");
-        } else {
-          setTickers([...seedRef.current]);
-          setStatus("error");
-        }
+        applyFallback();
       }
     };
 
     void refresh(true);
-    timer = window.setInterval(() => void refresh(false), MARKET_POLL_MS);
+    timer = window.setInterval(() => {
+      // Hidden tabs skip the poll; the visibilitychange handler catches up.
+      if (document.hidden) return;
+      void refresh(false);
+    }, MARKET_POLL_MS);
 
     const onVisibility = () => {
       if (document.visibilityState === "visible") void refresh(false);

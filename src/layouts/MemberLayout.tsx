@@ -1,9 +1,14 @@
-import { Link, NavLink, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Logo from "../components/Logo";
 import { cn } from "../lib/cn";
 import { EASE_LUX } from "../lib/motion";
-import { useSession } from "../pages/investor/session-context";
+import { isActivePath } from "../lib/routes";
+import { useSession } from "../views/investor/session-context";
 
 const MEMBER_NAV = [
   { to: "/investor/dashboard", label: "Dashboard" },
@@ -16,16 +21,23 @@ const MEMBER_NAV = [
  * supplies the minimal member nav + sign-out, and frames each screen. Unsigned
  * visitors are bounced to the sign-in gateway.
  */
-const MemberLayout = () => {
-  const navigate = useNavigate();
-  const { pathname } = useLocation();
-  const { signedIn, memberId, signOut } = useSession();
+const MemberLayout = ({ children }: { children: React.ReactNode }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const { signedIn, memberId, signOut, hydrated } = useSession();
 
-  if (!signedIn) return <Navigate to="/investor/login" replace />;
+  // Gate on hydration: the exported HTML is signed-out, and the session is only
+  // read from sessionStorage after mount — redirecting before that would bounce
+  // legitimately signed-in members to the login page on every hard refresh.
+  useEffect(() => {
+    if (hydrated && !signedIn) router.replace("/investor/login");
+  }, [hydrated, signedIn, router]);
+
+  if (!hydrated || !signedIn) return null;
 
   const onSignOut = () => {
     signOut();
-    navigate("/investor/login");
+    router.push("/investor/login");
   };
 
   return (
@@ -34,35 +46,32 @@ const MemberLayout = () => {
 
       <header className="relative z-10 border-b border-gold/10 bg-obsidian/70 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-4 lg:px-10">
-          <Link to="/investor/dashboard" aria-label="Investor area — dashboard">
+          <Link href="/investor/dashboard" aria-label="Investor area — dashboard">
             <Logo size={32} />
           </Link>
 
           <nav className="hidden items-center gap-8 md:flex" aria-label="Member area">
-            {MEMBER_NAV.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) =>
-                  cn(
+            {MEMBER_NAV.map((item) => {
+              const isActive = isActivePath(pathname, item.to);
+              return (
+                <Link
+                  key={item.to}
+                  href={item.to}
+                  className={cn(
                     "group relative text-[0.7rem] font-medium uppercase tracking-[0.2em] transition-colors duration-300",
                     isActive ? "text-ghost" : "text-silver/70 hover:text-ghost",
-                  )
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    {item.label}
-                    <span
-                      className={cn(
-                        "absolute -bottom-1.5 left-0 h-px bg-gold transition-all duration-300",
-                        isActive ? "w-full" : "w-0 group-hover:w-full",
-                      )}
-                    />
-                  </>
-                )}
-              </NavLink>
-            ))}
+                  )}
+                >
+                  {item.label}
+                  <span
+                    className={cn(
+                      "absolute -bottom-1.5 left-0 h-px bg-gold transition-all duration-300",
+                      isActive ? "w-full" : "w-0 group-hover:w-full",
+                    )}
+                  />
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="flex items-center gap-4">
@@ -80,25 +89,25 @@ const MemberLayout = () => {
           </div>
         </div>
 
-        {/* Member nav — compact row for small screens */}
         <nav
           className="flex items-center gap-6 border-t border-gold/10 px-6 py-3 md:hidden"
           aria-label="Member area"
         >
-          {MEMBER_NAV.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                cn(
+          {MEMBER_NAV.map((item) => {
+            const isActive = isActivePath(pathname, item.to);
+            return (
+              <Link
+                key={item.to}
+                href={item.to}
+                className={cn(
                   "text-[0.66rem] font-medium uppercase tracking-[0.18em] transition-colors",
                   isActive ? "text-gold" : "text-silver/60 hover:text-ghost",
-                )
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
+                )}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
       </header>
 
@@ -109,7 +118,7 @@ const MemberLayout = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: EASE_LUX }}
       >
-        <Outlet />
+        {children}
       </motion.main>
 
       <footer className="relative z-10 border-t border-gold/10 px-6 py-6 lg:px-10">

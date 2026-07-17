@@ -3,35 +3,36 @@
 Marketing site for **Obsidian Quant Group** — institutional quantitative asset management.
 _Profit from Market Dislocation. Beyond the Market. Within the Model._
 
-Live: **https://obsidian.abedubas.dev**
+Live: **https://obsidianquantgroup.com**
 
 ## Stack
 
-- **Vite 7** + **React 19** + **TypeScript**
+- **Next.js 15** (App Router, static export) + **React 19** + **TypeScript**
 - **Tailwind CSS v4** (design tokens in `src/index.css`)
-- **react-router-dom v7** (SPA), **framer-motion** (motion)
+- **framer-motion** (motion)
 
-The brand system (palette, type, motifs) is encoded in `src/index.css`, and all
-copy lives in `src/content/site.ts` (single source of truth).
+Public pages are statically generated HTML (SEO). The brand system (palette, type, motifs)
+is encoded in `src/index.css`, and all copy lives in `src/content/site.ts`.
 
 ## Develop
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm run build    # type-check + production build → dist/
-npm run preview  # serve the production build
+npm run dev      # http://localhost:3000
+npm run build    # static export → out/ synced to dist/
+npm run preview  # serve dist/ on :4173
 ```
 
 ## Structure
 
 ```
 src/
-  components/   reusable UI + brand motifs (Logo, AuroraRibbon, …)
-  layouts/      Header, Footer, RootLayout, Preloader, …
-  pages/        Home, Firm, Strategy, Architecture, Insights, Contact, NotFound
+  app/          Next.js routes + metadata (marketing + investor)
+  components/   reusable UI + brand motifs
+  layouts/      Header, Footer, Preloader, …
+  views/        page bodies (client components)
   content/      site.ts — all copy
-  lib/          cn(), motion presets
+  lib/          cn(), motion, seo, contact, …
 ```
 
 ## Deploy

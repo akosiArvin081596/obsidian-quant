@@ -1,11 +1,14 @@
 # Deployment — obsidianquantgroup.com
 
-Static React/Vite SPA, built on the VPS and served by nginx. **Production is
+Static Next.js export (App Router), built on the VPS and served by nginx. **Production is
 `obsidianquantgroup.com`** (+ `www.`). `obsidian.abedubas.dev` is a preview/staging
 alias on the **same VPS**, served from the **same** build in
 `/var/www/obsidian-quant/dist`. They are **two separate nginx vhosts**, and each
 one must have the `deploy/*.conf` includes wired in — see
 [nginx vhosts](#-nginx-vhosts--wire-the-includes-into-both).
+
+`npm run build` runs `next build` (static export to `out/`) then copies `out/` → `dist/`
+so the nginx root path stays unchanged.
 
 ## Pipeline
 
@@ -136,17 +139,17 @@ submissions to `access@obsidianquantgroup.com` via FormSubmit.
 | Who | Action |
 |-----|--------|
 | First-time setup | Submit the form once, then click FormSubmit's **"Activate Form"** email in the `access@obsidianquantgroup.com` inbox — required once before any submission is delivered |
-| Repo / VPS owner (optional) | Set `VITE_CRM_WEBHOOK_URL` at build time to push leads into Zapier / Make / HubSpot |
+| Repo / VPS owner (optional) | Set `NEXT_PUBLIC_CRM_WEBHOOK_URL` at build time to push leads into Zapier / Make / HubSpot |
 
 Optional overrides (owner only — CI / VPS env, not needed by contributors):
 
 ```bash
-VITE_CONTACT_INBOX=access@obsidianquantgroup.com
-VITE_CONTACT_ENDPOINT=https://formsubmit.co/ajax/access@obsidianquantgroup.com
-VITE_CRM_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/...
+NEXT_PUBLIC_CONTACT_INBOX=access@obsidianquantgroup.com
+NEXT_PUBLIC_CONTACT_ENDPOINT=https://formsubmit.co/ajax/access@obsidianquantgroup.com
+NEXT_PUBLIC_CRM_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/...
 ```
 
-> **CSP note:** the default lead intake is same-origin (`/api/lead`) — **no CSP change needed.** Only if you override `VITE_CRM_WEBHOOK_URL` to a DIFFERENT origin (e.g. `https://hooks.zapier.com`) must you add that origin to `connect-src` in both `deploy/nginx-security-headers.conf` and the `index.html` meta CSP, or the CRM fetch is blocked.
+> **CSP note:** the default lead intake is same-origin (`/api/lead`) — **no CSP change needed.** Only if you override `NEXT_PUBLIC_CRM_WEBHOOK_URL` to a DIFFERENT origin (e.g. `https://hooks.zapier.com`) must you add that origin to `connect-src` in both `deploy/nginx-security-headers.conf` and the root layout CSP meta, or the CRM fetch is blocked.
 
 ### Lead intake → alchemydev-crm ("Leads" tab)
 
@@ -192,8 +195,7 @@ Mailbox **passwords must never** be stored in the repo or frontend env.
 ## Market Intelligence proxy (Yahoo quotes)
 
 The hero Market Intelligence panel fetches live index quotes through
-same-origin `/api/yahoo/...`. Vite proxies that path in `npm run dev` /
-`npm run preview`. On the VPS, nginx must do the same — include the snippet
+same-origin `/api/yahoo/...`. On the VPS, nginx must proxy that path — include the snippet
 inside the HTTPS server block (alongside the security headers):
 
 ```nginx
@@ -223,14 +225,14 @@ submissions to `access@obsidianquantgroup.com` via FormSubmit.
 | Who | Action |
 |-----|--------|
 | Anyone testing locally | Submit the form; confirm FormSubmit’s first-time activation email to the inbox |
-| Repo / VPS owner (optional) | Set `VITE_CRM_WEBHOOK_URL` at build time to push leads into Zapier / Make / HubSpot |
+| Repo / VPS owner (optional) | Set `NEXT_PUBLIC_CRM_WEBHOOK_URL` at build time to push leads into Zapier / Make / HubSpot |
 
 Optional overrides (owner only — CI / VPS env, not needed by contributors):
 
 ```bash
-VITE_CONTACT_INBOX=access@obsidianquantgroup.com
-VITE_CONTACT_ENDPOINT=https://formsubmit.co/ajax/access@obsidianquantgroup.com
-VITE_CRM_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/...
+NEXT_PUBLIC_CONTACT_INBOX=access@obsidianquantgroup.com
+NEXT_PUBLIC_CONTACT_ENDPOINT=https://formsubmit.co/ajax/access@obsidianquantgroup.com
+NEXT_PUBLIC_CRM_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/...
 ```
 
 Mailbox **passwords must never** be stored in the repo or frontend env.
@@ -253,3 +255,14 @@ cd /var/www/obsidian-quant && git reset --hard <sha> && npm ci && npm run build
 ```bash
 curl -sI --resolve obsidianquantgroup.com:443:76.13.22.110 https://obsidianquantgroup.com/ | head
 ```
+
+## 404 page
+
+The export writes `404.html`, but nginx `try_files $uri $uri/ /index.html` serves the HOMEPAGE for unknown URLs (a soft-404). To serve the real 404 page, change the vhost fallback to:
+
+```nginx
+try_files $uri $uri/ =404;
+error_page 404 /404.html;
+```
+
+(Every real route is a physical `<route>/index.html` in the export, so the SPA-style `/index.html` fallback is no longer needed.)

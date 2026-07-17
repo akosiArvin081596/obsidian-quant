@@ -26,7 +26,7 @@ const StrategyProcess = () => (
             {/* Mobile/tablet: vertical rail down the left of each step */}
             {i < STRATEGY.process.length - 1 && (
               <span
-                className="absolute left-[9px] top-8 h-[calc(100%+3rem)] w-px bg-gradient-to-b from-gold/30 to-transparent sm:hidden"
+                className="absolute left-[9px] top-8 h-[calc(100%+3rem)] w-px bg-gradient-to-b from-gold/30 to-transparent lg:hidden"
                 aria-hidden
               />
             )}

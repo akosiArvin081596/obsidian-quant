@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -17,7 +19,11 @@ const BackToTop = () => {
           type="button"
           aria-label="Back to top"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-7 right-7 z-40 flex h-11 w-11 items-center justify-center border border-gold/30 bg-obsidian/70 text-gold backdrop-blur-md transition-colors hover:border-gold hover:bg-gold hover:text-obsidian"
+          className="fixed z-40 flex h-11 w-11 items-center justify-center border border-gold/30 bg-obsidian/70 text-gold backdrop-blur-md transition-colors hover:border-gold hover:bg-gold hover:text-obsidian"
+          style={{
+            bottom: "max(1.25rem, env(safe-area-inset-bottom, 0px))",
+            right: "max(1.25rem, env(safe-area-inset-right, 0px))",
+          }}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 16 }}

@@ -21,7 +21,7 @@ const Section = ({
 }: SectionProps) => (
   <section
     id={id}
-    className={cn("relative px-6 lg:px-16", spacing, className)}
+    className={cn("relative px-5 sm:px-6 lg:px-16", spacing, className)}
   >
     {inner ? <div className={cn("scene-content relative z-10 mx-auto w-full", inner)}>{children}</div> : children}
   </section>

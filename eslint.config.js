@@ -1,33 +1,20 @@
-import js from "@eslint/js";
-import globals from "globals";
-import reactHooks from "eslint-plugin-react-hooks";
-import reactRefresh from "eslint-plugin-react-refresh";
-import tseslint from "typescript-eslint";
-import { globalIgnores } from "eslint/config";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { FlatCompat } from "@eslint/eslintrc";
+import { defineConfig, globalIgnores } from "eslint/config";
 
-export default tseslint.config([
-  globalIgnores(["dist", ".claude"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      js.configs.recommended,
-      tseslint.configs.recommended,
-      // NOTE: do NOT extend reactHooks.configs["recommended-latest"] here.
-      // In eslint-plugin-react-hooks v7 that preset is still eslintrc-legacy
-      // shaped (`plugins: ["react-hooks"]`, an array of strings), which ESLint 9
-      // flat config rejects before linting any file. Register the plugin object
-      // explicitly and pull in its rules below instead (same coverage).
-      reactRefresh.configs.vite,
-    ],
-    plugins: {
-      "react-hooks": reactHooks,
-    },
-    rules: {
-      ...reactHooks.configs["recommended-latest"].rules,
-    },
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-    },
-  },
+const compat = new FlatCompat({
+  baseDirectory: dirname(fileURLToPath(import.meta.url)),
+});
+
+/**
+ * Next.js 15 + ESLint 9 flat config.
+ * FlatCompat loads `eslint-config-next` (registers `@next/next`) so `next build`
+ * no longer warns that the Next.js plugin was not detected.
+ */
+const eslintConfig = defineConfig([
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  globalIgnores([".next/**", "out/**", "dist/**", "build/**", "next-env.d.ts"]),
 ]);
+
+export default eslintConfig;

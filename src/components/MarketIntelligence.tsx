@@ -28,7 +28,7 @@ const MarketIntelligence = () => {
 
   return (
     <motion.aside
-      className="hero-market scene-content relative z-20 hidden lg:block"
+      className="hero-market scene-content relative z-20"
       aria-label="Market intelligence snapshot"
       initial={reduce ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}

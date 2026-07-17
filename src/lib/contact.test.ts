@@ -119,7 +119,7 @@ describe("submitContactRequest", () => {
   // never re-open the mailto draft when the email inbox already accepted the lead.
   it("resolves ok (no mailto fallback) when the CRM webhook rejects but email succeeds", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
-    vi.stubEnv("VITE_CRM_WEBHOOK_URL", "https://crm.example.com/hook");
+    vi.stubEnv("NEXT_PUBLIC_CRM_WEBHOOK_URL", "https://crm.example.com/hook");
     // Re-import so the module re-reads the stubbed env into CRM_WEBHOOK_URL.
     vi.resetModules();
 
@@ -145,7 +145,7 @@ describe("submitContactRequest", () => {
 
   it("posts the CRM lead to the same-origin /api/lead proxy by default", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
-    vi.resetModules(); // no VITE_CRM_WEBHOOK_URL stub → default "/api/lead"
+    vi.resetModules(); // no NEXT_PUBLIC_CRM_WEBHOOK_URL stub → default "/api/lead"
 
     const fetchMock = vi.fn<
       (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>

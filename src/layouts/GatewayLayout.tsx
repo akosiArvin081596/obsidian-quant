@@ -1,15 +1,24 @@
-import { Link, Navigate, Outlet } from "react-router-dom";
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import AuroraRibbon from "../components/AuroraRibbon";
-import { useSession } from "../pages/investor/session-context";
+import { useSession } from "../views/investor/session-context";
 
 /**
  * Chrome for the sign-in gateway — full-bleed obsidian field, no marketing nav.
  * Already signed in? Skip the form and drop straight into the member area.
  */
-const GatewayLayout = () => {
+const GatewayLayout = ({ children }: { children: React.ReactNode }) => {
   const { signedIn } = useSession();
+  const router = useRouter();
 
-  if (signedIn) return <Navigate to="/investor/dashboard" replace />;
+  useEffect(() => {
+    if (signedIn) router.replace("/investor/dashboard");
+  }, [signedIn, router]);
+
+  if (signedIn) return null;
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden hex-bg gold-grid">
@@ -18,7 +27,7 @@ const GatewayLayout = () => {
 
       <header className="relative z-10 flex items-center justify-end px-6 py-6 lg:px-16">
         <Link
-          to="/"
+          href="/"
           className="text-[0.66rem] uppercase tracking-[0.24em] text-silver/55 transition-colors hover:text-gold"
         >
           ← Return to site
@@ -26,7 +35,7 @@ const GatewayLayout = () => {
       </header>
 
       <main className="relative z-10 flex flex-1 items-center justify-center px-6 py-10">
-        <Outlet />
+        {children}
       </main>
     </div>
   );

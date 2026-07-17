@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { cn } from "../lib/cn";
 
 type Variant = "primary" | "outline" | "ghost";
@@ -7,7 +7,7 @@ type Variant = "primary" | "outline" | "ghost";
 type ButtonProps = {
   children: ReactNode;
   variant?: Variant;
-  /** Internal route → renders a react-router Link. */
+  /** Internal route → renders a Next.js Link. */
   to?: string;
   /** External / anchor link. */
   href?: string;
@@ -28,7 +28,7 @@ const VARIANTS: Record<Variant, string> = {
 };
 
 const BASE =
-  "inline-flex items-center justify-center gap-2.5 rounded-none px-7 py-3.5 text-[0.7rem] font-semibold uppercase tracking-[0.22em] transition-all duration-300 ease-out";
+  "inline-flex items-center justify-center gap-2.5 rounded-none px-5 py-3.5 text-center text-[0.65rem] font-semibold uppercase leading-snug tracking-[0.16em] transition-all duration-300 ease-out sm:px-7 sm:text-[0.7rem] sm:tracking-[0.22em]";
 
 /** Brand button — sharp-cornered, uppercase, gold. Polymorphic (Link / a / button). */
 const Button = ({
@@ -52,7 +52,7 @@ const Button = ({
 
   if (to) {
     return (
-      <Link to={to} className={classes} onClick={onClick} aria-disabled={disabled}>
+      <Link href={to} className={classes} onClick={onClick} aria-disabled={disabled}>
         {children}
       </Link>
     );

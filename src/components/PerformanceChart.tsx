@@ -2,7 +2,7 @@ import { useId } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "../lib/cn";
 import { EASE_LUX } from "../lib/motion";
-import type { PerfPoint } from "../pages/investor/mockData";
+import type { PerfPoint } from "../views/investor/mockData";
 
 type PerformanceChartProps = {
   /** Primary (member) series — indexed values, charted as the green alpha line. */

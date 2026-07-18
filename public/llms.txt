@@ -8,11 +8,13 @@ Obsidian Quant Group develops quantitative investment strategies designed around
 
 - [Home](https://obsidianquantgroup.com/): The main overview of Obsidian Quant Group, its investment approach, philosophy, and core positioning.
 
-- [Strategy](https://obsidianquantgroup.com/strategy): Information about the firm's investment strategy, quantitative approach, and methods used to identify opportunities across financial markets.
+- [Strategy](https://obsidianquantgroup.com/strategy/): Information about the firm's investment strategy, quantitative approach, and methods used to identify opportunities across financial markets.
 
-- [Architecture](https://obsidianquantgroup.com/architecture): An overview of the architecture behind Obsidian Quant Group's investment approach and the systems supporting its quantitative strategies.
+- [Architecture](https://obsidianquantgroup.com/architecture/): An overview of the architecture behind Obsidian Quant Group's investment approach and the systems supporting its quantitative strategies.
 
-- [Firm](https://obsidianquantgroup.com/firm): Information about Obsidian Quant Group as a firm, including its approach, principles, and organizational focus.
+- [Firm](https://obsidianquantgroup.com/firm/): Information about Obsidian Quant Group as a firm, including its approach, principles, and organizational focus.
+
+- [Contact](https://obsidianquantgroup.com/contact/): How to reach Obsidian Quant Group, including the strategic allocation request channel for institutional counterparties.
 
 ## Core Topics
 
@@ -28,6 +30,11 @@ Obsidian Quant Group develops quantitative investment strategies designed around
 ## Official Website
 
 - [Obsidian Quant Group](https://obsidianquantgroup.com/)
+
+## Legal
+
+- [Regulatory Disclosure](https://obsidianquantgroup.com/legal/regulatory-disclosure/)
+- [Data Cryptography](https://obsidianquantgroup.com/legal/data-cryptography/)
 
 ## Additional Resources
 

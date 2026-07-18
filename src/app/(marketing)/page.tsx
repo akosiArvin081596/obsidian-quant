@@ -1,12 +1,7 @@
 import Home from "@/views/Home";
-import { pageMetadata } from "@/lib/seo";
-import { BRAND, HERO } from "@/content/site";
+import { seoFor } from "@/lib/seo";
 
-export const metadata = pageMetadata({
-  title: `${BRAND.name} | Profit from Market Dislocation`,
-  description: `${HERO.sub} ${BRAND.intro}`,
-  path: "/",
-});
+export const metadata = seoFor("home");
 
 export default function HomePage() {
   return <Home />;

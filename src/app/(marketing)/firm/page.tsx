@@ -1,12 +1,7 @@
 import Firm from "@/views/Firm";
-import { pageMetadata } from "@/lib/seo";
-import { FIRM } from "@/content/site";
+import { seoFor } from "@/lib/seo";
 
-export const metadata = pageMetadata({
-  title: "The Firm",
-  description: FIRM.hero.body,
-  path: "/firm",
-});
+export const metadata = seoFor("firm");
 
 export default function FirmPage() {
   return <Firm />;

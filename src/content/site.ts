@@ -273,14 +273,43 @@ export const CONTACT = {
   title: "Request Strategic Allocation",
   body: "Access to Obsidian Quant asset pools is highly restricted. Complete our secure baseline verification framework to schedule an institutional briefing with our technical committee.",
   fields: {
-    name: "Name",
-    namePlaceholder: "Full name",
+    // Split given/family name: the first name is the salutation of the client
+    // acknowledgment email, and deriving it from one string mis-fires exactly
+    // where it costs most (titles, CJK family-first ordering, particle surnames).
+    firstName: "First Name",
+    firstNamePlaceholder: "Given name",
+    lastName: "Last Name",
+    lastNamePlaceholder: "Family name",
     email: "Corporate Email Address",
     emailPlaceholder: "secure@entity.com",
-    profile: "Institutional Entity",
+    // The client's internal-notification template reads "Institutional Entity:
+    // [Entity]", i.e. the ORGANISATION NAME — never the counterparty category.
+    // The placeholder must ask for a legal name: the previous
+    // "e.g. Sovereign Wealth Fund / Family Office" wording is what made this
+    // field read as a duplicate of the dropdown and got it deleted.
+    entity: "Institutional Entity",
+    entityPlaceholder: "Registered legal name of your institution",
+    profile: "Counterparty Profile",
     profileOther: "Please explain",
-    profileOtherPlaceholder: "Describe your institutional entity…",
+    profileOtherPlaceholder: "Describe your counterparty type…",
     note: "Briefing Notes",
   },
   submit: "Submit Credentials",
+  /**
+   * On-screen confirmation shown immediately after a successful submit —
+   * client spec §4.1, VERBATIM. Do not paraphrase: this is contractual copy.
+   *
+   * Two details are load-bearing:
+   *  - "1–2" uses an EN DASH (U+2013), not a hyphen.
+   *  - `eyebrow` is stored ALREADY UPPERCASE. Tailwind's `uppercase` is purely
+   *    presentational and browsers copy the *source* text, so a client
+   *    QA-ing the page by copy-paste would otherwise diff a mismatch.
+   * Both are locked by src/content/site.test.ts.
+   */
+  confirmation: {
+    eyebrow: "REQUEST RECEIVED",
+    heading: "Your request has been logged.",
+    body: "Thank you for your interest in Obsidian. A member of our team will review your submission and follow up within 1–2 business days to schedule a brief discovery call.",
+    spam: "Please check your inbox, and your spam folder just in case, for our response.",
+  },
 } as const;

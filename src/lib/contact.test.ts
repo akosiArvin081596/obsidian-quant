@@ -9,21 +9,50 @@ import {
 
 const filledForm = () => {
   const form = new FormData();
-  form.set("name", "Jordan Lee");
+  form.set("firstName", "Jordan");
+  form.set("lastName", "Lee");
   form.set("email", "allocations@example.com");
+  form.set("entity", "Meridian Family Office");
   form.set("profile", "Family Office");
   form.set("note", "Please send terms.\nSingapore mandate.");
   return form;
 };
 
 describe("parseContactForm", () => {
-  it("captures name and profile fields", () => {
+  it("captures the name, entity and profile fields", () => {
     expect(parseContactForm(filledForm())).toMatchObject({
+      firstName: "Jordan",
+      lastName: "Lee",
       name: "Jordan Lee",
       email: "allocations@example.com",
+      entity: "Meridian Family Office",
       profile: "Family Office",
       source: "obsidian-quant-web",
     });
+  });
+
+  it("composes the display name from the two captured parts", () => {
+    const form = filledForm();
+    form.set("firstName", "  Ava  ");
+    form.set("lastName", "  Chen ");
+    expect(parseContactForm(form).name).toBe("Ava Chen");
+  });
+
+  // Regression guard for the heuristic this form exists to avoid. A surname is
+  // captured whole and never re-split, so multi-token family names survive; if
+  // anyone reintroduces a "derive from full name" path, this is what breaks.
+  it("keeps a particle surname intact", () => {
+    const form = filledForm();
+    form.set("firstName", "Sanne");
+    form.set("lastName", "van der Berg");
+
+    const submission = parseContactForm(form);
+    expect(submission.lastName).toBe("van der Berg");
+    expect(submission.name).toBe("Sanne van der Berg");
+
+    const payload = toCrmPayload(submission);
+    expect(payload.contactName).toBe("Sanne van der Berg");
+    expect(payload.contactFirstName).toBe("Sanne");
   });
 });
 
@@ -41,13 +70,21 @@ describe("buildContactMailto", () => {
     expect(url.searchParams.get("body")).toContain(
       "Reply email: allocations@example.com",
     );
+    // The draft is the fallback carrier of the whole lead, so it must name the
+    // entity too — otherwise a failed intake loses the field the internal
+    // notification template is built around.
+    expect(url.searchParams.get("body")).toContain(
+      "Institutional entity: Meridian Family Office",
+    );
     expect(url.searchParams.get("body")).toContain("Singapore mandate.");
   });
 
   it("uses an explicit placeholder when briefing notes are empty", () => {
     const form = new FormData();
-    form.set("name", "Ava Chen");
+    form.set("firstName", "Ava");
+    form.set("lastName", "Chen");
     form.set("email", "team@example.com");
+    form.set("entity", "Chen Capital Partners");
     form.set("profile", "Institutional Allocator");
 
     const result = buildContactMailto("access@obsidianquantgroup.com", form);
@@ -80,8 +117,10 @@ describe("profile helpers", () => {
     const payload = toCrmPayload(parseContactForm(filledForm()));
     expect(payload).toEqual({
       source: "obsidian-quant-web",
-      companyName: "Family Office",
+      companyName: "Meridian Family Office",
+      entityName: "Meridian Family Office",
       contactName: "Jordan Lee",
+      contactFirstName: "Jordan",
       contactEmail: "allocations@example.com",
       notes: expect.stringContaining("Counterparty profile: Family Office"),
       submittedAt: expect.any(String),
@@ -90,13 +129,56 @@ describe("profile helpers", () => {
     expect(payload.notes).toContain("Please send terms.");
   });
 
+  // The bug this whole field restoration fixes: the CRM's company column used to
+  // receive the dropdown CATEGORY, so the internal notification read
+  // "Institutional Entity: Family Office" for every family office on earth.
+  it("never puts the counterparty category in companyName when an entity is given", () => {
+    const form = filledForm();
+    form.set("entity", "Meridian Family Office");
+    form.set("profile", "Family Office");
+
+    const payload = toCrmPayload(parseContactForm(form));
+    expect(payload.companyName).toBe("Meridian Family Office");
+    expect(payload.entityName).toBe("Meridian Family Office");
+    expect(payload.companyName).not.toBe("Family Office");
+    // The category is still recorded — just as free text, where it belongs.
+    expect(payload.notes).toContain("Counterparty profile: Family Office");
+  });
+
+  it("falls back to the profile label so the CRM-required companyName is never blank", () => {
+    const form = new FormData();
+    form.set("profile", "Institutional Allocator");
+    const payload = toCrmPayload(parseContactForm(form));
+    // Unreachable through the form (entity is required + min-length); this only
+    // guarantees the required field can never go out empty and 400 the webhook.
+    expect(payload.companyName).toBe("Institutional Allocator");
+    expect(payload.entityName).toBe("Institutional Allocator");
+  });
+
   it("omits optional CRM fields when the form leaves them blank", () => {
     const form = new FormData();
     form.set("profile", "Institutional Allocator");
     const payload = toCrmPayload(parseContactForm(form));
-    expect(payload.companyName).toBe("Institutional Allocator");
     expect(payload.contactName).toBeUndefined();
+    expect(payload.contactFirstName).toBeUndefined();
     expect(payload.contactEmail).toBeUndefined();
+  });
+
+  // The CRM call is fire-and-forget, so a 400 would be invisible to the visitor
+  // AND to us. Clamp to its zod bounds instead of gambling on input length.
+  it("clamps every bounded field to the CRM's limits", () => {
+    const form = filledForm();
+    form.set("firstName", "F".repeat(400));
+    form.set("lastName", "L".repeat(400));
+    form.set("entity", "E".repeat(400));
+    form.set("note", "N".repeat(9000));
+
+    const payload = toCrmPayload(parseContactForm(form));
+    expect(payload.companyName).toHaveLength(200);
+    expect(payload.entityName).toHaveLength(200);
+    expect(payload.contactName).toHaveLength(120);
+    expect(payload.contactFirstName).toHaveLength(120);
+    expect(payload.notes).toHaveLength(5000);
   });
 
   it("formats Others for CRM display", () => {
@@ -163,5 +245,73 @@ describe("submitContactRequest", () => {
       | Record<string, string>
       | undefined;
     expect(headers?.Authorization).toBeUndefined();
+  });
+
+  it("sends the entity as companyName/entityName on the wire", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.resetModules();
+
+    const fetchMock = vi.fn<
+      (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+    >(() => Promise.resolve(new Response(null, { status: 201 })));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { submitContactRequest } = await import("./contact");
+    await submitContactRequest(filledForm());
+
+    const crmCall = fetchMock.mock.calls.find((c) => String(c[0]) === "/api/lead");
+    const body = JSON.parse(String((crmCall?.[1] as RequestInit).body));
+    expect(body).toMatchObject({
+      source: "obsidian-quant-web",
+      companyName: "Meridian Family Office",
+      entityName: "Meridian Family Office",
+      contactName: "Jordan Lee",
+      contactFirstName: "Jordan",
+      contactEmail: "allocations@example.com",
+    });
+    expect(body.notes).toContain("Counterparty profile: Family Office");
+    expect(body.submittedAt).toMatch(/Z$/);
+  });
+
+  // Validation runs before EITHER channel fires. A rejected submission that had
+  // already posted the lead would leave the CRM holding a record the visitor was
+  // just told did not go through.
+  it("issues zero fetches when the institutional entity is too short", async () => {
+    vi.resetModules();
+    const fetchMock = vi.fn<
+      (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+    >(() => Promise.resolve(new Response(null, { status: 200 })));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { submitContactRequest } = await import("./contact");
+    const form = filledForm();
+    form.set("entity", "M");
+
+    const result = await submitContactRequest(form);
+
+    expect(result.ok).toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("issues zero fetches when a required field is missing", async () => {
+    vi.resetModules();
+    const fetchMock = vi.fn<
+      (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+    >(() => Promise.resolve(new Response(null, { status: 200 })));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { submitContactRequest } = await import("./contact");
+
+    for (const missing of ["firstName", "lastName", "email", "entity"]) {
+      const form = filledForm();
+      form.set(missing, "");
+      const result = await submitContactRequest(form);
+      expect(result, `missing ${missing} must be rejected`).toEqual({
+        ok: false,
+        error: "Please complete all required fields.",
+      });
+    }
+
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

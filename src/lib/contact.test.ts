@@ -273,6 +273,45 @@ describe("submitContactRequest", () => {
     expect(body.submittedAt).toMatch(/Z$/);
   });
 
+  // The mailto arm is the only thing keeping a lead alive when the inbox is
+  // unreachable, and it is what the panel's "Action Required" state and its
+  // screen-reader announcement are driven from — so it needs its own guard.
+  it("falls back to a mailto draft carrying the lead when the inbox rejects", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.resetModules();
+
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("formsubmit.co")) {
+        return Promise.resolve(new Response("unavailable", { status: 503 }));
+      }
+      return Promise.resolve(new Response(null, { status: 201 }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { submitContactRequest } = await import("./contact");
+    const result = await submitContactRequest(filledForm());
+
+    if (!result.ok || result.mailtoFallback !== true) {
+      throw new Error(`expected a mailto fallback, got ${JSON.stringify(result)}`);
+    }
+
+    const url = new URL(result.mailto);
+    expect(url.protocol).toBe("mailto:");
+    expect(url.pathname).toBe("access@obsidianquantgroup.com");
+    // The draft has to carry the whole lead — it is the last copy of it.
+    const body = url.searchParams.get("body") ?? "";
+    expect(body).toContain("Name: Jordan Lee");
+    expect(body).toContain("Reply email: allocations@example.com");
+    expect(body).toContain("Institutional entity: Meridian Family Office");
+    // Exactly one delivery attempt: a retry here would double-send the lead
+    // whenever the first attempt actually landed but answered non-2xx.
+    const emailCalls = fetchMock.mock.calls.filter((call) =>
+      String(call[0]).includes("formsubmit.co"),
+    );
+    expect(emailCalls).toHaveLength(1);
+  });
+
   // Validation runs before EITHER channel fires. A rejected submission that had
   // already posted the lead would leave the CRM holding a record the visitor was
   // just told did not go through.

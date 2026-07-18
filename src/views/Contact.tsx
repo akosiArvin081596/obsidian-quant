@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import PageHero from "../components/PageHero";
 import Section from "../components/Section";
@@ -17,22 +17,48 @@ import {
   isOthersProfile,
   submitContactRequest,
 } from "../lib/contact";
+import {
+  ANNOUNCE_DELAY_MS,
+  contactAnnouncement,
+  FALLBACK_COPY,
+  type ContactStatus,
+} from "./contact-announcement";
 
 const inputClass =
   "w-full rounded-none border border-gold/20 bg-midnight/70 px-4 py-3.5 text-base text-ghost placeholder:text-silver/30 transition-colors focus:border-gold focus:outline-none";
 const labelClass =
   "mb-2 block text-[0.62rem] font-medium uppercase tracking-[0.24em] text-silver/55";
 
-type Status = "idle" | "submitting" | "success" | "fallback" | "error";
-
 const Contact = () => {
   const [profile, setProfile] = useState<string>(CONTACT_PROFILES[0]);
-  const [status, setStatus] = useState<Status>("idle");
+  const [status, setStatus] = useState<ContactStatus>("idle");
   const [message, setMessage] = useState("");
   const [mailtoHref, setMailtoHref] = useState("");
+  const [announcement, setAnnouncement] = useState("");
 
   const showOther = isOthersProfile(profile);
   const showConfirmation = status === "success" || status === "fallback";
+
+  /*
+   * Fill the persistent live region below, one task AFTER the state change.
+   *
+   * The region has to already exist in the accessibility tree when its text
+   * changes; a region that is inserted together with its content is not
+   * reliably announced. The confirmation panel used to carry its own
+   * aria-live, and it mounts at the same instant as the copy inside it — so
+   * the §4.1 confirmation could go unspoken entirely.
+   */
+  useEffect(() => {
+    const spoken = contactAnnouncement(status, message);
+    // Returning to `idle` writes "" — clearing matters, because writing the
+    // same text twice is not a DOM mutation and would be silent. Without it,
+    // submitting a second time and getting the same outcome says nothing.
+    const timer = window.setTimeout(
+      () => setAnnouncement(spoken),
+      ANNOUNCE_DELAY_MS,
+    );
+    return () => window.clearTimeout(timer);
+  }, [status, message]);
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -93,11 +119,18 @@ const Contact = () => {
           <Reveal className="lg:col-span-7">
             <Spotlight size={360} strength={0.1}>
               <div className="relative z-10 border border-gold/15 bg-obsidian/80 p-8 backdrop-blur-sm lg:bg-obsidian/50 lg:p-10 gold-grid">
+                {/* The one live region for this form. It is mounted here, OUTSIDE
+                    the form/panel toggle below, so it is present in the
+                    accessibility tree from first paint and every later state
+                    change reaches a screen reader as a text change rather than
+                    as a freshly inserted region. Nothing inside the toggle may
+                    carry aria-live: a second region would double-announce. */}
+                <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+                  {announcement}
+                </p>
+
                 {showConfirmation ? (
-                  <div
-                    aria-live="polite"
-                    className="space-y-6 border border-gold/20 bg-midnight/60 p-6 text-sm text-silver/78"
-                  >
+                  <div className="space-y-6 border border-gold/20 bg-midnight/60 p-6 text-sm text-silver/78">
                     {status === "success" ? (
                       /* Client spec §4.1, verbatim and in order. Nothing may be
                          appended here: the spec ends at the spam-folder line. */
@@ -121,10 +154,10 @@ const Contact = () => {
                       <>
                         <div>
                           <p className="text-[0.62rem] uppercase tracking-[0.24em] text-gold/80">
-                            Action Required
+                            {FALLBACK_COPY.eyebrow}
                           </p>
                           <h3 className="mt-3 font-serif text-2xl text-ghost">
-                            Finish sending the backup email.
+                            {FALLBACK_COPY.heading}
                           </h3>
                           <p className="mt-3 leading-relaxed">{message}</p>
                         </div>
@@ -282,8 +315,9 @@ const Contact = () => {
                     <p className="text-center text-[0.62rem] uppercase tracking-[0.2em] text-silver/35">
                       Secure intake · {CONTACT_INBOX}
                     </p>
+                    {/* Visible error text only — the hoisted region above does
+                        the announcing, so this must not be a live region too. */}
                     <p
-                      aria-live="polite"
                       className={cn(
                         "min-h-4 text-center text-xs",
                         status === "error" && "text-loss",

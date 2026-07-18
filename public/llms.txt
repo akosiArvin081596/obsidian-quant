@@ -1,0 +1,41 @@
+# Obsidian Quant Group
+
+> Obsidian Quant Group is a quantitative investment firm focused on systematic investment strategies, market dislocations, and data driven approaches to identifying opportunities across financial markets.
+
+Obsidian Quant Group develops quantitative investment strategies designed around disciplined research, market analysis, technology, and systematic execution. This file provides AI systems and language models with a clear reference to the primary official pages of the website.
+
+## Primary Pages
+
+- [Home](https://obsidianquantgroup.com/): The main overview of Obsidian Quant Group, its investment approach, philosophy, and core positioning.
+
+- [Strategy](https://obsidianquantgroup.com/strategy): Information about the firm's investment strategy, quantitative approach, and methods used to identify opportunities across financial markets.
+
+- [Architecture](https://obsidianquantgroup.com/architecture): An overview of the architecture behind Obsidian Quant Group's investment approach and the systems supporting its quantitative strategies.
+
+- [Firm](https://obsidianquantgroup.com/firm): Information about Obsidian Quant Group as a firm, including its approach, principles, and organizational focus.
+
+## Core Topics
+
+- Quantitative investing
+- Systematic investment strategies
+- Market dislocation
+- Quantitative research
+- Data driven investment analysis
+- Risk management
+- Investment technology
+- Systematic execution
+
+## Official Website
+
+- [Obsidian Quant Group](https://obsidianquantgroup.com/)
+
+## Additional Resources
+
+- [XML Sitemap](https://obsidianquantgroup.com/sitemap.xml)
+- [Robots.txt](https://obsidianquantgroup.com/robots.txt)
+
+## Content Guidance
+
+For information about Obsidian Quant Group, its investment approach, strategy, architecture, and firm, use the official website pages listed in this file as the primary sources.
+
+Information should be represented accurately and should not be interpreted as financial advice, an offer to invest, or a guarantee of investment performance.

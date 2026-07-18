@@ -12,8 +12,9 @@ import { cn } from "../lib/cn";
 import {
   CONTACT_INBOX,
   CONTACT_PROFILES,
+  ENTITY_MAX_LENGTH,
+  ENTITY_MIN_LENGTH,
   isOthersProfile,
-  parseContactForm,
   submitContactRequest,
 } from "../lib/contact";
 
@@ -23,18 +24,12 @@ const labelClass =
   "mb-2 block text-[0.62rem] font-medium uppercase tracking-[0.24em] text-silver/55";
 
 type Status = "idle" | "submitting" | "success" | "fallback" | "error";
-type SubmittedSnapshot = {
-  name: string;
-  email: string;
-  profile: string;
-};
 
 const Contact = () => {
   const [profile, setProfile] = useState<string>(CONTACT_PROFILES[0]);
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
   const [mailtoHref, setMailtoHref] = useState("");
-  const [submitted, setSubmitted] = useState<SubmittedSnapshot | null>(null);
 
   const showOther = isOthersProfile(profile);
   const showConfirmation = status === "success" || status === "fallback";
@@ -44,12 +39,12 @@ const Contact = () => {
     const formEl = e.currentTarget;
     if (!formEl.reportValidity()) return;
 
-    const submission = parseContactForm(new FormData(formEl));
     setStatus("submitting");
     setMessage("");
     setMailtoHref("");
-    setSubmitted(null);
 
+    // One parse per submit, inside submitContactRequest — parsing here as well
+    // would stamp two different `submittedAt` instants for the same lead.
     const result = await submitContactRequest(new FormData(formEl));
 
     if (!result.ok) {
@@ -61,26 +56,14 @@ const Contact = () => {
     if (result.mailtoFallback) {
       setStatus("fallback");
       setMailtoHref(result.mailto);
-      setSubmitted({
-        name: submission.name,
-        email: submission.email,
-        profile: submission.profileOther || submission.profile,
-      });
       setMessage(
         "We prepared a backup email draft because the secure intake service did not confirm delivery.",
       );
       return;
     }
 
+    // Success copy is fixed by the client's spec and lives in CONTACT.confirmation.
     setStatus("success");
-    setSubmitted({
-      name: submission.name,
-      email: submission.email,
-      profile: submission.profileOther || submission.profile,
-    });
-    setMessage(
-      "Your request has been received. Our team will review it and respond with next steps through the secure channel.",
-    );
     formEl.reset();
     setProfile(CONTACT_PROFILES[0]);
   };
@@ -89,7 +72,6 @@ const Contact = () => {
     setStatus("idle");
     setMessage("");
     setMailtoHref("");
-    setSubmitted(null);
     setProfile(CONTACT_PROFILES[0]);
   };
 
@@ -116,50 +98,38 @@ const Contact = () => {
                     aria-live="polite"
                     className="space-y-6 border border-gold/20 bg-midnight/60 p-6 text-sm text-silver/78"
                   >
-                    <div>
-                      <p className="text-[0.62rem] uppercase tracking-[0.24em] text-gold/80">
-                        {status === "success" ? "Request Received" : "Action Required"}
-                      </p>
-                      <h3 className="mt-3 font-serif text-2xl text-ghost">
-                        {status === "success"
-                          ? "Confirmation sent to this page."
-                          : "Finish sending the backup email."}
-                      </h3>
-                      <p className="mt-3 leading-relaxed">{message}</p>
-                    </div>
-
-                    {submitted && (
-                      <div className="grid gap-4 border border-gold/10 bg-obsidian/45 p-5 sm:grid-cols-2">
-                        <div>
-                          <div className="text-[0.62rem] uppercase tracking-[0.2em] text-silver/40">
-                            Contact
-                          </div>
-                          <div className="mt-1 text-ghost">{submitted.name}</div>
-                        </div>
-                        <div>
-                          <div className="text-[0.62rem] uppercase tracking-[0.2em] text-silver/40">
-                            Reply Email
-                          </div>
-                          <div className="mt-1 text-ghost">{submitted.email}</div>
-                        </div>
-                        <div>
-                          <div className="text-[0.62rem] uppercase tracking-[0.2em] text-silver/40">
-                            Institutional Entity
-                          </div>
-                          <div className="mt-1 text-ghost">{submitted.profile}</div>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="space-y-3 text-silver/72">
-                      {status === "success" ? (
-                        <p>
-                          Next step: our team will review your submission and reply from{" "}
-                          <span className="text-ghost">{CONTACT_INBOX}</span> with any
-                          follow-up instructions.
+                    {status === "success" ? (
+                      /* Client spec §4.1, verbatim and in order. Nothing may be
+                         appended here: the spec ends at the spam-folder line. */
+                      <div>
+                        <p className="text-[0.62rem] uppercase tracking-[0.24em] text-gold/80">
+                          {CONTACT.confirmation.eyebrow}
                         </p>
-                      ) : (
-                        <>
+                        <h3 className="mt-3 font-serif text-2xl text-ghost">
+                          {CONTACT.confirmation.heading}
+                        </h3>
+                        <p className="mt-4 leading-relaxed">
+                          {CONTACT.confirmation.body}
+                        </p>
+                        <p className="mt-4 leading-relaxed">
+                          {CONTACT.confirmation.spam}
+                        </p>
+                      </div>
+                    ) : (
+                      /* The lead was NOT delivered in this branch, so §4.1's
+                         "logged" would be untrue — this arm keeps its own copy. */
+                      <>
+                        <div>
+                          <p className="text-[0.62rem] uppercase tracking-[0.24em] text-gold/80">
+                            Action Required
+                          </p>
+                          <h3 className="mt-3 font-serif text-2xl text-ghost">
+                            Finish sending the backup email.
+                          </h3>
+                          <p className="mt-3 leading-relaxed">{message}</p>
+                        </div>
+
+                        <div className="space-y-3 text-silver/72">
                           <p>
                             We could not verify the secure handoff automatically. Open the
                             prepared message below, then send it from your email client so
@@ -168,9 +138,9 @@ const Contact = () => {
                           <Button href={mailtoHref} variant="primary" full>
                             Open Backup Email Draft
                           </Button>
-                        </>
-                      )}
-                    </div>
+                        </div>
+                      </>
+                    )}
 
                     <Button type="button" variant="outline" full onClick={resetForm}>
                       Submit Another Request
@@ -188,19 +158,39 @@ const Contact = () => {
                       aria-hidden="true"
                       hidden
                     />
-                    <div>
-                      <label className={labelClass} htmlFor="name">
-                        {CONTACT.fields.name}
-                      </label>
-                      <input
-                        id="name"
-                        name="name"
-                        type="text"
-                        required
-                        autoComplete="name"
-                        placeholder={CONTACT.fields.namePlaceholder}
-                        className={inputClass}
-                      />
+                    {/* Given/family name captured separately: the first name is the
+                        salutation of the acknowledgment email, and autofill still
+                        fills both in a single interaction. */}
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div>
+                        <label className={labelClass} htmlFor="firstName">
+                          {CONTACT.fields.firstName}
+                        </label>
+                        <input
+                          id="firstName"
+                          name="firstName"
+                          type="text"
+                          required
+                          autoComplete="given-name"
+                          placeholder={CONTACT.fields.firstNamePlaceholder}
+                          className={inputClass}
+                        />
+                      </div>
+
+                      <div>
+                        <label className={labelClass} htmlFor="lastName">
+                          {CONTACT.fields.lastName}
+                        </label>
+                        <input
+                          id="lastName"
+                          name="lastName"
+                          type="text"
+                          required
+                          autoComplete="family-name"
+                          placeholder={CONTACT.fields.lastNamePlaceholder}
+                          className={inputClass}
+                        />
+                      </div>
                     </div>
 
                     <div>
@@ -214,6 +204,23 @@ const Contact = () => {
                         required
                         autoComplete="email"
                         placeholder={CONTACT.fields.emailPlaceholder}
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass} htmlFor="entity">
+                        {CONTACT.fields.entity}
+                      </label>
+                      <input
+                        id="entity"
+                        name="entity"
+                        type="text"
+                        required
+                        minLength={ENTITY_MIN_LENGTH}
+                        maxLength={ENTITY_MAX_LENGTH}
+                        autoComplete="organization"
+                        placeholder={CONTACT.fields.entityPlaceholder}
                         className={inputClass}
                       />
                     </div>

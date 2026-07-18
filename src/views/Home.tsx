@@ -109,7 +109,7 @@ const Home = () => {
 
   return (
     <>
-      <section ref={heroRef} className="home-reference-hero reference-hero relative flex min-h-[100svh] flex-col overflow-hidden border-b border-gold/20 px-5 pt-28 sm:px-6 sm:pt-32 lg:h-screen lg:min-h-0 lg:px-16 lg:pt-24">
+      <section ref={heroRef} className="home-reference-hero reference-hero relative flex min-h-[100svh] flex-col overflow-hidden border-b border-gold/20 px-5 pt-28 sm:px-6 sm:pt-32 lg:h-screen lg:min-h-0 lg:px-16 lg:pt-70">
         {/* Clip parallax only; stays behind the traveling gem (scene-behind). */}
         <div className="scene-behind pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
           <motion.div className="home-hero-bg absolute inset-0" style={reduce ? undefined : { y: heroY, scale: heroScale }} />

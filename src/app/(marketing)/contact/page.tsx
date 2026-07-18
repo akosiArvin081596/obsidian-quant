@@ -1,12 +1,7 @@
 import Contact from "@/views/Contact";
-import { pageMetadata } from "@/lib/seo";
-import { CONTACT } from "@/content/site";
+import { seoFor } from "@/lib/seo";
 
-export const metadata = pageMetadata({
-  title: "Request Access",
-  description: CONTACT.body,
-  path: "/contact",
-});
+export const metadata = seoFor("contact");
 
 export default function ContactPage() {
   return <Contact />;

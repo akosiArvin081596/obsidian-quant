@@ -1,12 +1,7 @@
 import Strategy from "@/views/Strategy";
-import { pageMetadata } from "@/lib/seo";
-import { STRATEGY } from "@/content/site";
+import { seoFor } from "@/lib/seo";
 
-export const metadata = pageMetadata({
-  title: "Strategy",
-  description: STRATEGY.hero.body,
-  path: "/strategy",
-});
+export const metadata = seoFor("strategy");
 
 export default function StrategyPage() {
   return <Strategy />;

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Legal from "@/views/Legal";
 import { LEGAL_PAGES } from "@/content/site";
-import { pageMetadata } from "@/lib/seo";
+import { seoData, type SeoKey } from "@/content/seoData";
+import { seoFor } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -10,15 +11,12 @@ export function generateStaticParams() {
   return Object.keys(LEGAL_PAGES).map((slug) => ({ slug }));
 }
 
+const isSeoKey = (slug: string): slug is SeoKey => slug in seoData;
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const page = LEGAL_PAGES[slug as keyof typeof LEGAL_PAGES];
-  if (!page) return {};
-  return pageMetadata({
-    title: page.title,
-    description: page.body,
-    path: `/legal/${slug}`,
-  });
+  if (!isSeoKey(slug)) return {};
+  return seoFor(slug);
 }
 
 export default async function LegalPage({ params }: Props) {

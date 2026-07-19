@@ -3,6 +3,7 @@ import { CONTACT } from "../content/site";
 import {
   contactAnnouncement,
   FALLBACK_COPY,
+  PANEL_FOCUS_LABEL,
   SUBMITTING_ANNOUNCEMENT,
 } from "./contact-announcement";
 
@@ -57,6 +58,21 @@ describe("contactAnnouncement", () => {
     expect(
       contactAnnouncement("error", "Please complete all required fields."),
     ).toBe("Please complete all required fields.");
+  });
+
+  /**
+   * The panel takes focus when it replaces the form, so this label is spoken
+   * too — just ahead of whatever the live region then says. It has to stay
+   * neutral on BOTH counts: it must not claim delivery (the mailto arm delivered
+   * nothing), and it must not restate the §4.1 copy (that would be the
+   * double-speak the single hoisted region exists to avoid).
+   */
+  it("keeps the focused panel's name neutral and free of the confirmation copy", () => {
+    const { heading, body, spam } = CONTACT.confirmation;
+    for (const line of [heading, body, spam]) {
+      expect(PANEL_FOCUS_LABEL).not.toContain(line);
+    }
+    expect(PANEL_FOCUS_LABEL).not.toMatch(/logged|received|sent|delivered/i);
   });
 
   it("announces progress while the request is in flight", () => {

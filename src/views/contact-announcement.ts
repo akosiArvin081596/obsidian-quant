@@ -18,6 +18,15 @@ export const FALLBACK_COPY = {
   heading: "Finish sending the backup email.",
 } as const;
 
+/**
+ * Accessible name of the confirmation panel, which takes focus when it replaces
+ * the form. A screen reader speaks this on the focus move, so it is deliberately
+ * NEUTRAL: it orients the user without asserting an outcome. It must stay free of
+ * delivery wording — on the mailto arm nothing was delivered — and free of the
+ * §4.1 copy, which the live region speaks a moment later and must not repeat.
+ */
+export const PANEL_FOCUS_LABEL = "Request status";
+
 /** Spoken while the request is in flight — the button's "Submitting…" is visual only. */
 export const SUBMITTING_ANNOUNCEMENT = "Submitting your request…";
 

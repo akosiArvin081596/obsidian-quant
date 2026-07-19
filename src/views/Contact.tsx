@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import PageHero from "../components/PageHero";
 import Section from "../components/Section";
@@ -21,6 +21,7 @@ import {
   ANNOUNCE_DELAY_MS,
   contactAnnouncement,
   FALLBACK_COPY,
+  PANEL_FOCUS_LABEL,
   type ContactStatus,
 } from "./contact-announcement";
 
@@ -35,6 +36,12 @@ const Contact = () => {
   const [message, setMessage] = useState("");
   const [mailtoHref, setMailtoHref] = useState("");
   const [announcement, setAnnouncement] = useState("");
+
+  const panelRef = useRef<HTMLDivElement>(null);
+  const firstFieldRef = useRef<HTMLInputElement>(null);
+  /** Set once a confirmation has actually been shown, so the reset path can hand
+   *  focus back to the form WITHOUT stealing it from the page on first paint. */
+  const cameFromConfirmation = useRef(false);
 
   const showOther = isOthersProfile(profile);
   const showConfirmation = status === "success" || status === "fallback";
@@ -59,6 +66,35 @@ const Contact = () => {
     );
     return () => window.clearTimeout(timer);
   }, [status, message]);
+
+  /*
+   * Keep keyboard focus inside the widget across the form ⇄ panel swap.
+   *
+   * The swap unmounts whichever control the user was on (the submit button, or
+   * "Submit Another Request" on the way back), which drops focus to <body> —
+   * the next Tab then restarts from the top of the document. So focus follows
+   * the swap: onto the panel, and back to the first field on reset.
+   *
+   * Why this does NOT double-speak against the live region above:
+   *  - the panel is not itself a live region — there is exactly one, hoisted
+   *    above this toggle — so taking focus re-announces nothing.
+   *  - `aria-label` makes the panel's accessible NAME the fixed, neutral
+   *    PANEL_FOCUS_LABEL rather than its own text, so the focus move cannot
+   *    repeat, or contradict, what the region says next. That is load-bearing
+   *    on the mailto arm, where the lead was NOT delivered.
+   *  - focus lands one frame after the swap and ~150ms before the region is
+   *    written (ANNOUNCE_DELAY_MS), so it cannot interrupt speech already in
+   *    progress: orientation first, outcome second.
+   */
+  useEffect(() => {
+    if (showConfirmation) {
+      cameFromConfirmation.current = true;
+      panelRef.current?.focus();
+    } else if (cameFromConfirmation.current) {
+      cameFromConfirmation.current = false;
+      firstFieldRef.current?.focus();
+    }
+  }, [showConfirmation]);
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -130,7 +166,16 @@ const Contact = () => {
                 </p>
 
                 {showConfirmation ? (
-                  <div className="space-y-6 border border-gold/20 bg-midnight/60 p-6 text-sm text-silver/78">
+                  /* Focus target for the swap above. `group` (not `region`, and
+                     never a `status`/`alert` role) gives the name below somewhere
+                     to live without adding a landmark or a second live region. */
+                  <div
+                    ref={panelRef}
+                    tabIndex={-1}
+                    role="group"
+                    aria-label={PANEL_FOCUS_LABEL}
+                    className="space-y-6 border border-gold/20 bg-midnight/60 p-6 text-sm text-silver/78"
+                  >
                     {status === "success" ? (
                       /* Client spec §4.1, verbatim and in order. Nothing may be
                          appended here: the spec ends at the spam-folder line. */
@@ -200,6 +245,7 @@ const Contact = () => {
                           {CONTACT.fields.firstName}
                         </label>
                         <input
+                          ref={firstFieldRef}
                           id="firstName"
                           name="firstName"
                           type="text"

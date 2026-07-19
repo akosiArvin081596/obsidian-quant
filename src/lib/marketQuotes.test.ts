@@ -141,4 +141,16 @@ describe("market quote cache round-trip", () => {
     writeCache(tickers);
     expect(readCache()).toEqual(tickers);
   });
+
+  // An empty array is TRUTHY, and every caller gates on `if (cached)`. A cache
+  // entry holding zero tickers would therefore be served as though it were a
+  // live stream — during a 429 cooldown the panel would render nothing at all
+  // while reporting itself current, instead of falling through to the error
+  // state. `null` is the only value that reaches the callers as "no cache".
+  it("treats an empty cached array as no cache at all", () => {
+    vi.stubGlobal("localStorage", memoryStorage());
+
+    writeCache([]);
+    expect(readCache()).toBeNull();
+  });
 });

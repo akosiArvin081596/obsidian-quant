@@ -5,6 +5,7 @@ import {
   parseContactForm,
   profileLabel,
   toCrmPayload,
+  toEmailPayload,
 } from "./contact";
 
 const filledForm = () => {
@@ -189,6 +190,31 @@ describe("profile helpers", () => {
   });
 });
 
+describe("toEmailPayload", () => {
+  // The spam defence, across both hops it travels: captured WITHOUT trimming,
+  // then handed to FormSubmit as `_honey`. FormSubmit silently drops any
+  // submission whose `_honey` is non-empty — so trimming a whitespace-only bot
+  // fill back to "" would deliver the exact spam the field exists to stop.
+  it("keeps the honeypot raw and passes it through to FormSubmit", () => {
+    const form = filledForm();
+    form.set("_honey", "   ");
+
+    const submission = parseContactForm(form);
+    expect(submission.honeypot).toBe("   ");
+    expect(toEmailPayload(submission)._honey).toBe("   ");
+  });
+
+  it("subjects the notification with the counterparty profile", () => {
+    const payload = toEmailPayload(parseContactForm(filledForm()));
+    expect(payload._subject).toBe("Institutional inquiry — Family Office");
+    // The separator is U+2014 EM DASH — a different character from the U+2013
+    // en dash the §4.1 copy is contractually held to. Asserted by codepoint so
+    // this line stays pure ASCII: a repo-wide "smart dash" pass cannot rewrite
+    // the source and the expectation above in lockstep and still stay green.
+    expect([...payload._subject].map((c) => c.codePointAt(0))).toContain(0x2014);
+  });
+});
+
 describe("submitContactRequest", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
@@ -329,6 +355,29 @@ describe("submitContactRequest", () => {
     const result = await submitContactRequest(form);
 
     expect(result.ok).toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  // "Others" is the one profile the dropdown cannot describe on its own, so an
+  // unexplained "Others" reaches the desk as a lead with no counterparty
+  // category at all. Rejected by the same pre-flight as the other guards —
+  // before either channel fires.
+  it("rejects an unexplained Others profile without issuing a fetch", async () => {
+    vi.resetModules();
+    const fetchMock = vi.fn<
+      (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+    >(() => Promise.resolve(new Response(null, { status: 200 })));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { submitContactRequest } = await import("./contact");
+    const form = filledForm();
+    form.set("profile", "Others");
+    form.set("profileOther", "");
+
+    expect(await submitContactRequest(form)).toEqual({
+      ok: false,
+      error: "Please explain your counterparty profile.",
+    });
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

@@ -73,6 +73,9 @@ const Footer = () => (
             © 2026 {BRAND.name}. All rights reserved.
           </p>
           <p className="text-[.65rem] leading-relaxed text-silver/45">
+            {BRAND.relationship}
+          </p>
+          <p className="text-[.65rem] leading-relaxed text-silver/45">
             Developed and designed by{" "}
             <a
               href="https://alchemydev.io"

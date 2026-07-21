@@ -14,6 +14,13 @@ export const BRAND = {
   email: "access@obsidianquantgroup.com",
   presence: ["Zurich", "Singapore", "New York"],
   established: "MMXXVI",
+  // A3 — entity relationship. Obsidian Quant Group is the brand / investment arm; the fund
+  // vehicle named on the PUBLIC offering documents is Strike Point Capital Fund I LLC.
+  // FINAL WORDING PENDING DESHORN'S APPROVAL. `relationship` embeds `legalEntity` verbatim so
+  // the sentence and the name can never drift; both are locked by site.test.ts.
+  legalEntity: "Strike Point Capital Fund I LLC",
+  relationship:
+    "Obsidian Quant Group operates as the investment arm of Strike Point Capital Fund I LLC.",
 } as const;
 
 /* ---------- Hero (Home) ---------- */

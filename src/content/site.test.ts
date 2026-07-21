@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CONTACT } from "./site";
+import { BRAND, CONTACT } from "./site";
 
 /**
  * The post-submit confirmation is CONTRACTUAL copy from the client's spec (§4.1),
@@ -70,5 +70,32 @@ describe("CONTACT.fields — entity vs. profile", () => {
     expect(CONTACT.fields.entityPlaceholder).not.toMatch(
       /sovereign wealth fund|family office/i,
     );
+  });
+});
+
+describe("BRAND — entity relationship (A3)", () => {
+  // Copy the investor reads: Obsidian Quant Group is the investment arm; the fund vehicle on
+  // the public offering documents is Strike Point Capital Fund I LLC. Locked verbatim here the
+  // same way CONTACT.confirmation is — final wording pending Deshorn's approval.
+  it("names the fund's legal entity as Strike Point Capital Fund I LLC", () => {
+    expect(BRAND.legalEntity).toBe("Strike Point Capital Fund I LLC");
+  });
+
+  it("states the relationship in the approved wording, verbatim", () => {
+    expect(BRAND.relationship).toBe(
+      "Obsidian Quant Group operates as the investment arm of Strike Point Capital Fund I LLC.",
+    );
+  });
+
+  it("keeps the sentence and the legal-entity name in agreement", () => {
+    expect(BRAND.relationship).toContain(BRAND.legalEntity);
+    expect(BRAND.relationship).toContain(BRAND.name); // "Obsidian Quant Group"
+    expect(BRAND.relationship).toContain("investment arm");
+  });
+
+  it("does not carry the retired fund mismatch", () => {
+    // "Obsidian Quant Group Fund I, L.P." was the wrong vehicle name; guard its return.
+    expect(BRAND.relationship).not.toContain("L.P.");
+    expect(BRAND.legalEntity).not.toContain("Obsidian");
   });
 });

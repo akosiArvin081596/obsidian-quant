@@ -1,8 +1,11 @@
 /**
  * Temporary mini SEO database — paste approved Google Sheet values here.
  * Pages look up entries via `seoFor(key)` in `src/lib/seo.ts`.
+ *
+ * Source: Copy of SEO On-Page Contents
+ * https://docs.google.com/spreadsheets/d/1UiANVNDZl6xBLLSCrYyN8v_nYxwf70J0ehikU7cbt2c
  */
-import { ARCHITECTURE, BRAND, CONTACT, FIRM, HERO, LEGAL_PAGES, STRATEGY } from "./site";
+import { BRAND, CONTACT, LEGAL_PAGES } from "./site";
 
 export type SeoEntry = {
   title: string;
@@ -20,28 +23,56 @@ export type SeoEntry = {
 
 export const seoData = {
   home: {
-    title: `${BRAND.name} | Profit from Market Dislocation`,
-    description: `${HERO.sub} ${BRAND.intro}`,
+    title: "Quantitative Asset Management | Obsidian Quant Group",
+    description:
+      "Obsidian Quant Group is a quantitative asset management firm delivering systematic investment strategies for institutional and eligible individual investors.",
     path: "/",
-    focusKeyword: "quantitative investment strategies",
+    focusKeyword: "quantitative asset management",
+    socialTitle: "Obsidian Quant Group | Quantitative Asset Management",
+    socialDescription:
+      "Discover Obsidian Quant Group's approach to quantitative asset management and systematic investment strategies for institutional and eligible individual investors.",
+    ogTitle: "Quantitative Asset Management | Obsidian Quant Group",
+    ogDescription:
+      "Explore systematic, research-driven investment strategies from Obsidian Quant Group, serving institutional and eligible individual investors.",
   },
   firm: {
-    title: "The Firm",
-    description: FIRM.hero.body,
+    title: "About Obsidian Quant Group | Quantitative Investment Firm",
+    description:
+      "Learn about Obsidian Quant Group, a quantitative investment firm focused on systematic, research-driven investment strategies for sophisticated investors.",
     path: "/firm",
-    focusKeyword: "Obsidian Quant Group",
+    focusKeyword: "quantitative investment firm",
+    socialTitle: "About Obsidian Quant Group | Our Firm",
+    socialDescription:
+      "Discover Obsidian Quant Group's approach to quantitative investing, systematic research, and disciplined investment management.",
+    ogTitle: "About Obsidian Quant Group | Quantitative Investment Firm",
+    ogDescription:
+      "Learn about Obsidian Quant Group and our research-driven approach to systematic quantitative investment management.",
   },
   strategy: {
-    title: "Strategy",
-    description: STRATEGY.hero.body,
+    title: "Quantitative Investment Strategies | Obsidian Quant Group",
+    description:
+      "Explore Obsidian Quant Group's quantitative investment strategies, built on systematic research, disciplined analysis, and data-driven investment processes.",
     path: "/strategy",
     focusKeyword: "quantitative investment strategies",
+    socialTitle: "Quantitative Investment Strategies | Obsidian Quant Group",
+    socialDescription:
+      "Explore our systematic approach to quantitative investing and discover how research, data, and disciplined processes shape our investment strategies.",
+    ogTitle: "Quantitative Investment Strategies | Obsidian Quant Group",
+    ogDescription:
+      "Discover Obsidian Quant Group's systematic, research-driven approach to quantitative investment strategies and portfolio management.",
   },
   architecture: {
-    title: "Architecture",
-    description: ARCHITECTURE.body,
+    title: "Quantitative Investment Process | Obsidian Quant Group",
+    description:
+      "Explore Obsidian Quant Group's quantitative investment process, integrating systematic research, data analysis, portfolio construction, and risk management.",
     path: "/architecture",
-    focusKeyword: "quantitative investment architecture",
+    focusKeyword: "quantitative investment process",
+    socialTitle: "Our Quantitative Investment Process | Obsidian Quant Group",
+    socialDescription:
+      "Explore the research, data analysis, portfolio construction, and risk management framework behind Obsidian Quant Group's systematic investment approach.",
+    ogTitle: "Quantitative Investment Process | Obsidian Quant Group",
+    ogDescription:
+      "Discover the systematic framework behind Obsidian Quant Group's approach to quantitative research, portfolio construction, and investment risk management.",
   },
   contact: {
     title: "Request Access",

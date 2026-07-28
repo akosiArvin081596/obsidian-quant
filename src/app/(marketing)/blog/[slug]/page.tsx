@@ -14,6 +14,7 @@ import { promoteDueScheduledPosts } from "@/lib/blog/publish";
 import BlogArticleHero from "@/components/blog/BlogArticleHero";
 import BlogCta from "@/components/blog/BlogCta";
 import BlogRelatedPosts from "@/components/blog/BlogRelatedPosts";
+import ArticleComments from "@/components/blog/ArticleComments";
 import Section from "@/components/Section";
 
 export const dynamic = "force-dynamic";
@@ -153,6 +154,9 @@ export default async function BlogArticlePage({ params }: Props) {
             ))}
           </div>
         ) : null}
+        <div className="mx-auto max-w-3xl">
+          <ArticleComments slug={slug} />
+        </div>
       </Section>
       <BlogRelatedPosts posts={related} />
       <BlogCta

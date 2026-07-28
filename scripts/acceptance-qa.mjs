@@ -3,15 +3,9 @@
  * Usage: node scripts/acceptance-qa.mjs [baseUrl]
  */
 import { chromium } from "playwright";
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
 import { writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-
-async function hashPassword(password) {
-  return bcrypt.hash(password, 12);
-}
 
 const BASE = process.argv[2] || process.env.BASE_URL || "http://localhost:3002";
 const ADMIN_EMAIL = process.env.ADMIN_SEED_EMAIL || "admin@obsidianquantgroup.com";
@@ -24,7 +18,6 @@ const OUT_DIR = path.join(__dirname, "..", "tmp", "acceptance-qa");
 
 mkdirSync(OUT_DIR, { recursive: true });
 
-const prisma = new PrismaClient();
 const results = [];
 
 function record(id, ok, detail = "") {
@@ -77,22 +70,32 @@ async function login(email, password) {
   return jar;
 }
 
-async function ensureAuthorUser() {
-  const authorRole = await prisma.role.findUniqueOrThrow({ where: { name: "Author" } });
-  const passwordHash = await hashPassword(AUTHOR_PASSWORD);
-  const user = await prisma.user.upsert({
-    where: { email: AUTHOR_EMAIL },
-    create: {
+async function ensureAuthorUser(adminJar) {
+  const usersRes = await api(adminJar, "GET", `/api/admin/users/?q=${encodeURIComponent(AUTHOR_EMAIL)}`);
+  if (!usersRes.res.ok) throw new Error(`Users lookup failed: ${JSON.stringify(usersRes.json)}`);
+  const authorRole = (usersRes.json.roles || []).find((role) => role.name === "Author");
+  if (!authorRole) throw new Error("Author role not found");
+
+  const existing = (usersRes.json.users || []).find((user) => user.email === AUTHOR_EMAIL);
+  if (!existing) {
+    const created = await api(adminJar, "POST", "/api/admin/users/", {
       name: "QA Author",
       email: AUTHOR_EMAIL,
-      passwordHash,
-      status: "active",
-    },
-    update: { passwordHash, status: "active" },
+      password: AUTHOR_PASSWORD,
+      roleIds: [authorRole.id],
+    });
+    if (!created.res.ok) throw new Error(`Author create failed: ${JSON.stringify(created.json)}`);
+    return created.json.user;
+  }
+
+  const updated = await api(adminJar, "PATCH", `/api/admin/users/${existing.id}/`, {
+    name: "QA Author",
+    password: AUTHOR_PASSWORD,
+    status: "active",
+    roleIds: [authorRole.id],
   });
-  await prisma.userRole.deleteMany({ where: { userId: user.id } });
-  await prisma.userRole.create({ data: { userId: user.id, roleId: authorRole.id } });
-  return user;
+  if (!updated.res.ok) throw new Error(`Author update failed: ${JSON.stringify(updated.json)}`);
+  return updated.json.user;
 }
 
 function tinyPng() {
@@ -167,8 +170,8 @@ function contentHtml(body, { deadInternal = false, deadExternal = false } = {}) 
 
 async function main() {
   console.log(`\nAcceptance QA against ${BASE}\n`);
-  await ensureAuthorUser();
   const admin = await login(ADMIN_EMAIL, ADMIN_PASSWORD);
+  await ensureAuthorUser(admin);
   const author = await login(AUTHOR_EMAIL, AUTHOR_PASSWORD);
   const category = await getCategory(admin);
   const tagShared = await getOrCreateTag(admin, "Acceptance Shared", `qa-shared-${RUN_ID}`);
@@ -376,11 +379,10 @@ async function main() {
       followed.ok &&
       (followed.url.includes(newSlug) || followedHtml.includes(`QA Published ${RUN_ID}`));
   }
-  const redirectRow = await prisma.redirect.findFirst({
-    where: {
-      OR: [{ sourcePath: `/blog/${oldSlug}/` }, { sourcePath: `/blog/${oldSlug}` }],
-    },
-  });
+  const redirectsRes = await api(admin, "GET", `/api/admin/redirects/?q=${encodeURIComponent(oldSlug)}`);
+  const redirectRow = (redirectsRes.json.redirects || []).find(
+    (row) => row.sourcePath === `/blog/${oldSlug}/` || row.sourcePath === `/blog/${oldSlug}`,
+  );
   record(
     "slug-change-redirect",
     Boolean(redirectRow?.active) && redirectWorks,
@@ -596,6 +598,181 @@ async function main() {
     `postCheck=${deadInternalFound} global=${globalHasDead} uiStatus=${pageLinkHealth.url()} findings=${findings.length}`,
   );
 
+  // --- 15. User management ---
+  const usersPage = await context.newPage();
+  await usersPage.goto(`${BASE}/admin/users/`, { waitUntil: "networkidle", timeout: 120_000 });
+  const usersHeading = await usersPage.locator("h1:text-is('Users')").count();
+  const usersRes = await api(admin, "GET", "/api/admin/users/");
+  const adminRoles = usersRes.json.roles || [];
+  const qaUserEmail = `qa-user-${RUN_ID}@example.com`;
+  const createUserRes = await api(admin, "POST", "/api/admin/users/", {
+    name: "QA Manager",
+    email: qaUserEmail,
+    password: "QaManager!2026",
+    roleIds: [adminRoles.find((r) => r.name === "Viewer")?.id || adminRoles[0]?.id],
+  });
+  const createdUser = createUserRes.json.user;
+  const disableUserRes = createdUser
+    ? await api(admin, "PATCH", `/api/admin/users/${createdUser.id}/`, { status: "disabled" })
+    : { res: { ok: false, status: 0 }, json: null };
+  const qaLogin = await api(new Map(), "POST", "/api/admin/auth/", {
+    email: qaUserEmail,
+    password: "QaManager!2026",
+  });
+  record(
+    "users-ui-and-api",
+    usersHeading > 0 &&
+      createUserRes.res.status === 201 &&
+      disableUserRes.res.ok &&
+      [401, 403].includes(qaLogin.res.status),
+    `ui=${usersHeading > 0} create=${createUserRes.res.status} disable=${disableUserRes.res.status} disabledLogin=${qaLogin.res.status}`,
+  );
+
+  // --- 16. Import / export ---
+  const importExportPage = await context.newPage();
+  await importExportPage.goto(`${BASE}/admin/blog/import-export/`, {
+    waitUntil: "networkidle",
+    timeout: 120_000,
+  });
+  const importExportHeading = await importExportPage.locator("h1:text-is('Import / Export')").count();
+  const exportRes = await fetch(`${BASE}/api/admin/export/`, {
+    headers: { Cookie: cookieHeader(admin) },
+  });
+  const exportJson = await exportRes.json();
+  const importSlug = `qa-imported-${RUN_ID}`;
+  exportJson.posts = [
+    {
+      title: `Imported ${RUN_ID}`,
+      subtitle: null,
+      slug: importSlug,
+      excerpt: "Imported from acceptance QA.",
+      status: "draft",
+      contentJson: {
+        type: "doc",
+        content: [{ type: "paragraph", content: [{ type: "text", text: "Imported bundle body" }] }],
+      },
+      contentHtml: "<p>Imported bundle body</p>",
+      focusKeyword: "import qa",
+      tagSlugs: [tagShared.slug],
+      categorySlugs: [category.slug],
+      primaryCategorySlug: category.slug,
+      seo: { metaTitle: "Imported QA", metaDescription: "Imported QA description" },
+    },
+  ];
+  const importRes1 = await api(admin, "POST", "/api/admin/import/", exportJson);
+  const importRes2 = await api(admin, "POST", "/api/admin/import/", exportJson);
+  const importedPostCheck = await api(admin, "GET", "/api/admin/posts/?q=" + encodeURIComponent(importSlug));
+  record(
+    "import-export-json",
+    importExportHeading > 0 &&
+      exportRes.ok &&
+      importRes1.res.ok &&
+      importRes1.json.postsCreated === 1 &&
+      importRes2.res.ok &&
+      importRes2.json.postsSkipped >= 1 &&
+      JSON.stringify(importedPostCheck.json).includes(importSlug),
+    `ui=${importExportHeading > 0} export=${exportRes.status} import1=${importRes1.json.postsCreated} import2skip=${importRes2.json.postsSkipped}`,
+  );
+
+  // --- 17. Analytics settings ---
+  const analyticsPage = await context.newPage();
+  await analyticsPage.goto(`${BASE}/admin/analytics/`, { waitUntil: "networkidle", timeout: 120_000 });
+  const analyticsUiOk = analyticsPage.url().includes("/admin/analytics/");
+  const gaId = `G-QA${RUN_ID.slice(-6).toUpperCase()}`;
+  const analyticsPatch = await api(admin, "PATCH", "/api/admin/analytics/", {
+    gaMeasurementId: gaId,
+    gscSiteUrl: "https://obsidianquantgroup.com/",
+  });
+  const analyticsGet = await api(admin, "GET", "/api/admin/analytics/");
+  const publicGaConfig = await api(null, "GET", "/api/public/config/ga/");
+  record(
+    "analytics-settings",
+    analyticsUiOk &&
+      analyticsPatch.res.ok &&
+      analyticsGet.json.gaMeasurementId === gaId &&
+      analyticsGet.json.gscSiteUrl === "https://obsidianquantgroup.com/" &&
+      publicGaConfig.json.gaMeasurementId === gaId,
+    `ui=${analyticsUiOk} ga=${analyticsGet.json.gaMeasurementId} public=${publicGaConfig.json.gaMeasurementId}`,
+  );
+
+  // --- 18. AI assists ---
+  await page.goto(`${BASE}/admin/blog/${editorDraft.id}/`, {
+    waitUntil: "domcontentloaded",
+    timeout: 120_000,
+  });
+  await page.getByRole("button", { name: /Publish settings/i }).click();
+  const aiButtonsVisible =
+    (await page.getByRole("button", { name: /Suggest excerpt/i }).count()) > 0 &&
+    (await page.getByRole("button", { name: /Suggest title/i }).count()) > 0 &&
+    (await page.getByRole("button", { name: /Suggest description/i }).count()) > 0;
+  const aiAssistRes = await api(admin, "POST", "/api/admin/ai/assist/", {
+    action: "excerpt",
+    title: `AI QA ${RUN_ID}`,
+    contentHtml: "<p>Trend following and risk controls in futures markets.</p>",
+    focusKeyword: "trend following",
+  });
+  const aiText = aiAssistRes.json.result || "";
+  record(
+    "ai-assists",
+    aiButtonsVisible && aiAssistRes.res.ok && typeof aiText === "string" && aiText.trim().length > 20,
+    `ui=${aiButtonsVisible} api=${aiAssistRes.res.status} len=${aiText.trim().length}`,
+  );
+
+  // --- 19. Newsletter signup ---
+  const publicHome = await browser.newPage();
+  await publicHome.goto(`${BASE}/`, { waitUntil: "networkidle", timeout: 120_000 });
+  const newsletterEmail = `newsletter-${RUN_ID}@example.com`;
+  const newsletterVisible = (await publicHome.getByRole("heading", { name: /Newsletter/i }).count()) > 0
+    || (await publicHome.locator("text=/Newsletter/i").count()) > 0;
+  const newsletterApi = await api(null, "POST", "/api/public/newsletter/subscribe/", {
+    email: newsletterEmail,
+    source: "acceptance",
+  });
+  const newsletterAdminPage = await context.newPage();
+  await newsletterAdminPage.goto(`${BASE}/admin/blog/newsletter/`, {
+    waitUntil: "networkidle",
+    timeout: 120_000,
+  });
+  const newsletterHeading = await newsletterAdminPage.locator("h1:text-is('Newsletter')").count();
+  const newsletterAdmin = await api(admin, "GET", "/api/admin/newsletter/");
+  const newsletterSeen = JSON.stringify(newsletterAdmin.json).includes(newsletterEmail);
+  record(
+    "newsletter-signup-admin",
+    newsletterVisible && newsletterApi.res.ok && newsletterHeading > 0 && newsletterSeen,
+    `ui=${newsletterVisible} api=${newsletterApi.res.status} admin=${newsletterHeading > 0} seen=${newsletterSeen}`,
+  );
+
+  // --- 20. Public comments + moderation ---
+  const commentAuthor = `Commenter ${RUN_ID}`;
+  const commentBody = `Insightful comment ${RUN_ID}`;
+  const commentSubmit = await api(null, "POST", `/api/public/posts/${newSlug}/comments/`, {
+    authorName: commentAuthor,
+    authorEmail: `comment-${RUN_ID}@example.com`,
+    body: commentBody,
+  });
+  const adminCommentsBefore = await api(admin, "GET", "/api/admin/comments/?status=pending");
+  const pendingComment = (adminCommentsBefore.json.comments || []).find((c) => c.body === commentBody);
+  const commentsPage = await context.newPage();
+  await commentsPage.goto(`${BASE}/admin/blog/comments/`, {
+    waitUntil: "networkidle",
+    timeout: 120_000,
+  });
+  const commentsHeading = await commentsPage.locator("h1:text-is('Comments')").count();
+  const approveComment = pendingComment
+    ? await api(admin, "PATCH", `/api/admin/comments/${pendingComment.id}/`, { status: "approved" })
+    : { res: { ok: false, status: 0 }, json: null };
+  await commentsPage.waitForTimeout(1000);
+  const publicComments = await api(null, "GET", `/api/public/posts/${newSlug}/comments/`);
+  record(
+    "comments-moderation-public",
+    commentSubmit.res.status === 201 &&
+      commentsHeading > 0 &&
+      Boolean(pendingComment) &&
+      approveComment.res.ok &&
+      JSON.stringify(publicComments.json).includes(commentBody),
+    `submit=${commentSubmit.res.status} ui=${commentsHeading > 0} pending=${Boolean(pendingComment)} approve=${approveComment.res.status}`,
+  );
+
   await browser.close();
 
   // Summary
@@ -614,12 +791,10 @@ async function main() {
     console.log("\nFailures:");
     for (const f of failed) console.log(` - ${f.id}: ${f.detail}`);
   }
-  await prisma.$disconnect();
   process.exit(failed.length ? 1 : 0);
 }
 
 main().catch(async (err) => {
   console.error(err);
-  await prisma.$disconnect();
   process.exit(1);
 });

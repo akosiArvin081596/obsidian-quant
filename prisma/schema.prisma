@@ -22,6 +22,18 @@ enum PostStatus {
   trash
 }
 
+enum NewsletterStatus {
+  active
+  unsubscribed
+}
+
+enum CommentStatus {
+  pending
+  approved
+  rejected
+  spam
+}
+
 model User {
   id           String     @id @default(cuid())
   name         String
@@ -37,9 +49,10 @@ model User {
   revisions     PostRevision[]
   media         Media[]
   redirects     Redirect[]
-  auditLogs     AuditLog[]
-  siteSettings  SiteSetting[]
-  sessions      Session[]
+  auditLogs       AuditLog[]
+  siteSettings    SiteSetting[]
+  sessions        Session[]
+  moderatedComments Comment[] @relation("CommentModerator")
 
   @@map("users")
 }
@@ -125,6 +138,7 @@ model Post {
   revisions       PostRevision[]
   tags            PostTag[]
   categories      PostCategory[]
+  comments        Comment[]
 
   @@unique([slug])
   @@index([status])
@@ -280,4 +294,35 @@ model SiteSetting {
   updatedBy User? @relation(fields: [updatedById], references: [id])
 
   @@map("site_settings")
+}
+
+model NewsletterSubscriber {
+  id             String           @id @default(cuid())
+  email          String           @unique
+  status         NewsletterStatus @default(active)
+  source         String?
+  createdAt      DateTime         @default(now()) @map("created_at")
+  unsubscribedAt DateTime?        @map("unsubscribed_at")
+
+  @@index([status])
+  @@map("newsletter_subscribers")
+}
+
+model Comment {
+  id            String        @id @default(cuid())
+  postId        String        @map("post_id")
+  authorName    String        @map("author_name")
+  authorEmail   String?       @map("author_email")
+  body          String
+  status        CommentStatus @default(pending)
+  createdAt     DateTime      @default(now()) @map("created_at")
+  moderatedAt   DateTime?     @map("moderated_at")
+  moderatedById String?       @map("moderated_by")
+
+  post        Post  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  moderatedBy User? @relation("CommentModerator", fields: [moderatedById], references: [id])
+
+  @@index([postId])
+  @@index([status])
+  @@map("comments")
 }

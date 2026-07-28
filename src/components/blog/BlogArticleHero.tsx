@@ -44,8 +44,8 @@ export default function BlogArticleHero({
   className,
 }: Props) {
   return (
-    <header className={cn("border-b border-gold/10 bg-obsidian", className)}>
-      <div className="mx-auto max-w-3xl px-5 pb-10 pt-24 sm:px-6 sm:pt-28 lg:px-8">
+    <header className={cn("relative border-b border-gold/10 bg-obsidian", className)}>
+      <div className="relative z-10 mx-auto max-w-3xl px-5 pb-10 pt-24 sm:px-6 sm:pt-28 lg:px-8">
         {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[.62rem] uppercase tracking-[.2em] text-silver/35">
           <Link href="/blog/" className="transition-colors hover:text-gold">

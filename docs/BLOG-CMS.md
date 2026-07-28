@@ -60,6 +60,15 @@ Administrator, Editor, Author, SEO Manager, Viewer — permissions enforced on `
 | `GET /api/admin/audit/` | Audit log |
 | `GET /api/admin/link-check/` · `GET …/posts/:id/link-check/` | Broken-link scan (on-demand) |
 | `GET /api/admin/link-targets/` | Internal link search for editor |
+| `GET/POST /api/admin/users/` · `GET/PATCH /api/admin/users/:id/` | User management |
+| `GET /api/admin/export/` · `POST /api/admin/import/` | Blog JSON backup / restore |
+| `GET/PATCH /api/admin/analytics/` | GA/GSC settings + metrics |
+| `POST /api/admin/ai/assist/` | Groq AI assists (editor) |
+| `GET /api/admin/newsletter/` | Newsletter subscribers |
+| `GET /api/admin/comments/` · `PATCH …/comments/:id/` | Comment moderation |
+| `POST /api/public/newsletter/subscribe/` | Public newsletter signup |
+| `GET/POST /api/public/posts/:slug/comments/` | Public article comments |
+| `GET /api/public/config/ga/` | GA measurement ID for client |
 | `GET /api/public/posts/` · `GET …/:slug/` | Public payloads |
 | `GET /api/public/tags/` · `GET /api/public/categories/` | Public taxonomy |
 | `GET /uploads/*` | Uploaded media |
@@ -70,9 +79,18 @@ Administrator, Editor, Author, SEO Manager, Viewer — permissions enforced on `
 - **Related posts** — public articles rank candidates by shared tags, primary/secondary category, and recency (`src/lib/blog/relatedPosts.ts`).
 - **Link health** — admin at `/admin/blog/links/` and **Check links** on Publish settings; scans post HTML for broken internal routes and unreachable external URLs.
 
-## Deferred (§3.2 remaining)
+## Deferred (§3.2) — implemented
 
-GSC/GA dashboards, AI assists, comments, newsletter, import/export, user management UI.
+| Feature | Admin route | API |
+|---------|-------------|-----|
+| User management | `/admin/users/` | `GET/POST /api/admin/users/` · `GET/PATCH /api/admin/users/:id/` |
+| Import / export | `/admin/blog/import-export/` | `GET /api/admin/export/` · `POST /api/admin/import/` |
+| Analytics (GA/GSC settings) | `/admin/analytics/` | `GET/PATCH /api/admin/analytics/` |
+| AI assists (Groq) | Post editor **Publish** tab | `POST /api/admin/ai/assist/` — requires `GROQ_API_KEY` |
+| Newsletter | `/admin/blog/newsletter/` | `GET /api/admin/newsletter/` · `POST /api/public/newsletter/subscribe/` |
+| Comments | `/admin/blog/comments/` | `GET /api/admin/comments/` · `PATCH /api/admin/comments/:id/` · public `GET/POST /api/public/posts/:slug/comments/` |
+
+Optional env for live GA4 dashboard metrics: `GA4_PROPERTY_ID` + `GA_SERVICE_ACCOUNT_JSON`.
 
 ## Publishing workflow
 

@@ -28,8 +28,8 @@ export default async function BlogIndexPage() {
   return (
     <>
       {/* Compact page header — clears fixed nav, no wasted vertical space */}
-      <div className="border-b border-gold/10 bg-obsidian px-5 pb-10 pt-28 sm:px-6 sm:pt-32 lg:px-16">
-        <div className="mx-auto max-w-7xl">
+      <div className="relative border-b border-gold/10 bg-obsidian px-5 pb-10 pt-28 sm:px-6 sm:pt-32 lg:px-16">
+        <div className="relative z-10 mx-auto max-w-7xl">
           <Eyebrow>Research &amp; Commentary</Eyebrow>
           <h1 className="mt-4 font-serif text-4xl text-ghost sm:text-5xl lg:text-6xl">
             Perspective from the model.

@@ -68,6 +68,7 @@ export default function PostEditor({ postId }: { postId: string }) {
   const [canPublish, setCanPublish] = useState(false);
   const [actionBusy, setActionBusy] = useState(false);
   const [linkChecking, setLinkChecking] = useState(false);
+  const [aiBusy, setAiBusy] = useState<string | null>(null);
   const [linkBroken, setLinkBroken] = useState<
     { href: string; kind: string; detail: string }[] | null
   >(null);
@@ -351,6 +352,36 @@ export default function PostEditor({ postId }: { postId: string }) {
     });
   }
 
+  async function runAiAssist(
+    action: "meta_title" | "meta_description" | "excerpt" | "outline",
+    apply: (text: string) => void,
+  ) {
+    if (!post) return;
+    setAiBusy(action);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/ai/assist/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action,
+          title: post.title,
+          contentHtml: draftHtml || post.contentHtml,
+          focusKeyword: post.focusKeyword,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error?.message || "AI assist failed");
+      apply(data.result);
+      dirty.current = true;
+      setMessage("AI suggestion applied — review before saving.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "AI assist failed");
+    } finally {
+      setAiBusy(null);
+    }
+  }
+
   async function createTag() {
     if (!newTag.trim() || !post) return;
     const res = await fetch("/api/admin/tags/", {
@@ -499,15 +530,26 @@ export default function PostEditor({ postId }: { postId: string }) {
               />
             </Field>
             <Field label="Excerpt">
-              <textarea
-                value={post.excerpt ?? ""}
-                onChange={(e) => {
-                  dirty.current = true;
-                  setPost({ ...post, excerpt: e.target.value || null });
-                }}
-                rows={3}
-                className="field"
-              />
+              <div className="space-y-2">
+                <textarea
+                  value={post.excerpt ?? ""}
+                  onChange={(e) => {
+                    dirty.current = true;
+                    setPost({ ...post, excerpt: e.target.value || null });
+                  }}
+                  rows={3}
+                  className="field"
+                />
+                <AiAssistButton
+                  label="Suggest excerpt"
+                  busy={aiBusy === "excerpt"}
+                  onClick={() =>
+                    void runAiAssist("excerpt", (text) =>
+                      setPost({ ...post, excerpt: text }),
+                    )
+                  }
+                />
+              </div>
             </Field>
             <Field label="Focus keyword (internal)">
               <input
@@ -642,31 +684,59 @@ export default function PostEditor({ postId }: { postId: string }) {
           </div>
           <div className="space-y-4">
             <Field label="Meta title">
-              <input
-                value={post.seo?.metaTitle ?? ""}
-                onChange={(e) => {
-                  dirty.current = true;
-                  setPost({
-                    ...post,
-                    seo: { ...(post.seo ?? blankSeo()), metaTitle: e.target.value || null },
-                  });
-                }}
-                className="field"
-              />
+              <div className="space-y-2">
+                <input
+                  value={post.seo?.metaTitle ?? ""}
+                  onChange={(e) => {
+                    dirty.current = true;
+                    setPost({
+                      ...post,
+                      seo: { ...(post.seo ?? blankSeo()), metaTitle: e.target.value || null },
+                    });
+                  }}
+                  className="field"
+                />
+                <AiAssistButton
+                  label="Suggest title"
+                  busy={aiBusy === "meta_title"}
+                  onClick={() =>
+                    void runAiAssist("meta_title", (text) =>
+                      setPost({
+                        ...post,
+                        seo: { ...(post.seo ?? blankSeo()), metaTitle: text },
+                      }),
+                    )
+                  }
+                />
+              </div>
             </Field>
             <Field label="Meta description">
-              <textarea
-                value={post.seo?.metaDescription ?? ""}
-                onChange={(e) => {
-                  dirty.current = true;
-                  setPost({
-                    ...post,
-                    seo: { ...(post.seo ?? blankSeo()), metaDescription: e.target.value || null },
-                  });
-                }}
-                rows={3}
-                className="field"
-              />
+              <div className="space-y-2">
+                <textarea
+                  value={post.seo?.metaDescription ?? ""}
+                  onChange={(e) => {
+                    dirty.current = true;
+                    setPost({
+                      ...post,
+                      seo: { ...(post.seo ?? blankSeo()), metaDescription: e.target.value || null },
+                    });
+                  }}
+                  rows={3}
+                  className="field"
+                />
+                <AiAssistButton
+                  label="Suggest description"
+                  busy={aiBusy === "meta_description"}
+                  onClick={() =>
+                    void runAiAssist("meta_description", (text) =>
+                      setPost({
+                        ...post,
+                        seo: { ...(post.seo ?? blankSeo()), metaDescription: text },
+                      }),
+                    )
+                  }
+                />
+              </div>
             </Field>
             <Field label="Social title">
               <input
@@ -818,5 +888,26 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="text-[.66rem] uppercase tracking-[.18em] text-gold">{label}</span>
       {children}
     </label>
+  );
+}
+
+function AiAssistButton({
+  label,
+  busy,
+  onClick,
+}: {
+  label: string;
+  busy: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={busy}
+      className="text-[.62rem] uppercase tracking-[.14em] text-gold/80 hover:text-gold disabled:opacity-50"
+    >
+      {busy ? "Generating…" : `✦ ${label}`}
+    </button>
   );
 }

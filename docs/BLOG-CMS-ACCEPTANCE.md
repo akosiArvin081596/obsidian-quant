@@ -27,6 +27,11 @@ Verified **2026-07-28** against local Docker Postgres + `next dev` (15/15 PASS).
 - Public article page no longer swallowed Next.js `redirect()` inside `try/catch` (old URLs were 404ing).
 - Publish settings gained a **Featured image alt text** field wired to `PATCH /api/admin/media/:id`.
 
-## Deferred (§3.2) — not in this release
+## Deferred (§3.2) — implemented 2026-07-28
 
-GSC/GA dashboards, AI assists, newsletter, import/export, comments, user management UI.
+- [x] User management UI (`/admin/users/`)
+- [x] Import / export JSON backup (`/admin/blog/import-export/`)
+- [x] GA/GSC settings + on-site metrics dashboard (`/admin/analytics/`)
+- [x] AI assists in post editor (Groq — `GROQ_API_KEY`)
+- [x] Newsletter signup (footer) + subscriber list (`/admin/blog/newsletter/`)
+- [x] Moderated comments on published articles (`/admin/blog/comments/`)

@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      # Host 5433 avoids clashing with a local/Laragon Postgres on 5432.
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: obsidian
+      POSTGRES_PASSWORD: obsidian
+      POSTGRES_DB: obsidian_quant
+    volumes:
+      - obsidian_pg:/var/lib/postgresql/data
+
+volumes:
+  obsidian_pg:

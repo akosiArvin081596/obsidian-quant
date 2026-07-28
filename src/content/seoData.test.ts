@@ -69,4 +69,9 @@ describe("seoData entries", () => {
       expect(entry.noIndex ?? false, `${key} must stay indexable`).toBe(false);
     }
   });
+
+  it("indexes the public blog hub", () => {
+    expect(seoData.blog.noIndex ?? false).toBe(false);
+    expect(seoData.blog.path).toBe("/blog");
+  });
 });

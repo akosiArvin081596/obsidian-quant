@@ -87,6 +87,16 @@ export const seoData = {
     focusKeyword: "quantitative research",
     noIndex: true,
   },
+  blog: {
+    title: "Blog | Obsidian Quant Group",
+    description:
+      "Research notes, market commentary, and institutional perspective from Obsidian Quant Group.",
+    path: "/blog",
+    focusKeyword: "quantitative research blog",
+    socialTitle: "Obsidian Quant Group Blog",
+    socialDescription:
+      "Systematic research notes and market commentary from Obsidian Quant Group.",
+  },
   "regulatory-disclosure": {
     title: LEGAL_PAGES["regulatory-disclosure"].title,
     description: LEGAL_PAGES["regulatory-disclosure"].body,

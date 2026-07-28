@@ -7,20 +7,33 @@ Live: **https://obsidianquantgroup.com**
 
 ## Stack
 
-- **Next.js 15** (App Router, static export) + **React 19** + **TypeScript**
+- **Next.js 15** (App Router, Node runtime) + **React 19** + **TypeScript**
+- **PostgreSQL** + Prisma (Blog CMS)
 - **Tailwind CSS v4** (design tokens in `src/index.css`)
 - **framer-motion** (motion)
+- **TipTap** editor in `/admin/blog`
 
-Public pages are statically generated HTML (SEO). The brand system (palette, type, motifs)
-is encoded in `src/index.css`, and all copy lives in `src/content/site.ts`.
+Public marketing pages + `/blog` are server-rendered. Copy for brochure pages
+lives in `src/content/site.ts`; blog posts are managed in the CMS.
 
 ## Develop
 
 ```bash
+docker compose up -d          # Postgres
+cp .env.example .env          # set DATABASE_URL
 npm install
-npm run dev      # http://localhost:3000
-npm run build    # static export → out/ synced to dist/
-npm run preview  # serve dist/ on :4173
+npx prisma migrate deploy
+npm run db:seed
+npm run dev                   # http://localhost:3000
+```
+
+- Blog: `/blog/`
+- Admin: `/admin/login/` (see [docs/BLOG-CMS.md](docs/BLOG-CMS.md))
+
+```bash
+npm run build
+npm start
+npm test
 ```
 
 ## Structure

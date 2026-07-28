@@ -1,14 +1,15 @@
 # Deployment — obsidianquantgroup.com
 
-Static Next.js export (App Router), built on the VPS and served by nginx. **Production is
-`obsidianquantgroup.com`** (+ `www.`). `obsidian.abedubas.dev` is a preview/staging
-alias on the **same VPS**, served from the **same** build in
-`/var/www/obsidian-quant/dist`. They are **two separate nginx vhosts**, and each
-one must have the `deploy/*.conf` includes wired in — see
-[nginx vhosts](#-nginx-vhosts--wire-the-includes-into-both).
+Next.js 15 App Router on Node (`next start`), reverse-proxied by nginx.
+**Production is `obsidianquantgroup.com`** (+ `www.`). `obsidian.abedubas.dev` is a
+preview/staging alias on the **same VPS**.
 
-`npm run build` runs `next build` (static export to `out/`) then copies `out/` → `dist/`
-so the nginx root path stays unchanged.
+`npm run build` runs `prisma generate && next build`. Process manager (PM2 or
+systemd) runs `next start` on `127.0.0.1:3000`. nginx proxies `/` to that process
+(see `deploy/nginx-next-proxy.conf`) while keeping Yahoo + lead proxy includes.
+
+Blog CMS requires PostgreSQL (`DATABASE_URL`) and a writable uploads directory
+(`UPLOADS_DIR`, default `./uploads`). See [docs/BLOG-CMS.md](docs/BLOG-CMS.md).
 
 ## Pipeline
 
@@ -16,13 +17,55 @@ so the nginx root path stays unchanged.
 push to main ──▶ GitHub Actions ──ssh──▶ VPS forced-command ──▶ deploy-obsidian.sh
                                                                   ├─ git pull (deploy key)
                                                                   ├─ npm ci
-                                                                  └─ npm run build → dist/
-                                                          nginx serves /var/www/obsidian-quant/dist
+                                                                  ├─ prisma migrate deploy
+                                                                  ├─ npm run build
+                                                                  └─ pm2 restart obsidian-quant
+                                                          nginx → 127.0.0.1:3000
 ```
 
-The deploy script only rebuilds the frontend — it does **not** touch nginx. Every
-vhost / include / header / cert change is a manual server step (below), and must
-be applied to **each** vhost that serves the app.
+The deploy script should migrate + rebuild + restart Node — it does **not**
+replace nginx config automatically. Vhost / include / header / cert changes remain
+manual server steps and must be applied to **each** vhost.
+
+> **Cutover from static export:** stop serving `/var/www/obsidian-quant/dist` as
+> the document root. Wire `include …/deploy/nginx-next-proxy.conf;` (after Yahoo
+> and lead includes) and run the Node process. Keep `dist/` only if you need a
+> rollback artifact; it is no longer the live app.
+
+## Owner checklist — Blog CMS cutover (one-time)
+
+Contributors cannot do these steps. Repo/VPS owner only. Prefer **preview**
+(`obsidian.abedubas.dev`) first, then production.
+
+1. **Postgres** — install or run Postgres on the VPS; create a dedicated DB + user.
+2. **App env** (PM2/systemd env or `/var/www/obsidian-quant/.env`, never commit):
+   - `DATABASE_URL=postgresql://…`
+   - `UPLOADS_DIR=/var/www/obsidian-quant/uploads` (or another writable path)
+   - Optional: `ADMIN_SEED_EMAIL` / `ADMIN_SEED_PASSWORD` for first seed
+3. **Uploads dir** — `mkdir -p` the uploads path; chown so the Node process can write.
+4. **Deploy script** — update `/usr/local/bin/deploy-obsidian.sh` so a main deploy:
+   - `npm ci`
+   - `npx prisma migrate deploy`
+   - `npm run build` (no more `out/` → `dist/` sync)
+   - `pm2 restart obsidian-quant` (or equivalent) running `next start` on `127.0.0.1:3000`
+5. **First boot after this PR merges** — once code is on the VPS:
+   - `npx prisma migrate deploy`
+   - `npm run db:seed` (creates admin + roles; change the default password immediately)
+6. **nginx (both vhosts)** — keep existing Yahoo + lead includes, then add after them:
+   ```nginx
+   include /var/www/obsidian-quant/deploy/nginx-next-proxy.conf;
+   ```
+   Stop using `root …/dist` + `try_files` as the primary app server for `/`.
+7. **Validate** — `nginx -t && systemctl reload nginx`
+8. **Smoke-test (preview, then prod)**
+   - `/` marketing homepage
+   - `/blog/` and `/admin/login/`
+   - Yahoo proxy + `/api/lead` wiring probe (existing DEPLOY.md curls)
+   - Publish one draft end-to-end; confirm sitemap/RSS update
+
+Rollback: keep `dist/` as an artifact, point the vhost back at static root, and
+restart the previous deploy SHA only if Node is unhealthy — Blog CMS will not
+work in static mode.
 
 ## Facts
 

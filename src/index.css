@@ -1450,6 +1450,140 @@ footer.site-footer h4 {
 .animate-marquee { animation: marquee 38s linear infinite; }
 .live-dot { animation: pulse-dot 2.4s ease-in-out infinite; }
 
+/* Blog article / TipTap preview prose */
+.prose-blog h2 {
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  margin: 1.5rem 0 0.75rem;
+  color: var(--color-ghost);
+}
+.prose-blog h3 {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  margin: 1.25rem 0 0.5rem;
+  color: var(--color-ghost);
+}
+.prose-blog h4 {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  margin: 1rem 0 0.5rem;
+  color: var(--color-ghost);
+}
+.prose-blog p { margin: 0.85rem 0; }
+.prose-blog > p:first-of-type {
+  font-size: 1.15rem;
+  line-height: 1.75;
+  color: color-mix(in oklab, var(--color-silver) 92%, transparent);
+}
+.prose-blog a {
+  color: var(--color-gold);
+  text-decoration: underline;
+}
+.prose-blog ul,
+.prose-blog ol {
+  margin: 0.85rem 0 0.85rem 1.25rem;
+}
+.prose-blog blockquote {
+  border-left: 2px solid color-mix(in oklab, var(--color-gold) 35%, transparent);
+  padding-left: 1rem;
+  color: color-mix(in oklab, var(--color-silver) 75%, transparent);
+  font-style: italic;
+}
+.prose-blog img,
+.prose-blog .blog-content-image {
+  display: block;
+  max-width: min(100%, 28rem);
+  max-height: 18rem;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  margin: 1rem 0;
+}
+.prose-blog video,
+.prose-blog .blog-content-video {
+  display: block;
+  width: 100%;
+  max-width: 40rem;
+  max-height: 24rem;
+  margin: 1.25rem 0;
+  background: var(--color-obsidian);
+}
+/* Editor attachments: medium left-aligned thumbnails */
+.prose-blog .ProseMirror .react-renderer.node-image {
+  display: block;
+  width: fit-content;
+  max-width: 16rem;
+  margin: 1rem 0;
+  margin-left: 0;
+}
+.prose-blog .ProseMirror .react-renderer.node-video {
+  display: block;
+  width: 100%;
+  max-width: 36rem;
+  margin: 1rem 0;
+}
+.prose-blog .ProseMirror .blog-editor-image,
+.prose-blog .blog-editor-image {
+  position: relative;
+  display: block;
+  width: fit-content;
+  max-width: 16rem;
+  margin: 0;
+}
+.prose-blog .ProseMirror .blog-editor-video,
+.prose-blog .blog-editor-video {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 36rem;
+  margin: 0;
+}
+.prose-blog .ProseMirror .blog-editor-image img,
+.prose-blog .blog-editor-image .blog-content-image {
+  display: block;
+  width: auto;
+  max-width: 16rem;
+  max-height: 12rem;
+  height: auto;
+  object-fit: cover;
+  margin: 0;
+}
+.prose-blog .ProseMirror .blog-editor-video video,
+.prose-blog .blog-editor-video .blog-content-video {
+  display: block;
+  width: 100%;
+  max-height: 18rem;
+  margin: 0;
+}
+.prose-blog .blog-editor-image.is-selected,
+.prose-blog .blog-editor-video.is-selected {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+}
+.prose-blog .ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+}
+.prose-blog .ProseMirror p.is-editor-empty:first-child::before {
+  color: color-mix(in oklab, var(--color-silver) 30%, transparent);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.field {
+  width: 100%;
+  border: 1px solid color-mix(in oklab, var(--color-gold) 15%, transparent);
+  background: color-mix(in oklab, var(--color-midnight) 55%, transparent);
+  padding: 0.7rem 0.9rem;
+  color: var(--color-silver);
+  outline: none;
+}
+.field:focus {
+  border-color: color-mix(in oklab, var(--color-gold) 45%, transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

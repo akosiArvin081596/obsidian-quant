@@ -58,20 +58,20 @@ describe("seoData entries", () => {
     }
   });
 
-  it("keeps the paused insights hub noindex", () => {
-    expect(seoData.insights.noIndex).toBe(true);
-    expect(seoFor("insights").robots).toMatchObject({ index: false, follow: false });
+  it("indexes the public insights hub", () => {
+    expect(seoData.insights.noIndex ?? false).toBe(false);
+    expect(seoData.insights.path).toBe("/insights");
+  });
+
+  it("keeps the legacy /blog route noindex", () => {
+    expect(seoData.blog.noIndex).toBe(true);
+    expect(seoFor("blog").robots).toMatchObject({ index: false, follow: false });
   });
 
   it("leaves every other page indexable", () => {
     for (const [key, entry] of entries) {
-      if (key === "insights") continue;
+      if (key === "blog") continue;
       expect(entry.noIndex ?? false, `${key} must stay indexable`).toBe(false);
     }
-  });
-
-  it("indexes the public blog hub", () => {
-    expect(seoData.blog.noIndex ?? false).toBe(false);
-    expect(seoData.blog.path).toBe("/blog");
   });
 });

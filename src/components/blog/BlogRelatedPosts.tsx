@@ -16,7 +16,7 @@ export default function BlogRelatedPosts({ posts, title = "Continue reading" }: 
       <div className="mb-8 flex items-end justify-between gap-4">
         <h2 className="font-serif text-2xl text-ghost lg:text-3xl">{title}</h2>
         <Link
-          href="/blog/"
+          href="/insights/"
           className="text-[.65rem] uppercase tracking-[0.18em] text-gold hover:underline"
         >
           All posts
@@ -29,7 +29,7 @@ export default function BlogRelatedPosts({ posts, title = "Continue reading" }: 
             className="group border border-gold/10 bg-midnight/30 p-5 transition-colors hover:border-gold/25 hover:bg-midnight/50"
           >
             {post.featuredImage ? (
-              <Link href={`/blog/${post.slug}/`} tabIndex={-1} aria-hidden>
+              <Link href={`/insights/${post.slug}/`} tabIndex={-1} aria-hidden>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={post.featuredImage.url}
@@ -43,7 +43,7 @@ export default function BlogRelatedPosts({ posts, title = "Continue reading" }: 
               {formatBlogDate(post.publishedAt)} · {post.readMinutes} min
             </p>
             <h3 className="mt-2 font-serif text-xl text-ghost transition-colors group-hover:text-gold">
-              <Link href={`/blog/${post.slug}/`}>{post.title}</Link>
+              <Link href={`/insights/${post.slug}/`}>{post.title}</Link>
             </h3>
           </article>
         ))}

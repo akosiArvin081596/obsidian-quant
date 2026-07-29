@@ -33,8 +33,8 @@ async function buildInternalContext(): Promise<InternalResolveContext> {
       }),
     ),
     taxonomyPaths: new Set([
-      ...categories.map((c) => ensureTrailingSlash(`/blog/category/${c.slug}`)),
-      ...tags.map((t) => ensureTrailingSlash(`/blog/tag/${t.slug}`)),
+      ...categories.map((c) => ensureTrailingSlash(`/insights/category/${c.slug}`)),
+      ...tags.map((t) => ensureTrailingSlash(`/insights/tag/${t.slug}`)),
     ]),
     uploadsRoot: process.env.UPLOADS_DIR || path.join(process.cwd(), "uploads"),
   };

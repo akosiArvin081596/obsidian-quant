@@ -40,8 +40,8 @@ export function sanitizeContentHtml(dirty: string): string {
     allowedTags: ALLOWED_TAGS,
     allowedAttributes: {
       a: ["href", "name", "target", "rel"],
-      img: ["src", "alt", "title", "width", "height", "loading"],
-      video: ["src", "controls", "preload", "poster", "title", "width", "height", "class"],
+      img: ["src", "alt", "title", "width", "height", "loading", "data-layout", "data-size"],
+      video: ["src", "controls", "preload", "poster", "title", "width", "height", "class", "data-layout"],
       source: ["src", "type"],
       span: ["class"],
       div: ["class"],
@@ -50,6 +50,32 @@ export function sanitizeContentHtml(dirty: string): string {
       td: ["colspan", "rowspan"],
       th: ["colspan", "rowspan"],
       "*": ["class"],
+    },
+    allowedClasses: {
+      img: [
+        "blog-content-image",
+        "blog-img-left", "blog-img-right", "blog-img-center", "blog-img-full",
+        "blog-img-sm", "blog-img-md", "blog-img-lg",
+      ],
+      video: [
+        "blog-content-video",
+        "blog-img-full",
+      ],
+      div: [
+        "blog-img-left", "blog-img-right", "blog-img-center", "blog-img-full",
+        "blog-img-sm", "blog-img-md", "blog-img-lg",
+        "blog-img-clearfix",
+      ],
+    },
+    allowedStyles: {
+      // TipTap TextAlign writes inline style="text-align: ..." on block elements.
+      // Allow only text-align (not arbitrary CSS) so alignment survives sanitization.
+      p:          { "text-align": [/^(left|center|right|justify)$/] },
+      h2:         { "text-align": [/^(left|center|right|justify)$/] },
+      h3:         { "text-align": [/^(left|center|right|justify)$/] },
+      h4:         { "text-align": [/^(left|center|right|justify)$/] },
+      blockquote: { "text-align": [/^(left|center|right|justify)$/] },
+      li:         { "text-align": [/^(left|center|right|justify)$/] },
     },
     allowedSchemes: ["http", "https", "mailto", "tel"],
     transformTags: {

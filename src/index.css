@@ -1489,15 +1489,15 @@ footer.site-footer h4 {
   color: color-mix(in oklab, var(--color-silver) 75%, transparent);
   font-style: italic;
 }
+/* ── Blog image: base (no layout class = fallback to inline-center) ───────── */
 .prose-blog img,
 .prose-blog .blog-content-image {
   display: block;
   max-width: min(100%, 28rem);
-  max-height: 18rem;
-  width: auto;
   height: auto;
+  width: auto;
   object-fit: contain;
-  margin: 1rem 0;
+  margin: 1rem auto;
 }
 .prose-blog video,
 .prose-blog .blog-content-video {
@@ -1508,72 +1508,265 @@ footer.site-footer h4 {
   margin: 1.25rem 0;
   background: var(--color-obsidian);
 }
-/* Editor attachments: medium left-aligned thumbnails */
-.prose-blog .ProseMirror .react-renderer.node-image {
-  display: block;
-  width: fit-content;
-  max-width: 16rem;
-  margin: 1rem 0;
-  margin-left: 0;
+
+/* ── Layout + size via data-* attributes (public article page) ────────────
+   TipTap renderHTML puts data-layout and data-size on the <img> tag.
+   CSS attribute selectors apply the same layout/float/size as the editor.
+────────────────────────────────────────────────────────────────────────── */
+
+/* inline — sits inside text flow, moderate width */
+.prose-blog img[data-layout="inline"] {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0.15rem 0.5rem;
+  float: none;
 }
-.prose-blog .ProseMirror .react-renderer.node-video {
+
+/* float left */
+.prose-blog img[data-layout="left"] {
+  float: left;
+  margin: 0.35rem 1.5rem 0.75rem 0;
+  clear: left;
+  display: block;
+}
+
+/* float right */
+.prose-blog img[data-layout="right"] {
+  float: right;
+  margin: 0.35rem 0 0.75rem 1.5rem;
+  clear: right;
+  display: block;
+}
+
+/* center (top and bottom) */
+.prose-blog img[data-layout="center"] {
+  float: none;
+  display: block;
+  margin: 1rem auto;
+  clear: both;
+}
+
+/* full width */
+.prose-blog img[data-layout="full"] {
+  float: none;
   display: block;
   width: 100%;
-  max-width: 36rem;
+  max-width: none !important;
+  max-height: 70vh;
+  object-fit: cover;
   margin: 1rem 0;
+  clear: both;
 }
-.prose-blog .ProseMirror .blog-editor-image,
+
+/* sizes — for non-floated layouts */
+.prose-blog img[data-size="sm"] { max-width: min(100%, 12rem); }
+.prose-blog img[data-size="md"] { max-width: min(100%, 24rem); }
+.prose-blog img[data-size="lg"] { max-width: min(100%, 40rem); }
+
+/* sizes — for floated layouts (cap at 45% to leave room for text) */
+.prose-blog img[data-layout="left"][data-size="sm"],
+.prose-blog img[data-layout="right"][data-size="sm"] { max-width: min(45%, 12rem); }
+.prose-blog img[data-layout="left"][data-size="md"],
+.prose-blog img[data-layout="right"][data-size="md"] { max-width: min(45%, 24rem); }
+.prose-blog img[data-layout="left"][data-size="lg"],
+.prose-blog img[data-layout="right"][data-size="lg"] { max-width: min(45%, 40rem); }
+
+/* clearfix: any block-level element after a floated image clears it */
+.prose-blog p,
+.prose-blog h2,
+.prose-blog h3,
+.prose-blog h4,
+.prose-blog ul,
+.prose-blog ol,
+.prose-blog blockquote {
+  overflow: hidden; /* creates BFC — text wraps floats correctly */
+}
+
+/* ── Layout classes on editor wrapper divs (editor only) ─────────────────── */
+.prose-blog .blog-img-left  {
+  float: left;
+  margin: 0.35rem 1.5rem 0.75rem 0;
+  clear: left;
+}
+.prose-blog .blog-img-right {
+  float: right;
+  margin: 0.35rem 0 0.75rem 1.5rem;
+  clear: right;
+}
+.prose-blog .blog-img-center {
+  float: none;
+  display: block;
+  margin: 1rem auto;
+  clear: both;
+}
+.prose-blog .blog-img-full {
+  float: none;
+  display: block;
+  width: 100%;
+  max-width: none !important;
+  margin: 1rem 0;
+  clear: both;
+}
+.prose-blog .blog-img-clearfix {
+  clear: both;
+  display: block;
+  height: 0;
+  overflow: hidden;
+}
+
+/* ── TipTap outer react-renderer wrapper ────────────────────────────────────
+   Must be block + full-width so children can expand freely.
+   data-layout/data-size on the inner NodeViewWrapper drive sizing.        */
+.prose-blog .ProseMirror .react-renderer.node-image {
+  display: block;
+  width: 100%;
+}
+
+/* ── Editor node wrapper (NodeViewWrapper div) ───────────────────────────── */
 .prose-blog .blog-editor-image {
   position: relative;
   display: block;
-  width: fit-content;
-  max-width: 16rem;
-  margin: 0;
+  /* default = md, overridden below by data-size */
+  width: min(100%, 24rem);
+  max-width: 100%;
 }
-.prose-blog .ProseMirror .blog-editor-video,
+
+/* Size via data attribute — higher specificity than base, no cascade fight */
+.prose-blog .blog-editor-image[data-size="sm"] { width: min(100%, 12rem); }
+.prose-blog .blog-editor-image[data-size="md"] { width: min(100%, 24rem); }
+.prose-blog .blog-editor-image[data-size="lg"] { width: min(100%, 40rem); }
+
+/* Full width */
+.prose-blog .blog-editor-image[data-layout="full"] {
+  width: 100%;
+  max-width: none;
+  float: none;
+}
+
+/* Float layouts: cap at 45% so text has room beside */
+.prose-blog .blog-editor-image[data-layout="left"] {
+  float: left;
+  margin: 0.35rem 1.5rem 0.5rem 0;
+}
+.prose-blog .blog-editor-image[data-layout="right"] {
+  float: right;
+  margin: 0.35rem 0 0.5rem 1.5rem;
+}
+.prose-blog .blog-editor-image[data-layout="left"][data-size="sm"],
+.prose-blog .blog-editor-image[data-layout="right"][data-size="sm"] { width: min(45%, 12rem); }
+.prose-blog .blog-editor-image[data-layout="left"][data-size="md"],
+.prose-blog .blog-editor-image[data-layout="right"][data-size="md"] { width: min(45%, 24rem); }
+.prose-blog .blog-editor-image[data-layout="left"][data-size="lg"],
+.prose-blog .blog-editor-image[data-layout="right"][data-size="lg"] { width: min(45%, 40rem); }
+
+/* Center */
+.prose-blog .blog-editor-image[data-layout="center"] {
+  float: none;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Inline */
+.prose-blog .blog-editor-image[data-layout="inline"] {
+  float: none;
+}
+
 .prose-blog .blog-editor-video {
   position: relative;
   display: block;
   width: 100%;
   max-width: 36rem;
-  margin: 0;
 }
-.prose-blog .ProseMirror .blog-editor-image img,
-.prose-blog .blog-editor-image .blog-content-image {
+.prose-blog .blog-editor-video.blog-img-full { max-width: none; }
+
+/* image inside editor wrapper — fills the wrapper's explicit width */
+.prose-blog .blog-editor-image img {
   display: block;
-  width: auto;
-  max-width: 16rem;
-  max-height: 12rem;
+  width: 100%;
   height: auto;
-  object-fit: cover;
+  /* Reset the base .prose-blog img max-width — wrapper controls the size */
+  max-width: none;
+  max-height: 28rem;
+  object-fit: contain;
   margin: 0;
 }
-.prose-blog .ProseMirror .blog-editor-video video,
-.prose-blog .blog-editor-video .blog-content-video {
+
+/* video inside editor wrapper */
+.prose-blog .blog-editor-video video {
   display: block;
   width: 100%;
   max-height: 18rem;
   margin: 0;
 }
+
+/* selection outline */
 .prose-blog .blog-editor-image.is-selected,
 .prose-blog .blog-editor-video.is-selected {
   outline: 2px solid var(--color-gold);
   outline-offset: 3px;
 }
-/* Hover-only × remove on editor media previews (TipTap node views) */
-.prose-blog .blog-media-remove {
+
+/* ── Media format toolbar (shown on hover / selected) ────────────────────── */
+.prose-blog .blog-media-toolbar {
+  position: absolute;
+  top: -2.25rem;
+  left: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  background: color-mix(in oklab, var(--color-ink) 95%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-gold) 20%, transparent);
+  padding: 2px;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.12s ease;
+  white-space: nowrap;
 }
-.prose-blog .blog-editor-image:hover .blog-media-remove,
-.prose-blog .blog-editor-video:hover .blog-media-remove,
-.prose-blog .blog-editor-image.is-selected .blog-media-remove,
-.prose-blog .blog-editor-video.is-selected .blog-media-remove,
-.prose-blog .blog-media-remove:focus-visible {
+.prose-blog .blog-editor-image:hover .blog-media-toolbar,
+.prose-blog .blog-editor-image.is-selected .blog-media-toolbar,
+.prose-blog .blog-editor-video:hover .blog-media-toolbar,
+.prose-blog .blog-editor-video.is-selected .blog-media-toolbar {
   opacity: 1;
   pointer-events: auto;
 }
+.prose-blog .blog-media-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.625rem;
+  min-width: 1.625rem;
+  padding: 0 0.3rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--color-silver) 60%, transparent);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+.prose-blog .blog-media-toolbar button:hover,
+.prose-blog .blog-media-toolbar button.is-active {
+  background: color-mix(in oklab, var(--color-gold) 12%, transparent);
+  color: var(--color-gold);
+}
+.prose-blog .blog-media-toolbar .toolbar-sep {
+  width: 1px;
+  height: 1rem;
+  background: color-mix(in oklab, var(--color-gold) 18%, transparent);
+  margin: 0 2px;
+}
+/* remove button lives in toolbar on the right */
+.prose-blog .blog-media-remove {
+  color: color-mix(in oklab, var(--color-silver) 50%, transparent) !important;
+  margin-left: 2px;
+}
+.prose-blog .blog-media-remove:hover {
+  color: var(--color-loss) !important;
+}
+
+/* ── ProseMirror misc ─────────────────────────────────────────────────────── */
 .prose-blog .ProseMirror img.ProseMirror-selectednode {
   outline: 2px solid var(--color-gold);
   outline-offset: 3px;

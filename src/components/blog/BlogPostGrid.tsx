@@ -57,7 +57,7 @@ export function BlogCategoryNav({
     <Section className="border-b border-gold/10 bg-obsidian" spacing="py-8 lg:py-10">
       <div className="flex flex-wrap items-center gap-3">
         <Link
-          href="/blog/"
+          href="/insights/"
           className={`border px-3 py-1.5 text-[.62rem] uppercase tracking-[.18em] transition-colors ${
             !activeSlug
               ? "border-gold/40 bg-gold/10 text-gold"
@@ -69,7 +69,7 @@ export function BlogCategoryNav({
         {categories.map((cat) => (
           <Link
             key={cat.slug}
-            href={`/blog/category/${cat.slug}/`}
+            href={`/insights/category/${cat.slug}/`}
             className={`border px-3 py-1.5 text-[.62rem] uppercase tracking-[.18em] transition-colors ${
               activeSlug === cat.slug
                 ? "border-gold/40 bg-gold/10 text-gold"

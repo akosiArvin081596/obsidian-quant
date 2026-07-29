@@ -6,49 +6,77 @@ import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from "@tip
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     video: {
-      setVideo: (attrs: { src: string; title?: string | null }) => ReturnType;
+      setVideo: (attrs: { src: string; title?: string | null; layout?: string }) => ReturnType;
     };
   }
 }
 
-function RemovableVideoView({ node, deleteNode, selected }: NodeViewProps) {
-  const src = String(node.attrs.src ?? "");
-  const title = node.attrs.title ? String(node.attrs.title) : undefined;
+type VideoLayout = "center" | "full";
+
+const LAYOUT_CLASS: Record<VideoLayout, string> = {
+  center: "",
+  full:   "blog-img-full",
+};
+
+function RemovableVideoView({ node, updateAttributes, deleteNode, selected }: NodeViewProps) {
+  const src    = String(node.attrs.src ?? "");
+  const title  = node.attrs.title ? String(node.attrs.title) : undefined;
+  const layout = (node.attrs.layout as VideoLayout) ?? "center";
+
+  const layouts: { key: VideoLayout; label: string }[] = [
+    { key: "center", label: "Center" },
+    { key: "full",   label: "Full" },
+  ];
 
   return (
     <NodeViewWrapper
       as="div"
-      className={`blog-editor-video group relative my-4 block w-full max-w-xl ${
-        selected ? "is-selected" : ""
-      }`}
       data-drag-handle
+      className={[
+        "blog-editor-video group relative my-4",
+        LAYOUT_CLASS[layout],
+        selected ? "is-selected" : "",
+      ].filter(Boolean).join(" ")}
     >
+      {/* ── Format toolbar ── */}
+      <div className="blog-media-toolbar" contentEditable={false}>
+        {layouts.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            title={label}
+            aria-label={label}
+            aria-pressed={layout === key}
+            className={layout === key ? "is-active" : ""}
+            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); updateAttributes({ layout: key }); }}
+          >
+            {label}
+          </button>
+        ))}
+
+        <span className="toolbar-sep" aria-hidden />
+
+        <button
+          type="button"
+          aria-label="Remove video"
+          title="Remove video"
+          className="blog-media-remove"
+          onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); deleteNode(); }}
+        >
+          ×
+        </button>
+      </div>
+
       <video
         src={src}
         title={title}
         controls
         preload="metadata"
-        className="blog-content-video block w-full max-h-72 bg-obsidian object-contain"
+        className="blog-content-video block w-full bg-obsidian object-contain"
         draggable={false}
       />
-      <button
-        type="button"
-        contentEditable={false}
-        aria-label="Remove video"
-        title="Remove video"
-        className="blog-media-remove absolute top-1.5 right-1.5 z-10 flex h-6 w-6 items-center justify-center border border-gold/30 bg-obsidian/90 text-sm leading-none text-silver hover:border-loss/50 hover:text-loss"
-        onMouseDown={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          deleteNode();
-        }}
-      >
-        ×
-      </button>
     </NodeViewWrapper>
   );
 }
@@ -62,8 +90,19 @@ export const RemovableVideo = Node.create({
 
   addAttributes() {
     return {
-      src: { default: null },
-      title: { default: null },
+      src:    { default: null },
+      title:  { default: null },
+      layout: {
+        default: "center",
+        parseHTML: (el) => (el.getAttribute("data-layout") as VideoLayout) ?? "center",
+        renderHTML: (attrs: Record<string, unknown>) => ({
+          "data-layout": attrs.layout ?? "center",
+          class: [
+            "blog-content-video",
+            LAYOUT_CLASS[(attrs.layout as VideoLayout) ?? "center"],
+          ].filter(Boolean).join(" "),
+        }),
+      },
     };
   },
 
@@ -74,8 +113,9 @@ export const RemovableVideo = Node.create({
         getAttrs: (el) => {
           if (!(el instanceof HTMLElement)) return false;
           return {
-            src: el.getAttribute("src"),
-            title: el.getAttribute("title"),
+            src:    el.getAttribute("src"),
+            title:  el.getAttribute("title"),
+            layout: (el.getAttribute("data-layout") as VideoLayout) ?? "center",
           };
         },
       },
@@ -87,8 +127,7 @@ export const RemovableVideo = Node.create({
       "video",
       mergeAttributes(HTMLAttributes, {
         controls: "true",
-        preload: "metadata",
-        class: "blog-content-video",
+        preload:  "metadata",
       }),
     ];
   },
@@ -98,10 +137,7 @@ export const RemovableVideo = Node.create({
       setVideo:
         (attrs) =>
         ({ commands }) =>
-          commands.insertContent({
-            type: this.name,
-            attrs,
-          }),
+          commands.insertContent({ type: this.name, attrs }),
     };
   },
 

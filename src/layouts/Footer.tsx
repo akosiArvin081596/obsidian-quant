@@ -15,7 +15,7 @@ const groups = [
   {
     title: "Resources",
     links: [
-      ["Blog", "/blog"],
+      ["Insights", "/insights"],
       ["Member Area", "/investor"],
     ],
   },

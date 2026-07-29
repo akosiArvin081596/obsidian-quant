@@ -48,13 +48,13 @@ export default function BlogArticleHero({
       <div className="relative z-10 mx-auto max-w-3xl px-5 pb-10 pt-24 sm:px-6 sm:pt-28 lg:px-8">
         {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[.62rem] uppercase tracking-[.2em] text-silver/35">
-          <Link href="/blog/" className="transition-colors hover:text-gold">
-            Blog
+          <Link href="/insights/" className="transition-colors hover:text-gold">
+            Insights
           </Link>
           {category ? (
             <>
               <span>/</span>
-              <Link href={`/blog/category/${category.slug}/`} className="transition-colors hover:text-gold">
+              <Link href={`/insights/category/${category.slug}/`} className="transition-colors hover:text-gold">
                 {category.name}
               </Link>
             </>

@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import LinkPickerModal from "@/components/admin/LinkPickerModal";
 import { RemovableImage } from "@/components/admin/RemovableImage";
 import { RemovableVideo } from "@/components/admin/RemovableVideo";
+import { readJsonResponse } from "@/lib/readJsonResponse";
 
 type Props = {
   initialJson: unknown;
@@ -106,6 +107,34 @@ const Icons = {
       <polygon points="10 9 16 12 10 15" fill="currentColor" stroke="none" />
     </Icon>
   ),
+  alignLeft: (
+    <Icon>
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="15" y2="12" />
+      <line x1="3" y1="18" x2="18" y2="18" />
+    </Icon>
+  ),
+  alignCenter: (
+    <Icon>
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="6" y1="12" x2="18" y2="12" />
+      <line x1="4" y1="18" x2="20" y2="18" />
+    </Icon>
+  ),
+  alignRight: (
+    <Icon>
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="9" y1="12" x2="21" y2="12" />
+      <line x1="6" y1="18" x2="21" y2="18" />
+    </Icon>
+  ),
+  alignJustify: (
+    <Icon>
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </Icon>
+  ),
   undo: (
     <Icon>
       <path d="M9 14 4 9l5-5" />
@@ -156,13 +185,27 @@ function ToolbarDivider() {
   return <span aria-hidden className="mx-1 hidden h-5 w-px bg-gold/15 sm:block" />;
 }
 
+const IMAGE_MIME = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
+const VIDEO_MIME = new Set(["video/mp4", "video/webm", "video/quicktime"]);
+
+function mediaKind(file: File): "image" | "video" | null {
+  if (IMAGE_MIME.has(file.type)) return "image";
+  if (VIDEO_MIME.has(file.type)) return "video";
+  return null;
+}
+
 export default function TipTapEditor({ initialJson, onChange }: Props) {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<"image" | "video" | null>(null);
+  const [dragOver, setDragOver] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkInitial, setLinkInitial] = useState("");
   const [, setSelectionTick] = useState(0);
+
+  // Keep a stable ref so editorProps callbacks can always call the latest version
+  // without recreating the editor on every render.
+  const uploadAndInsertRef = useRef<(file: File, kind: "image" | "video") => Promise<void>>();
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -186,6 +229,29 @@ export default function TipTapEditor({ initialJson, onChange }: Props) {
       attributes: {
         class:
           "prose-blog min-h-[420px] max-w-none px-3 py-4 text-[1.05rem] leading-relaxed text-silver outline-none",
+      },
+      handlePaste(_view, event) {
+        const items = Array.from(event.clipboardData?.items ?? []);
+        const fileItem = items.find((i) => i.kind === "file" && (IMAGE_MIME.has(i.type) || VIDEO_MIME.has(i.type)));
+        if (!fileItem) return false;
+        const file = fileItem.getAsFile();
+        if (!file) return false;
+        const kind = mediaKind(file);
+        if (!kind) return false;
+        event.preventDefault();
+        void uploadAndInsertRef.current?.(file, kind);
+        return true;
+      },
+      handleDrop(_view, event) {
+        const files = Array.from(event.dataTransfer?.files ?? []);
+        const mediaFiles = files.filter((f) => mediaKind(f) !== null);
+        if (!mediaFiles.length) return false;
+        event.preventDefault();
+        for (const file of mediaFiles) {
+          const kind = mediaKind(file);
+          if (kind) void uploadAndInsertRef.current?.(file, kind);
+        }
+        return true;
       },
     },
     onUpdate: ({ editor: ed }) => {
@@ -218,7 +284,7 @@ export default function TipTapEditor({ initialJson, onChange }: Props) {
       form.set("file", file);
       form.set("altText", file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "));
       const res = await fetch("/api/admin/media/", { method: "POST", body: form });
-      const data = await res.json();
+      const data = await readJsonResponse<{ media: { storageKey: string; altText: string | null }; error?: { message?: string } }>(res);
       if (!res.ok) {
         throw new Error(data?.error?.message || "Upload failed");
       }
@@ -238,6 +304,9 @@ export default function TipTapEditor({ initialJson, onChange }: Props) {
     }
   }
 
+  // Keep the ref in sync after every render so the editorProps callbacks are always fresh.
+  uploadAndInsertRef.current = uploadAndInsert;
+
   function openLinkModal() {
     if (!editor) return;
     const existing = editor.getAttributes("link").href as string | undefined;
@@ -250,7 +319,13 @@ export default function TipTapEditor({ initialJson, onChange }: Props) {
   }
 
   return (
-    <div className="border border-gold/15 bg-midnight/30">
+    <div
+      className={`border bg-midnight/30 transition-colors ${dragOver ? "border-gold/60 ring-1 ring-gold/30" : "border-gold/15"}`}
+      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+      onDragEnter={() => setDragOver(true)}
+      onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOver(false); }}
+      onDrop={() => setDragOver(false)}
+    >
       <input
         ref={imageInputRef}
         type="file"
@@ -337,6 +412,37 @@ export default function TipTapEditor({ initialJson, onChange }: Props) {
           active={editor.isActive("blockquote")}
         >
           {Icons.quote}
+        </ToolbarButton>
+
+        <ToolbarDivider />
+
+        <ToolbarButton
+          label="Align left"
+          onClick={() => editor.chain().focus().setTextAlign("left").run()}
+          active={editor.isActive({ textAlign: "left" })}
+        >
+          {Icons.alignLeft}
+        </ToolbarButton>
+        <ToolbarButton
+          label="Align center"
+          onClick={() => editor.chain().focus().setTextAlign("center").run()}
+          active={editor.isActive({ textAlign: "center" })}
+        >
+          {Icons.alignCenter}
+        </ToolbarButton>
+        <ToolbarButton
+          label="Align right"
+          onClick={() => editor.chain().focus().setTextAlign("right").run()}
+          active={editor.isActive({ textAlign: "right" })}
+        >
+          {Icons.alignRight}
+        </ToolbarButton>
+        <ToolbarButton
+          label="Justify"
+          onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+          active={editor.isActive({ textAlign: "justify" })}
+        >
+          {Icons.alignJustify}
         </ToolbarButton>
 
         <ToolbarDivider />

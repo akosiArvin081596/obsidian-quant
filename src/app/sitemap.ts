@@ -11,7 +11,7 @@ const STATIC_PATHS = [
   "/strategy/",
   "/architecture/",
   "/contact/",
-  "/blog/",
+  "/insights/",
   "/legal/regulatory-disclosure/",
   "/legal/data-cryptography/",
 ];
@@ -20,7 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries: MetadataRoute.Sitemap = STATIC_PATHS.map((path) => ({
     url: `${SITE_URL}${path === "/" ? "/" : path}`,
     changeFrequency: path === "/" ? "weekly" : "monthly",
-    priority: path === "/" ? 1 : path.startsWith("/blog") ? 0.7 : 0.8,
+    priority: path === "/" ? 1 : path.startsWith("/insights") ? 0.7 : 0.8,
   }));
 
   let postEntries: MetadataRoute.Sitemap = [];
@@ -48,12 +48,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     postEntries = [
       ...postEntries,
       ...tags.map((t) => ({
-        url: `${SITE_URL}/blog/tag/${t.slug}/`,
+        url: `${SITE_URL}/insights/tag/${t.slug}/`,
         changeFrequency: "weekly" as const,
         priority: 0.4,
       })),
       ...categories.map((c) => ({
-        url: `${SITE_URL}/blog/category/${c.slug}/`,
+        url: `${SITE_URL}/insights/category/${c.slug}/`,
         changeFrequency: "weekly" as const,
         priority: 0.4,
       })),

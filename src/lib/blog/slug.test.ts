@@ -10,7 +10,7 @@ describe("slugify", () => {
   });
 
   it("builds trailing-slash blog paths", () => {
-    expect(blogPostPath("market-notes")).toBe("/blog/market-notes/");
+    expect(blogPostPath("market-notes")).toBe("/insights/market-notes/");
   });
 });
 

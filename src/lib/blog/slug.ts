@@ -15,5 +15,5 @@ export function ensureTrailingSlash(path: string): string {
 }
 
 export function blogPostPath(slug: string): string {
-  return ensureTrailingSlash(`/blog/${slug}`);
+  return ensureTrailingSlash(`/insights/${slug}`);
 }

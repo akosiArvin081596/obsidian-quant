@@ -42,8 +42,8 @@ describe("classifyHref", () => {
 describe("resolveInternalPath", () => {
   const ctx = {
     staticPaths: knownStaticPaths(),
-    publishedBlogPaths: new Set(["/blog/hello-world/"]),
-    redirectSources: new Set(["/blog/old-slug/"]),
+    publishedBlogPaths: new Set(["/insights/hello-world/"]),
+    redirectSources: new Set(["/insights/old-slug/"]),
   };
 
   it("accepts known static routes", () => {
@@ -51,16 +51,16 @@ describe("resolveInternalPath", () => {
     expect(resolveInternalPath("/contact/", ctx).ok).toBe(true);
   });
 
-  it("accepts published blog slugs", () => {
-    expect(resolveInternalPath("/blog/hello-world/", ctx).ok).toBe(true);
+  it("accepts published insights slugs", () => {
+    expect(resolveInternalPath("/insights/hello-world/", ctx).ok).toBe(true);
   });
 
   it("accepts active redirects", () => {
-    expect(resolveInternalPath("/blog/old-slug/", ctx).ok).toBe(true);
+    expect(resolveInternalPath("/insights/old-slug/", ctx).ok).toBe(true);
   });
 
-  it("flags missing blog slugs as broken", () => {
-    const r = resolveInternalPath("/blog/missing/", ctx);
+  it("flags missing insights slugs as broken", () => {
+    const r = resolveInternalPath("/insights/missing/", ctx);
     expect(r.ok).toBe(false);
   });
 });

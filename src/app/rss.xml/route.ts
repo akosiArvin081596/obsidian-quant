@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { SITE_URL } from "@/lib/seo";
-import { blogPostPath } from "@/lib/blog/slug";
+import { blogPostPath } from "@/lib/insights/slug";
 import { BRAND } from "@/content/site";
 
 export const dynamic = "force-dynamic";
@@ -59,7 +59,7 @@ export async function GET() {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>${escapeXml(BRAND.name)} Blog</title>
-    <link>${SITE_URL}/blog/</link>
+    <link>${SITE_URL}/insights/</link>
     <description>${escapeXml("Research notes and institutional commentary from " + BRAND.name)}</description>
     <language>en-us</language>
     <lastBuildDate>${lastBuild}</lastBuildDate>

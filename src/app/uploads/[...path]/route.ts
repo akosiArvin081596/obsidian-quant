@@ -26,7 +26,14 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
     return new NextResponse("Not found", { status: 404 });
   }
 
-  const filePath = path.join(uploadsRoot(), ...segments);
+  // Defence in depth: resolve the final path and confirm it is still inside the
+  // uploads root, so an absolute segment or an encoding trick that slips past the
+  // ".." check above still cannot escape the directory.
+  const root = path.resolve(uploadsRoot());
+  const filePath = path.resolve(root, ...segments);
+  if (filePath !== root && !filePath.startsWith(root + path.sep)) {
+    return new NextResponse("Not found", { status: 404 });
+  }
   if (!existsSync(filePath) || !statSync(filePath).isFile()) {
     return new NextResponse("Not found", { status: 404 });
   }

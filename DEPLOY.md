@@ -5,7 +5,7 @@ Next.js 15 App Router on Node (`next start`), reverse-proxied by nginx.
 preview/staging alias on the **same VPS**.
 
 `npm run build` runs `prisma generate && next build`. Process manager (PM2 or
-systemd) runs `next start` on `127.0.0.1:3000`. nginx proxies `/` to that process
+systemd) runs `next start` on `127.0.0.1:3006`. nginx proxies `/` to that process
 (see `deploy/nginx-next-proxy.conf`) while keeping Yahoo + lead proxy includes.
 
 Blog CMS requires PostgreSQL (`DATABASE_URL`) and a writable uploads directory
@@ -20,7 +20,7 @@ push to main ──▶ GitHub Actions ──ssh──▶ VPS forced-command ─�
                                                                   ├─ prisma migrate deploy
                                                                   ├─ npm run build
                                                                   └─ pm2 restart obsidian-quant
-                                                          nginx → 127.0.0.1:3000
+                                                          nginx → 127.0.0.1:3006
 ```
 
 The deploy script should migrate + rebuild + restart Node — it does **not**
@@ -47,7 +47,7 @@ Contributors cannot do these steps. Repo/VPS owner only. Prefer **preview**
    - `npm ci`
    - `npx prisma migrate deploy`
    - `npm run build` (no more `out/` → `dist/` sync)
-   - `pm2 restart obsidian-quant` (or equivalent) running `next start` on `127.0.0.1:3000`
+   - `pm2 restart obsidian-quant` (or equivalent) running `next start` on `127.0.0.1:3006`
 5. **First boot after this PR merges** — once code is on the VPS:
    - `npx prisma migrate deploy`
    - `npm run db:seed` (creates admin + roles; change the default password immediately)

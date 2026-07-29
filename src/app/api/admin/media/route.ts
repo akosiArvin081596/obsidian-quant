@@ -27,6 +27,24 @@ function uploadsRoot() {
   return process.env.UPLOADS_DIR || path.join(process.cwd(), "uploads");
 }
 
+// Identify the real format from the file's magic bytes, not the client-declared
+// Content-Type (which is trivially spoofable). Returns an allowed MIME or null.
+function sniffMime(buf: Buffer): string | null {
+  if (buf.length < 12) return null;
+  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return "image/jpeg";
+  if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) return "image/png";
+  if (buf.toString("ascii", 0, 4) === "RIFF" && buf.toString("ascii", 8, 12) === "WEBP") return "image/webp";
+  if (buf[0] === 0x1a && buf[1] === 0x45 && buf[2] === 0xdf && buf[3] === 0xa3) return "video/webm";
+  // ISO-BMFF (ftyp box) — brand at bytes 8..12 distinguishes avif / mov / mp4.
+  if (buf.toString("ascii", 4, 8) === "ftyp") {
+    const brand = buf.toString("ascii", 8, 12);
+    if (brand === "avif" || brand === "avis") return "image/avif";
+    if (brand.startsWith("qt")) return "video/quicktime";
+    return "video/mp4";
+  }
+  return null;
+}
+
 export async function GET(req: NextRequest) {
   try {
     await requireUser(PERMISSIONS.mediaManage);
@@ -75,11 +93,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const ext = EXT_BY_MIME[file.type] ?? "bin";
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    // Verify the bytes actually match an allowed format, and that it agrees with
+    // the declared image-vs-video family. Store the sniffed type/extension so a
+    // spoofed Content-Type can never dictate what lands on disk.
+    const sniffed = sniffMime(buffer);
+    if (!sniffed || !ALLOWED.has(sniffed) || VIDEO_TYPES.has(sniffed) !== isVideo) {
+      throw new ApiError(
+        400,
+        "File contents don't match a supported image or video format.",
+        "validation",
+      );
+    }
+
+    const ext = EXT_BY_MIME[sniffed] ?? "bin";
     const storageKey = `${new Date().toISOString().slice(0, 10)}/${randomBytes(12).toString("hex")}.${ext}`;
     const dest = path.join(uploadsRoot(), storageKey);
     await mkdir(path.dirname(dest), { recursive: true });
-    const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(dest, buffer);
 
     const altText = String(form.get("altText") ?? "") || null;
@@ -87,7 +118,7 @@ export async function POST(req: NextRequest) {
       data: {
         storageKey,
         originalName: file.name,
-        mimeType: file.type,
+        mimeType: sniffed,
         fileSize: file.size,
         altText,
         uploadedById: user.id,

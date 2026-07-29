@@ -53,7 +53,7 @@ export const NAV = [
   { to: "/firm", label: "The Firm" },
   { to: "/strategy", label: "Strategy" },
   { to: "/architecture", label: "Architecture" },
-  // Insights restored when articles are ready
+  { to: "/blog", label: "Blog" },
 ] as const;
 
 export const LEGAL = [

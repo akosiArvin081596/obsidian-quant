@@ -1,3 +1,5 @@
+"use client";
+
 import Eyebrow from "./Eyebrow";
 import Reveal from "./Reveal";
 import AuroraRibbon from "./AuroraRibbon";

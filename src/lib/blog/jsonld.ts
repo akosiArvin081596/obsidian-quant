@@ -1,0 +1,44 @@
+import { BRAND } from "@/content/site";
+import { SITE_URL } from "@/lib/seo";
+import { blogPostPath } from "@/lib/blog/slug";
+import type { PostPublicPayload } from "@/lib/blog/includes";
+
+function absoluteMediaUrl(storageKey: string | undefined | null): string | undefined {
+  if (!storageKey) return undefined;
+  if (storageKey.startsWith("http")) return storageKey;
+  return `${SITE_URL}/uploads/${storageKey.replace(/^\/+/, "")}`;
+}
+
+export function buildBlogPostingJsonLd(post: PostPublicPayload) {
+  const url = `${SITE_URL}${blogPostPath(post.slug!)}`;
+  const image = absoluteMediaUrl(post.featuredMedia?.storageKey);
+  const description =
+    post.seo?.metaDescription || post.excerpt || BRAND.intro;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": post.seo?.schemaType || "BlogPosting",
+    headline: post.title,
+    description,
+    ...(image ? { image: [image] } : {}),
+    datePublished: post.publishedAt?.toISOString(),
+    dateModified: post.updatedAt.toISOString(),
+    author: {
+      "@type": "Person",
+      name: post.author.name,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: BRAND.name,
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/assets/obsidian-gem.webp`,
+      },
+    },
+    mainEntityOfPage: url,
+  };
+}
+
+export function mediaPublicUrl(storageKey: string): string {
+  return `/uploads/${storageKey.replace(/^\/+/, "")}`;
+}

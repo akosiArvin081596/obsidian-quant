@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { ensureGoogleAnalytics, trackPageview } from "../lib/analytics";
+import { ensureGoogleAnalytics, setGaMeasurementId, trackPageview } from "../lib/analytics";
 
 /**
  * Loads GA4 (once) and records client navigations.
@@ -14,7 +14,13 @@ const GoogleAnalytics = () => {
   const search = searchParams?.toString();
 
   useEffect(() => {
-    ensureGoogleAnalytics();
+    void fetch("/api/public/config/ga/")
+      .then((r) => r.json())
+      .then((data: { gaMeasurementId?: string }) => {
+        if (data.gaMeasurementId) setGaMeasurementId(data.gaMeasurementId);
+        ensureGoogleAnalytics();
+      })
+      .catch(() => ensureGoogleAnalytics());
   }, []);
 
   useEffect(() => {

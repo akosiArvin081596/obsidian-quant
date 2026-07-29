@@ -1,7 +1,6 @@
-"use client";
-
 import Link from "next/link";
 import Logo from "../components/Logo";
+import NewsletterSignup from "../components/NewsletterSignup";
 import { BRAND, LEGAL } from "../content/site";
 
 const groups = [
@@ -15,7 +14,10 @@ const groups = [
   },
   {
     title: "Resources",
-    links: [["Member Area", "/investor"]],
+    links: [
+      ["Blog", "/blog"],
+      ["Member Area", "/investor"],
+    ],
   },
 ] as const;
 
@@ -63,6 +65,7 @@ const Footer = () => (
         >
           Request Access →
         </Link>
+        <NewsletterSignup />
       </div>
     </div>
 

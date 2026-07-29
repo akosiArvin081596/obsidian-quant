@@ -1,16 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Static HTML per route — nginx keeps serving dist/ unchanged.
-  output: "export",
-  images: { unoptimized: true },
-  // Directory indexes (firm/index.html) so existing nginx
-  // `try_files $uri $uri/ /index.html` keeps serving deep links.
+  // Node runtime (CMS APIs, auth, SSR blog). nginx reverse-proxies `next start`.
   trailingSlash: true,
   // Keep page URLs with trailing slash via Link; don't 308-redirect /api/* fetches.
   skipTrailingSlashRedirect: true,
-  // Dev-only proxies (mirror deploy/nginx-*.conf).
-  // Ignored for static `next build` / `out/` — production uses nginx.
+  // Dev-only proxies (production Yahoo/lead stay on nginx — see deploy/*.conf).
   async rewrites() {
     const rewrites = [
       {

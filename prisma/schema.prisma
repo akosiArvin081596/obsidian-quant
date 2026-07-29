@@ -1,0 +1,328 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  active
+  disabled
+}
+
+enum PostStatus {
+  draft
+  pending_review
+  scheduled
+  published
+  unpublished
+  archived
+  trash
+}
+
+enum NewsletterStatus {
+  active
+  unsubscribed
+}
+
+enum CommentStatus {
+  pending
+  approved
+  rejected
+  spam
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  passwordHash String     @map("password_hash")
+  status       UserStatus @default(active)
+  bio          String?
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  roles         UserRole[]
+  posts         Post[]            @relation("PostAuthor")
+  revisions     PostRevision[]
+  media         Media[]
+  redirects     Redirect[]
+  auditLogs       AuditLog[]
+  siteSettings    SiteSetting[]
+  sessions        Session[]
+  moderatedComments Comment[] @relation("CommentModerator")
+
+  @@map("users")
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  users       UserRole[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  key         String           @unique
+  description String?
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model UserRole {
+  userId String @map("user_id")
+  roleId String @map("role_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  roleId       String     @map("role_id")
+  permissionId String     @map("permission_id")
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model Post {
+  id                String     @id @default(cuid())
+  authorId          String     @map("author_id")
+  title             String     @default("")
+  subtitle          String?
+  slug              String?
+  excerpt           String?
+  status            PostStatus @default(draft)
+  contentJson       Json       @default("{}") @map("content_json")
+  contentHtml       String     @default("") @map("content_html")
+  featuredMediaId   String?    @map("featured_media_id")
+  primaryCategoryId String?    @map("primary_category_id")
+  focusKeyword      String?    @map("focus_keyword")
+  publishedAt       DateTime?  @map("published_at")
+  scheduledAt       DateTime?  @map("scheduled_at")
+  canonicalUrl      String?    @map("canonical_url")
+  robotsIndex       Boolean    @default(true) @map("robots_index")
+  robotsFollow      Boolean    @default(true) @map("robots_follow")
+  version           Int        @default(1)
+  createdAt         DateTime   @default(now()) @map("created_at")
+  updatedAt         DateTime   @updatedAt @map("updated_at")
+  deletedAt         DateTime?  @map("deleted_at")
+
+  author          User            @relation("PostAuthor", fields: [authorId], references: [id])
+  featuredMedia   Media?          @relation("FeaturedMedia", fields: [featuredMediaId], references: [id])
+  primaryCategory Category?       @relation("PrimaryCategory", fields: [primaryCategoryId], references: [id])
+  seo             PostSeo?
+  revisions       PostRevision[]
+  tags            PostTag[]
+  categories      PostCategory[]
+  comments        Comment[]
+
+  @@unique([slug])
+  @@index([status])
+  @@index([authorId])
+  @@index([publishedAt])
+  @@index([updatedAt])
+  @@map("posts")
+}
+
+model PostSeo {
+  postId            String  @id @map("post_id")
+  metaTitle         String? @map("meta_title")
+  metaDescription   String? @map("meta_description")
+  socialTitle       String? @map("social_title")
+  socialDescription String? @map("social_description")
+  socialMediaId     String? @map("social_media_id")
+  schemaType        String  @default("BlogPosting") @map("schema_type")
+  customSchemaJson  Json?   @map("custom_schema_json")
+
+  post        Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  socialMedia Media? @relation(fields: [socialMediaId], references: [id])
+
+  @@map("post_seo")
+}
+
+model PostRevision {
+  id           String   @id @default(cuid())
+  postId       String   @map("post_id")
+  revisionNo   Int      @map("revision_no")
+  snapshotJson Json     @map("snapshot_json")
+  createdById  String   @map("created_by")
+  createdAt    DateTime @default(now()) @map("created_at")
+  reason       String?
+
+  post      Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  @@unique([postId, revisionNo])
+  @@index([postId])
+  @@map("post_revisions")
+}
+
+model Tag {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  posts       PostTag[]
+
+  @@map("tags")
+}
+
+model PostTag {
+  postId String @map("post_id")
+  tagId  String @map("tag_id")
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("post_tags")
+}
+
+model Category {
+  id          String         @id @default(cuid())
+  parentId    String?        @map("parent_id")
+  name        String         @unique
+  slug        String         @unique
+  description String?
+  createdAt   DateTime       @default(now()) @map("created_at")
+  parent      Category?      @relation("CategoryTree", fields: [parentId], references: [id])
+  children    Category[]     @relation("CategoryTree")
+  posts       PostCategory[]
+  primaryFor  Post[]         @relation("PrimaryCategory")
+
+  @@map("categories")
+}
+
+model PostCategory {
+  postId     String  @map("post_id")
+  categoryId String  @map("category_id")
+  isPrimary  Boolean @default(false) @map("is_primary")
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([postId, categoryId])
+  @@map("post_categories")
+}
+
+model Media {
+  id           String   @id @default(cuid())
+  storageKey   String   @unique @map("storage_key")
+  originalName String   @map("original_name")
+  mimeType     String   @map("mime_type")
+  fileSize     Int      @map("file_size")
+  width        Int?
+  height       Int?
+  altText      String?  @map("alt_text")
+  caption      String?
+  credit       String?
+  focalX       Float?   @map("focal_x")
+  focalY       Float?   @map("focal_y")
+  uploadedById String   @map("uploaded_by")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  uploadedBy    User      @relation(fields: [uploadedById], references: [id])
+  featuredPosts Post[]    @relation("FeaturedMedia")
+  socialSeo     PostSeo[]
+
+  @@index([uploadedById])
+  @@map("media")
+}
+
+model Redirect {
+  id             String   @id @default(cuid())
+  sourcePath     String   @unique @map("source_path")
+  destinationUrl String   @map("destination_url")
+  statusCode     Int      @default(301) @map("status_code")
+  active         Boolean  @default(true)
+  hitCount       Int      @default(0) @map("hit_count")
+  createdById    String   @map("created_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  @@map("redirects")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?  @map("user_id")
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id")
+  beforeJson Json?    @map("before_json")
+  afterJson  Json?    @map("after_json")
+  ipAddress  String?  @map("ip_address")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model SiteSetting {
+  key       String   @id
+  valueJson Json     @map("value_json")
+  updatedById String? @map("updated_by")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  updatedBy User? @relation(fields: [updatedById], references: [id])
+
+  @@map("site_settings")
+}
+
+model NewsletterSubscriber {
+  id             String           @id @default(cuid())
+  email          String           @unique
+  status         NewsletterStatus @default(active)
+  source         String?
+  createdAt      DateTime         @default(now()) @map("created_at")
+  unsubscribedAt DateTime?        @map("unsubscribed_at")
+
+  @@index([status])
+  @@map("newsletter_subscribers")
+}
+
+model Comment {
+  id            String        @id @default(cuid())
+  postId        String        @map("post_id")
+  authorName    String        @map("author_name")
+  authorEmail   String?       @map("author_email")
+  body          String
+  status        CommentStatus @default(pending)
+  createdAt     DateTime      @default(now()) @map("created_at")
+  moderatedAt   DateTime?     @map("moderated_at")
+  moderatedById String?       @map("moderated_by")
+
+  post        Post  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  moderatedBy User? @relation("CommentModerator", fields: [moderatedById], references: [id])
+
+  @@index([postId])
+  @@index([status])
+  @@map("comments")
+}

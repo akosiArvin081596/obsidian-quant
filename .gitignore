@@ -40,3 +40,8 @@ tsconfig.tsbuildinfo
 # Scoped to the exact file so real assets under src/ or public/ are unaffected.
 # (Brand assets are SVG; there are no legitimate root-level PNGs.)
 /before-essence-positioning-boundary.png
+
+# Blog CMS local uploads (served via /uploads/* in Node runtime)
+/uploads/
+
+tmp/

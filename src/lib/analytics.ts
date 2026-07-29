@@ -1,5 +1,18 @@
 /** Google Analytics 4 measurement ID (gtag.js). */
-export const GA_MEASUREMENT_ID = "G-VSGHTHYWHD";
+export const DEFAULT_GA_MEASUREMENT_ID = "G-VSGHTHYWHD";
+
+let activeGaMeasurementId = DEFAULT_GA_MEASUREMENT_ID;
+
+export function setGaMeasurementId(id: string) {
+  if (id?.trim()) activeGaMeasurementId = id.trim();
+}
+
+export function getGaMeasurementId(): string {
+  return activeGaMeasurementId;
+}
+
+/** @deprecated Use getGaMeasurementId() — kept for existing imports */
+export const GA_MEASUREMENT_ID = DEFAULT_GA_MEASUREMENT_ID;
 
 const SCRIPT_ID = "ga-gtag-js";
 let lastTrackedPath: string | null = null;
@@ -29,15 +42,16 @@ export const ensureGoogleAnalytics = () => {
     window.gtag("js", new Date());
     // send_page_view off: trackPageview() below owns every page_view,
     // including the landing page — otherwise the first page is double-counted.
-    window.gtag("config", GA_MEASUREMENT_ID, { send_page_view: false });
+    window.gtag("config", getGaMeasurementId(), { send_page_view: false });
   }
 
+  const measurementId = getGaMeasurementId();
   if (document.getElementById(SCRIPT_ID)) return;
 
   const script = document.createElement("script");
   script.id = SCRIPT_ID;
   script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
   document.head.appendChild(script);
 };
 
@@ -46,7 +60,7 @@ export const trackPageview = (path: string) => {
   if (typeof window.gtag !== "function") return;
   if (lastTrackedPath === path) return;
   lastTrackedPath = path;
-  window.gtag("config", GA_MEASUREMENT_ID, {
+  window.gtag("config", getGaMeasurementId(), {
     page_path: path,
   });
 };

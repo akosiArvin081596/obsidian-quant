@@ -29,7 +29,7 @@ function RemovableImageView({ node, deleteNode, selected }: NodeViewProps) {
         contentEditable={false}
         aria-label="Remove image"
         title="Remove image"
-        className="absolute top-1.5 right-1.5 z-10 flex h-6 w-6 items-center justify-center border border-gold/30 bg-obsidian/90 text-sm leading-none text-silver opacity-0 transition-opacity hover:border-loss/50 hover:text-loss group-hover:opacity-100 focus-visible:opacity-100"
+        className="blog-media-remove absolute top-1.5 right-1.5 z-10 flex h-6 w-6 items-center justify-center border border-gold/30 bg-obsidian/90 text-sm leading-none text-silver hover:border-loss/50 hover:text-loss"
         onMouseDown={(e) => {
           e.preventDefault();
           e.stopPropagation();

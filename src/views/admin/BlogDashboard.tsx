@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { PERMISSIONS } from "@/lib/auth/permissions";
 
 type Summary = {
   published: number;
@@ -50,6 +51,10 @@ export default function BlogDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [canDelete, setCanDelete] = useState(false);
+  const [canRestore, setCanRestore] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const query = useMemo(() => {
     const params = new URLSearchParams();
@@ -63,11 +68,22 @@ export default function BlogDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/posts/?${query}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error?.message || "Failed to load posts");
+      const [postsRes, authRes] = await Promise.all([
+        fetch(`/api/admin/posts/?${query}`),
+        fetch("/api/admin/auth/"),
+      ]);
+      const data = await postsRes.json();
+      if (!postsRes.ok) throw new Error(data?.error?.message || "Failed to load posts");
       setItems(data.items);
       setSummary(data.summary);
+      if (authRes.ok) {
+        const authData = await authRes.json();
+        const perms: string[] = authData.user?.permissions ?? [];
+        const roles: string[] = authData.user?.roles ?? [];
+        setCanDelete(perms.includes(PERMISSIONS.postsDelete));
+        setCanRestore(perms.includes(PERMISSIONS.postsRestore));
+        setIsAdmin(roles.includes("Administrator"));
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
     } finally {
@@ -96,6 +112,66 @@ export default function BlogDashboard() {
       setCreating(false);
     }
   }
+
+  async function trashPost(post: PostRow) {
+    if (!canDelete) return;
+    const label = post.title.trim() || "Untitled draft";
+    if (!window.confirm(`Move “${label}” to Trash?`)) return;
+    setBusyId(post.id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/posts/${post.id}/`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error?.message || "Could not move to Trash");
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not move to Trash");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function restorePost(post: PostRow) {
+    if (!canRestore) return;
+    setBusyId(post.id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/posts/${post.id}/restore/`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error?.message || "Could not restore post");
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not restore post");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function purgePost(post: PostRow) {
+    if (!isAdmin || !canDelete) return;
+    const label = post.title.trim() || "Untitled draft";
+    if (
+      !window.confirm(
+        `Permanently delete “${label}”? This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+    setBusyId(post.id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/posts/${post.id}/purge/`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error?.message || "Could not permanently delete");
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not permanently delete");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  const inTrash = tab === "trash";
 
   return (
     <div className="space-y-8">
@@ -150,6 +226,7 @@ export default function BlogDashboard() {
               }`}
             >
               {t.label}
+              {t.key === "trash" && summary?.trash ? ` (${summary.trash})` : ""}
             </button>
           ))}
         </div>
@@ -185,69 +262,138 @@ export default function BlogDashboard() {
             ) : items.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-10 text-center text-silver/50">
-                  No posts yet. Click <span className="text-gold">Write a Blog</span> to create the first draft.
+                  {inTrash ? (
+                    "Trash is empty."
+                  ) : (
+                    <>
+                      No posts yet. Click <span className="text-gold">Write a Blog</span> to create the
+                      first draft.
+                    </>
+                  )}
                 </td>
               </tr>
             ) : (
-              items.map((post) => (
-                <tr key={post.id} className="border-t border-gold/10">
-                  <td className="px-4 py-3">
-                    <Link href={`/admin/blog/${post.id}/`} className="text-silver hover:text-gold">
-                      {post.title.trim() || "Untitled draft"}
-                    </Link>
-                    {post.primaryCategory ? (
-                      <p className="mt-1 text-[.65rem] text-silver/40">{post.primaryCategory.name}</p>
-                    ) : null}
-                  </td>
-                  <td className="px-4 py-3 text-silver/65">
-                    <span className="capitalize">{post.status.replace("_", " ")}</span>
-                    {post.status === "scheduled" && post.scheduledAt ? (
-                      <p className="mt-1 text-[.65rem] text-gold/70">
-                        {new Date(post.scheduledAt).toLocaleString(undefined, {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        })}
-                      </p>
-                    ) : null}
-                  </td>
-                  <td className="px-4 py-3 text-silver/65">{post.author.name}</td>
-                  <td className="px-4 py-3 text-silver/55">
-                    {new Date(post.updatedAt).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-3 text-silver/65">{post.seoScore}%</td>
-                  <td className="px-4 py-3">
-                    <Link href={`/admin/blog/${post.id}/`} className="text-gold hover:underline">
-                      Edit
-                    </Link>
-                    {" · "}
-                    <button
-                      type="button"
-                      className="text-silver/50 hover:text-gold"
-                      onClick={async () => {
-                        const res = await fetch(`/api/admin/posts/${post.id}/duplicate/`, {
-                          method: "POST",
-                        });
-                        const data = await res.json();
-                        if (!res.ok) {
-                          setError(data?.error?.message || "Duplicate failed");
-                          return;
-                        }
-                        router.push(`/admin/blog/${data.post.id}/`);
-                      }}
-                    >
-                      Duplicate
-                    </button>
-                    {post.slug && post.status === "published" ? (
-                      <>
-                        {" · "}
-                        <Link href={`/blog/${post.slug}/`} className="text-silver/50 hover:text-gold">
-                          View
+              items.map((post) => {
+                const busy = busyId === post.id;
+                const isTrashed = post.status === "trash";
+                return (
+                  <tr key={post.id} className="border-t border-gold/10">
+                    <td className="px-4 py-3">
+                      {isTrashed ? (
+                        <span className="text-silver/70">{post.title.trim() || "Untitled draft"}</span>
+                      ) : (
+                        <Link href={`/admin/blog/${post.id}/`} className="text-silver hover:text-gold">
+                          {post.title.trim() || "Untitled draft"}
                         </Link>
-                      </>
-                    ) : null}
-                  </td>
-                </tr>
-              ))
+                      )}
+                      {post.primaryCategory ? (
+                        <p className="mt-1 text-[.65rem] text-silver/40">{post.primaryCategory.name}</p>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3 text-silver/65">
+                      <span className="capitalize">{post.status.replace("_", " ")}</span>
+                      {post.status === "scheduled" && post.scheduledAt ? (
+                        <p className="mt-1 text-[.65rem] text-gold/70">
+                          {new Date(post.scheduledAt).toLocaleString(undefined, {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })}
+                        </p>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3 text-silver/65">{post.author.name}</td>
+                    <td className="px-4 py-3 text-silver/55">
+                      {new Date(post.updatedAt).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-silver/65">{post.seoScore}%</td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        {!isTrashed ? (
+                          <>
+                            <Link
+                              href={`/admin/blog/${post.id}/`}
+                              className="text-gold hover:underline"
+                            >
+                              Edit
+                            </Link>
+                            <span className="text-silver/25">·</span>
+                            <button
+                              type="button"
+                              disabled={busy}
+                              className="text-silver/50 hover:text-gold disabled:opacity-50"
+                              onClick={async () => {
+                                setBusyId(post.id);
+                                const res = await fetch(`/api/admin/posts/${post.id}/duplicate/`, {
+                                  method: "POST",
+                                });
+                                const data = await res.json();
+                                setBusyId(null);
+                                if (!res.ok) {
+                                  setError(data?.error?.message || "Duplicate failed");
+                                  return;
+                                }
+                                router.push(`/admin/blog/${data.post.id}/`);
+                              }}
+                            >
+                              Duplicate
+                            </button>
+                            {post.slug && post.status === "published" ? (
+                              <>
+                                <span className="text-silver/25">·</span>
+                                <Link
+                                  href={`/blog/${post.slug}/`}
+                                  className="text-silver/50 hover:text-gold"
+                                >
+                                  View
+                                </Link>
+                              </>
+                            ) : null}
+                            {canDelete ? (
+                              <>
+                                <span className="text-silver/25">·</span>
+                                <button
+                                  type="button"
+                                  disabled={busy}
+                                  className="text-silver/50 hover:text-loss disabled:opacity-50"
+                                  onClick={() => void trashPost(post)}
+                                >
+                                  {busy ? "…" : "Delete"}
+                                </button>
+                              </>
+                            ) : null}
+                          </>
+                        ) : (
+                          <>
+                            {canRestore ? (
+                              <button
+                                type="button"
+                                disabled={busy}
+                                className="text-gold hover:underline disabled:opacity-50"
+                                onClick={() => void restorePost(post)}
+                              >
+                                {busy ? "…" : "Restore"}
+                              </button>
+                            ) : null}
+                            {isAdmin && canDelete ? (
+                              <>
+                                {canRestore ? <span className="text-silver/25">·</span> : null}
+                                <button
+                                  type="button"
+                                  disabled={busy}
+                                  className="text-silver/50 hover:text-loss disabled:opacity-50"
+                                  onClick={() => void purgePost(post)}
+                                >
+                                  {busy ? "…" : "Delete forever"}
+                                </button>
+                              </>
+                            ) : null}
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

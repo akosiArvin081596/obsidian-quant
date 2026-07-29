@@ -305,7 +305,9 @@ export default function TipTapEditor({ initialJson, onChange }: Props) {
   }
 
   // Keep the ref in sync after every render so the editorProps callbacks are always fresh.
-  uploadAndInsertRef.current = uploadAndInsert;
+  useEffect(() => {
+    uploadAndInsertRef.current = uploadAndInsert;
+  });
 
   function openLinkModal() {
     if (!editor) return;

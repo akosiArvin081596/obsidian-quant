@@ -43,7 +43,7 @@ export default async function AdminShell({ children }: { children: React.ReactNo
             <span>{user.name}</span>
             <span className="hidden text-silver/35 sm:inline">{user.roles.join(", ")}</span>
             <AdminLogoutButton />
-            <Link href="/blog/" className="text-gold hover:underline">
+            <Link href="/insights/" className="text-gold hover:underline">
               View blog
             </Link>
           </div>

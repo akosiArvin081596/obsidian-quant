@@ -81,11 +81,14 @@ export const seoData = {
     focusKeyword: "institutional briefing",
   },
   insights: {
-    title: "Insights",
-    description: BRAND.intro,
+    title: "Insights | Obsidian Quant Group",
+    description:
+      "Research notes, market commentary, and institutional perspective from Obsidian Quant Group.",
     path: "/insights",
-    focusKeyword: "quantitative research",
-    noIndex: true,
+    focusKeyword: "quantitative research blog",
+    socialTitle: "Obsidian Quant Group Insights",
+    socialDescription:
+      "Systematic research notes and market commentary from Obsidian Quant Group.",
   },
   blog: {
     title: "Blog | Obsidian Quant Group",
@@ -96,6 +99,7 @@ export const seoData = {
     socialTitle: "Obsidian Quant Group Blog",
     socialDescription:
       "Systematic research notes and market commentary from Obsidian Quant Group.",
+    noIndex: true,
   },
   "regulatory-disclosure": {
     title: LEGAL_PAGES["regulatory-disclosure"].title,

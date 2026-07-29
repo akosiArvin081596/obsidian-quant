@@ -10,7 +10,7 @@ type Props = {
 };
 
 export default function BlogPostCard({ post, featured = false, priority = false }: Props) {
-  const href = `/blog/${post.slug}/`;
+  const href = `/insights/${post.slug}/`;
   const excerpt = post.excerpt?.trim() || post.subtitle?.trim();
 
   return (
@@ -47,7 +47,7 @@ export default function BlogPostCard({ post, featured = false, priority = false 
             {post.categoryName && post.categorySlug ? (
               /* z-20 so category link stays clickable above the card overlay */
               <Link
-                href={`/blog/category/${post.categorySlug}/`}
+                href={`/insights/category/${post.categorySlug}/`}
                 className="relative z-20 inline-flex items-center gap-2 border border-gold/25 bg-midnight/50 px-3 py-1 text-[0.6rem] uppercase tracking-[0.22em] text-gold transition-colors hover:border-gold/50"
               >
                 <span className="h-1 w-1 rotate-45 bg-gold" aria-hidden />

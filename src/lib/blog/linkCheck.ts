@@ -25,7 +25,7 @@ const SKIP_SCHEMES = /^(mailto:|tel:|javascript:|data:)/i;
 
 /** Known static marketing + legal routes (with and without trailing slash). */
 export function knownStaticPaths(): Set<string> {
-  const paths = new Set<string>(["/", "/blog", "/blog/", "/contact", "/contact/"]);
+  const paths = new Set<string>(["/", "/blog", "/blog/", "/insights", "/insights/", "/contact", "/contact/"]);
   for (const item of NAV) {
     paths.add(item.to);
     paths.add(ensureTrailingSlash(item.to));
@@ -118,9 +118,9 @@ export function resolveInternalPath(
     return { ok: true, detail: "Active redirect" };
   }
 
-  // /blog/ and /blog index
-  if (normalized === "/blog/" || bare === "/blog") {
-    return { ok: true, detail: "Blog index" };
+  // /insights/ and /blog/ (legacy redirect) index
+  if (normalized === "/insights/" || bare === "/insights" || normalized === "/blog/" || bare === "/blog") {
+    return { ok: true, detail: "Insights index" };
   }
 
   // Category / tag archives

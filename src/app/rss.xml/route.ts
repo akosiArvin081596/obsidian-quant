@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { SITE_URL } from "@/lib/seo";
-import { blogPostPath } from "@/lib/insights/slug";
+import { blogPostPath } from "@/lib/blog/slug";
 import { BRAND } from "@/content/site";
 
 export const dynamic = "force-dynamic";

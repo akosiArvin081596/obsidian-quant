@@ -66,6 +66,7 @@ export default function PostEditor({ postId }: { postId: string }) {
   const [draftHtml, setDraftHtml] = useState("");
   const [draftJson, setDraftJson] = useState<unknown>(null);
   const [canPublish, setCanPublish] = useState(false);
+  const [canDelete, setCanDelete] = useState(false);
   const [actionBusy, setActionBusy] = useState(false);
   const [linkChecking, setLinkChecking] = useState(false);
   const [aiBusy, setAiBusy] = useState<string | null>(null);
@@ -110,6 +111,7 @@ export default function PostEditor({ postId }: { postId: string }) {
           if (authRes.ok) {
             const perms: string[] = authData.user?.permissions ?? [];
             setCanPublish(perms.includes(PERMISSIONS.postsPublish));
+            setCanDelete(perms.includes(PERMISSIONS.postsDelete));
           }
         });
       } catch (err) {
@@ -298,6 +300,25 @@ export default function PostEditor({ postId }: { postId: string }) {
     }
   }
 
+  async function moveToTrash() {
+    if (!post) return;
+    const label = post.title.trim() || "Untitled draft";
+    if (!window.confirm(`Move “${label}” to Trash?`)) return;
+    setActionBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/posts/${postId}/`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data?.error?.message || "Could not move to Trash");
+        return;
+      }
+      router.push("/admin/blog/");
+    } finally {
+      setActionBusy(false);
+    }
+  }
+
   async function checkLinks() {
     setLinkChecking(true);
     setError(null);
@@ -478,6 +499,16 @@ export default function PostEditor({ postId }: { postId: string }) {
             onUnschedule={() => void unschedule()}
             onUnpublish={() => void unpublish()}
           />
+          {canDelete && post.status !== "trash" ? (
+            <button
+              type="button"
+              disabled={actionBusy || saveState === "saving"}
+              onClick={() => void moveToTrash()}
+              className="min-h-10 border border-loss/30 px-4 text-[.65rem] uppercase tracking-[.14em] text-loss/80 hover:border-loss hover:text-loss disabled:opacity-50"
+            >
+              Delete
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -637,6 +668,36 @@ export default function PostEditor({ postId }: { postId: string }) {
                     }
                   }}
                 />
+                {post.featuredMediaId ? (
+                  <div className="group relative w-fit max-w-xs border border-gold/25 p-1">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`/uploads/${
+                        post.featuredMedia?.storageKey ??
+                        media.find((m) => m.id === post.featuredMediaId)?.storageKey ??
+                        ""
+                      }`}
+                      alt={
+                        post.featuredMedia?.altText ??
+                        media.find((m) => m.id === post.featuredMediaId)?.altText ??
+                        "Featured image"
+                      }
+                      className="block max-h-40 max-w-xs object-cover"
+                    />
+                    <button
+                      type="button"
+                      aria-label="Remove featured image"
+                      title="Remove featured image"
+                      className="absolute top-1.5 right-1.5 z-10 flex h-6 w-6 items-center justify-center border border-gold/30 bg-obsidian/90 text-sm leading-none text-silver opacity-0 transition-opacity hover:border-loss/50 hover:text-loss group-hover:opacity-100 focus-visible:opacity-100"
+                      onClick={() => {
+                        dirty.current = true;
+                        setPost({ ...post, featuredMediaId: null, featuredMedia: null });
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : null}
                 <div className="grid max-h-48 grid-cols-3 gap-2 overflow-y-auto">
                   {media
                     .filter((m) => !m.mimeType || m.mimeType.startsWith("image/"))

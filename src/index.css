@@ -1560,6 +1560,20 @@ footer.site-footer h4 {
   outline: 2px solid var(--color-gold);
   outline-offset: 3px;
 }
+/* Hover-only × remove on editor media previews (TipTap node views) */
+.prose-blog .blog-media-remove {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.prose-blog .blog-editor-image:hover .blog-media-remove,
+.prose-blog .blog-editor-video:hover .blog-media-remove,
+.prose-blog .blog-editor-image.is-selected .blog-media-remove,
+.prose-blog .blog-editor-video.is-selected .blog-media-remove,
+.prose-blog .blog-media-remove:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
 .prose-blog .ProseMirror img.ProseMirror-selectednode {
   outline: 2px solid var(--color-gold);
   outline-offset: 3px;

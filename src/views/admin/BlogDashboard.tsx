@@ -249,7 +249,7 @@ export default function BlogDashboard() {
               <th className="px-4 py-3 font-medium">Author</th>
               <th className="px-4 py-3 font-medium">Updated</th>
               <th className="px-4 py-3 font-medium">SEO</th>
-              <th className="px-4 py-3 font-medium">Actions</th>
+              <th className="whitespace-nowrap px-4 py-3 font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -306,8 +306,8 @@ export default function BlogDashboard() {
                       {new Date(post.updatedAt).toLocaleString()}
                     </td>
                     <td className="px-4 py-3 text-silver/65">{post.seoScore}%</td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <div className="flex flex-nowrap items-center gap-x-2">
                         {!isTrashed ? (
                           <>
                             <Link

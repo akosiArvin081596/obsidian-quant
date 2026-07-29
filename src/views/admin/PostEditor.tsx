@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import TipTapEditor from "@/components/admin/TipTapEditor";
 import PublishMenu from "@/components/admin/PublishMenu";
 import { PERMISSIONS } from "@/lib/auth/permissions";
+import { readJsonResponse } from "@/lib/readJsonResponse";
 
 type Media = {
   id: string;
@@ -347,7 +348,7 @@ export default function PostEditor({ postId }: { postId: string }) {
     form.set("file", file);
     form.set("altText", file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "));
     const res = await fetch("/api/admin/media/", { method: "POST", body: form });
-    const data = await res.json();
+    const data = await readJsonResponse<{ media: Media; error?: { message?: string } }>(res);
     if (!res.ok) throw new Error(data?.error?.message || "Upload failed");
     setMedia((m) => [data.media, ...m]);
     return data.media as Media;

@@ -56,6 +56,8 @@ Contributors cannot do these steps. Repo/VPS owner only. Prefer **preview**
    include /var/www/obsidian-quant/deploy/nginx-next-proxy.conf;
    ```
    Stop using `root …/dist` + `try_files` as the primary app server for `/`.
+   The proxy include sets `client_max_body_size 55m` for CMS media uploads (nginx’s
+   1MB default otherwise returns HTML 413 and breaks editor uploads).
 7. **Validate** — `nginx -t && systemctl reload nginx`
 8. **Smoke-test (preview, then prod)**
    - `/` marketing homepage

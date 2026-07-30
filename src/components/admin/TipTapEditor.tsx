@@ -205,7 +205,7 @@ export default function TipTapEditor({ initialJson, onChange }: Props) {
 
   // Keep a stable ref so editorProps callbacks can always call the latest version
   // without recreating the editor on every render.
-  const uploadAndInsertRef = useRef<(file: File, kind: "image" | "video") => Promise<void>>();
+  const uploadAndInsertRef = useRef<((file: File, kind: "image" | "video") => Promise<void>) | undefined>(undefined);
 
   const editor = useEditor({
     immediatelyRender: false,

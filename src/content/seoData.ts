@@ -5,7 +5,7 @@
  * Source: Copy of SEO On-Page Contents
  * https://docs.google.com/spreadsheets/d/1UiANVNDZl6xBLLSCrYyN8v_nYxwf70J0ehikU7cbt2c
  */
-import { BRAND, CONTACT, LEGAL_PAGES } from "./site";
+import { CONTACT, LEGAL_PAGES } from "./site";
 
 export type SeoEntry = {
   title: string;

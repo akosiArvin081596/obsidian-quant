@@ -24,15 +24,6 @@ const SIZE_CLASS: Record<ImgSize, string> = {
 };
 
 // ── Icons (inline SVG, 14×14) ─────────────────────────────────────────────────
-function Ico({ d, title }: { d: string; title: string }) {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <title>{title}</title>
-      <path d={d} />
-    </svg>
-  );
-}
 
 const ICONS = {
   inline: (

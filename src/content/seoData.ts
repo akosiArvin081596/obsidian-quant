@@ -89,6 +89,8 @@ export const seoData = {
     socialTitle: "Obsidian Quant Group Insights",
     socialDescription:
       "Systematic research notes and market commentary from Obsidian Quant Group.",
+    // Empty hub — noindex until published articles exist (audit Issue 5).
+    noIndex: true,
   },
   blog: {
     title: "Blog | Obsidian Quant Group",

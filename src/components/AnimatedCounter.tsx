@@ -1,17 +1,28 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import { useInView, useReducedMotion } from "framer-motion";
 
 type Props = { value: number; suffix?: string };
 
+/**
+ * Count-up for display. Initial/SSR markup always contains the final value so
+ * crawlers never index "0 Process Stages" — animation is client-only after
+ * the section enters view.
+ */
 const AnimatedCounter = ({ value, suffix = "" }: Props) => {
   const ref = useRef<HTMLSpanElement>(null);
-  const visible = useInView(ref, { once: true, amount: .45 });
+  const visible = useInView(ref, { once: true, amount: 0.45 });
   const reduce = useReducedMotion();
-  const [display, setDisplay] = useState(reduce ? value : 0);
+  const [display, setDisplay] = useState(value);
 
   useEffect(() => {
     if (!visible) return;
-    if (reduce) return;
+    if (reduce) {
+      setDisplay(value);
+      return;
+    }
+    setDisplay(0);
     const start = performance.now();
     let frame = 0;
     const tick = (now: number) => {
@@ -23,7 +34,12 @@ const AnimatedCounter = ({ value, suffix = "" }: Props) => {
     return () => cancelAnimationFrame(frame);
   }, [reduce, value, visible]);
 
-  return <span ref={ref}>{reduce ? value : display}{suffix}</span>;
+  return (
+    <span ref={ref}>
+      {display}
+      {suffix}
+    </span>
+  );
 };
 
 export default AnimatedCounter;

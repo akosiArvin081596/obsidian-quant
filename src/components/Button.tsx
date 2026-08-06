@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { cn } from "../lib/cn";
+import { toPublicHref } from "../lib/routes";
 
 type Variant = "primary" | "outline" | "ghost";
 
@@ -52,7 +53,7 @@ const Button = ({
 
   if (to) {
     return (
-      <Link href={to} className={classes} onClick={onClick} aria-disabled={disabled}>
+      <Link href={toPublicHref(to)} className={classes} onClick={onClick} aria-disabled={disabled}>
         {children}
       </Link>
     );

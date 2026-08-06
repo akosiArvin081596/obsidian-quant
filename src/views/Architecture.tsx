@@ -62,7 +62,7 @@ const Architecture = () => (
     </Section>
 
     {/* ============ CAPABILITIES ============ */}
-    <Section className="hex-bg">
+    <Section id="risk-discipline" className="hex-bg">
       <Stagger className="max-w-2xl">
         <StaggerItem>
           <Eyebrow index="02">Capabilities</Eyebrow>

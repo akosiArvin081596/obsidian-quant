@@ -44,6 +44,11 @@ const Preloader = () => {
     getServerReducedMotion,
   );
   const [done, setDone] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const t = window.setTimeout(() => setDone(true), reduce ? 650 : 2150);
@@ -179,8 +184,10 @@ const Preloader = () => {
                   transition={{ duration: reduce ? 0 : 2.0, ease: EASE_LUX }}
                 />
               </div>
-              <div className="relative mt-5 h-3 w-48 text-center">
-                {!reduce && (
+              {/* Labels are client-only: SSR of both "Forging" + "Forged"
+                  concatenated into crawlable "ForgingForged" site-wide. */}
+              <div className="relative mt-5 h-3 w-48 text-center" aria-hidden>
+                {mounted && !reduce && (
                   <motion.span
                     className="absolute inset-0 text-[0.6rem] uppercase tracking-[0.42em] text-silver/45"
                     initial={{ opacity: 0 }}
@@ -190,14 +197,16 @@ const Preloader = () => {
                     Forging
                   </motion.span>
                 )}
-                <motion.span
-                  className="absolute inset-0 text-[0.6rem] uppercase tracking-[0.42em] text-gold"
-                  initial={{ opacity: reduce ? 1 : 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={reduce ? { duration: 0 } : { delay: 1.95, duration: 0.5 }}
-                >
-                  Forged
-                </motion.span>
+                {mounted && (
+                  <motion.span
+                    className="absolute inset-0 text-[0.6rem] uppercase tracking-[0.42em] text-gold"
+                    initial={{ opacity: reduce ? 1 : 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={reduce ? { duration: 0 } : { delay: 1.95, duration: 0.5 }}
+                  >
+                    Forged
+                  </motion.span>
+                )}
               </div>
             </div>
           </div>

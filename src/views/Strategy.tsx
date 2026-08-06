@@ -36,7 +36,7 @@ const Strategy = () => (
     />
 
     {/* ============ CAPABILITY PILLARS ============ */}
-    <Section className="border-y border-gold/10 bg-midnight">
+    <Section id="systematic-approach" className="border-y border-gold/10 bg-midnight">
       <Stagger className="max-w-3xl">
         <StaggerItem>
           <Eyebrow index={POSITIONING.index}>{POSITIONING.eyebrow}</Eyebrow>
@@ -128,7 +128,7 @@ const Strategy = () => (
     </Section>
 
     {/* ============ ASSET CLASSES ============ */}
-    <Section className="border-y border-gold/10 bg-midnight">
+    <Section id="mandate-coverage" className="border-y border-gold/10 bg-midnight">
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
         <Stagger className="lg:col-span-4">
           <StaggerItem>

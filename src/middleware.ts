@@ -1,6 +1,20 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+/**
+ * Redirect target as a plain `URL`, preserving the incoming query string.
+ *
+ * Deliberately NOT `req.nextUrl.clone()`: `NextURL` re-applies the app's
+ * trailing-slash normalisation when it serialises, so a pathname we just set to
+ * `/strategy/` goes back out as `/strategy` — which points the redirect at the
+ * request it came from and loops until the browser gives up.
+ */
+const redirectTarget = (req: NextRequest, pathname: string) => {
+  const url = new URL(req.url);
+  url.pathname = pathname;
+  return url;
+};
+
 /** Paths that must not receive a trailing-slash redirect (APIs, Next internals, files). */
 const skipTrailingSlash = (pathname: string) =>
   pathname.startsWith("/api") ||
@@ -15,8 +29,7 @@ export function middleware(req: NextRequest) {
   if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
     const token = req.cookies.get("oqg_admin_session")?.value;
     if (!token) {
-      const url = req.nextUrl.clone();
-      url.pathname = "/admin/login/";
+      const url = redirectTarget(req, "/admin/login/");
       url.searchParams.set("next", pathname);
       return NextResponse.redirect(url);
     }
@@ -29,9 +42,7 @@ export function middleware(req: NextRequest) {
     !pathname.endsWith("/") &&
     !skipTrailingSlash(pathname)
   ) {
-    const url = req.nextUrl.clone();
-    url.pathname = `${pathname}/`;
-    return NextResponse.redirect(url, 308);
+    return NextResponse.redirect(redirectTarget(req, `${pathname}/`), 308);
   }
 
   return NextResponse.next();

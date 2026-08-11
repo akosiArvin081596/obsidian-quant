@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { BRAND } from "@/content/site";
 import { pageMetadata, SITE_URL } from "@/lib/seo";
 import { postPublicInclude } from "@/lib/blog/includes";
-import { buildBlogPostingJsonLd, mediaPublicUrl } from "@/lib/blog/jsonld";
+import { buildBlogPostingJsonLd, mediaPublicUrl, serializeJsonLd } from "@/lib/blog/jsonld";
 import { readingTimeMinutes } from "@/lib/blog/seoScore";
 import { loadRelatedPosts } from "@/lib/blog/queries";
 import type { BlogCardPost } from "@/lib/blog/public";
@@ -117,7 +117,7 @@ export default async function InsightsArticlePage({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <BlogArticleHero
         title={post.title}

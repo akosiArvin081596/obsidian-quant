@@ -3,6 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Logo from "../components/Logo";
+import { useIsClient } from "../hooks/useIsClient";
 import { EASE_LUX } from "../lib/motion";
 
 /** Hammer-strike moments (seconds). */
@@ -44,11 +45,7 @@ const Preloader = () => {
     getServerReducedMotion,
   );
   const [done, setDone] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const isClient = useIsClient();
 
   useEffect(() => {
     const t = window.setTimeout(() => setDone(true), reduce ? 650 : 2150);
@@ -187,7 +184,7 @@ const Preloader = () => {
               {/* Labels are client-only: SSR of both "Forging" + "Forged"
                   concatenated into crawlable "ForgingForged" site-wide. */}
               <div className="relative mt-5 h-3 w-48 text-center" aria-hidden>
-                {mounted && !reduce && (
+                {isClient && !reduce && (
                   <motion.span
                     className="absolute inset-0 text-[0.6rem] uppercase tracking-[0.42em] text-silver/45"
                     initial={{ opacity: 0 }}
@@ -197,7 +194,7 @@ const Preloader = () => {
                     Forging
                   </motion.span>
                 )}
-                {mounted && (
+                {isClient && (
                   <motion.span
                     className="absolute inset-0 text-[0.6rem] uppercase tracking-[0.42em] text-gold"
                     initial={{ opacity: reduce ? 1 : 0 }}

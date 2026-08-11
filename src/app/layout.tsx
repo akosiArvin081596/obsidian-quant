@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Montserrat } from "next/font/google";
 import { BRAND } from "@/content/site";
 import { SITE_URL } from "@/lib/seo";
-import { buildOrganizationJsonLd } from "@/lib/blog/jsonld";
+import { buildOrganizationJsonLd, serializeJsonLd } from "@/lib/blog/jsonld";
 import MotionProvider from "@/components/MotionProvider";
 import "../index.css";
 
@@ -63,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preload" as="image" href="/assets/obsidian-gem.webp" type="image/webp" />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd) }}
         />
       </head>
       <body>

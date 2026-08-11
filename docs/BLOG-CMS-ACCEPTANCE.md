@@ -2,9 +2,22 @@
 
 Use after `docker compose up -d`, migrate, seed, and `npm run dev`.
 
-Automated harness: `node scripts/acceptance-qa.mjs [baseUrl]` (defaults to `http://localhost:3002`).
+Automated harness (defaults to `http://localhost:3002`):
 
-Verified **2026-07-28** against local Docker Postgres + `next dev` (15/15 PASS).
+```bash
+ADMIN_SEED_PASSWORD='…' QA_AUTHOR_EMAIL='…' QA_AUTHOR_PASSWORD='…' QA_MANAGER_PASSWORD='…' \
+  npm run qa:acceptance [baseUrl]
+```
+
+All four are required and have no defaults — the harness exits 1 before its first
+request if any is missing. See `.env.example` for what each one is for. **Point
+this at a disposable database, never production:** the suite creates the Author
+user, PATCHes an existing one back to `status: "active"`, and stands up a
+throwaway manager account.
+
+Verified **2026-07-28** against local Docker Postgres + `next dev` (15/15 PASS) —
+note that run predates the env-var requirement and used the old hardcoded
+defaults, which have since been removed.
 
 - [x] Author/Admin can create a draft via **Write a Blog**, close the browser, return, and continue from the last successful save (autosave / Save Draft).
 - [x] Editor can format content, insert links/images, set featured image alt text, and preview desktop/tablet/mobile.

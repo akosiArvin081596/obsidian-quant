@@ -1,10 +1,15 @@
 import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../src/lib/auth/password";
 import { ROLE_PERMISSIONS, PERMISSIONS } from "../src/lib/auth/permissions";
+import { resolveSeedAdmin } from "../src/lib/auth/seedCredentials";
 
 const prisma = new PrismaClient();
 
 async function main() {
+  // Resolved before any write so a misconfigured environment fails fast, rather
+  // than half-seeding and then aborting on the administrator.
+  const { email: adminEmail, password: adminPassword } = resolveSeedAdmin(process.env);
+
   const permissionKeys = Object.values(PERMISSIONS);
   for (const key of permissionKeys) {
     await prisma.permission.upsert({
@@ -33,8 +38,6 @@ async function main() {
     });
   }
 
-  const adminEmail = process.env.ADMIN_SEED_EMAIL ?? "admin@obsidianquantgroup.com";
-  const adminPassword = process.env.ADMIN_SEED_PASSWORD ?? "ChangeMeNow!2026";
   const passwordHash = await hashPassword(adminPassword);
 
   const admin = await prisma.user.upsert({
@@ -45,10 +48,13 @@ async function main() {
       passwordHash,
       status: "active",
     },
-    update: {
-      passwordHash,
-      status: "active",
-    },
+    // Bootstrap only — matching every other upsert in this file. Re-seeding an
+    // existing database must never rewrite a live credential back to whatever
+    // ADMIN_SEED_PASSWORD happens to hold, nor silently reactivate an account
+    // an operator deliberately suspended. `prisma migrate dev` runs this hook,
+    // so it fires far more often than a deliberate bootstrap. Rotate passwords
+    // through the admin UI, not the seed.
+    update: {},
   });
 
   const adminRole = await prisma.role.findUniqueOrThrow({ where: { name: "Administrator" } });
@@ -71,9 +77,8 @@ async function main() {
   console.log("Seed complete.");
   console.log(`Admin: ${adminEmail}`);
   console.log(`Default category: ${defaultCategory.slug}`);
-  if (!process.env.ADMIN_SEED_PASSWORD) {
-    console.log("Default password: ChangeMeNow!2026 (set ADMIN_SEED_PASSWORD to override)");
-  }
+  // The password is never printed. Seed output lands in deploy and CI logs,
+  // which are retained far longer and read far more widely than a terminal.
 }
 
 main()

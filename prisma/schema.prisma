@@ -44,6 +44,11 @@ model User {
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")
 
+  // Login throttle state. Policy lives in `src/lib/auth/loginThrottle.ts`;
+  // these two columns are the only persistence it needs.
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime? @map("locked_until")
+
   roles         UserRole[]
   posts         Post[]            @relation("PostAuthor")
   revisions     PostRevision[]

@@ -24,10 +24,10 @@ const groups = [
   },
   {
     title: "Resources",
-    links: [
-      ["Insights", "/insights"],
-      ["Member Area", "/investor"],
-    ],
+    // "Member Area" (/investor) is intentionally NOT linked here: the member area is a
+    // mock-data demo whose login accepts any credentials, so a public footer link on a
+    // fund's site advertises a gate that does not gate. Reachable by direct URL only.
+    links: [["Insights", "/insights"]],
   },
 ] as const;
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Montserrat } from "next/font/google";
 import { BRAND } from "@/content/site";
 import { SITE_URL } from "@/lib/seo";
+import { buildOrganizationJsonLd, serializeJsonLd } from "@/lib/blog/jsonld";
 import MotionProvider from "@/components/MotionProvider";
 import "../index.css";
 
@@ -52,12 +53,18 @@ export const metadata: Metadata = {
   },
 };
 
+const organizationJsonLd = buildOrganizationJsonLd();
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`scroll-smooth ${cormorant.variable} ${montserrat.variable}`}>
       <head>
         <meta httpEquiv="Content-Security-Policy" content={CSP} />
         <link rel="preload" as="image" href="/assets/obsidian-gem.webp" type="image/webp" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd) }}
+        />
       </head>
       <body>
         <MotionProvider>{children}</MotionProvider>

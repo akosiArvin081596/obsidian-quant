@@ -11,7 +11,7 @@ const STATIC_PATHS = [
   "/strategy/",
   "/architecture/",
   "/contact/",
-  "/insights/",
+  // /insights/ omitted while the empty hub is noindex (seoData.insights.noIndex).
   "/legal/regulatory-disclosure/",
   "/legal/data-cryptography/",
 ];

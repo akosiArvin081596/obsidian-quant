@@ -2,15 +2,25 @@ import Link from "next/link";
 import Logo from "../components/Logo";
 import NewsletterSignup from "../components/NewsletterSignup";
 import { BRAND, LEGAL } from "../content/site";
+import { toPublicHref } from "../lib/routes";
 
 const groups = [
   {
     title: "Company",
-    links: [["The Firm", "/firm"], ["Architecture", "/architecture"], ["Contact", "/contact"]],
+    links: [
+      ["The Firm", "/firm"],
+      ["Architecture", "/architecture"],
+      ["Contact", "/contact"],
+    ],
   },
   {
     title: "Strategies",
-    links: [["Systematic Approach", "/strategy"], ["Mandate Coverage", "/strategy"], ["Risk Discipline", "/architecture"]],
+    // Distinct destinations (audit Issue 6): section anchors, not three labels → two URLs.
+    links: [
+      ["Systematic Approach", "/strategy#systematic-approach"],
+      ["Mandate Coverage", "/strategy#mandate-coverage"],
+      ["Risk Discipline", "/architecture#risk-discipline"],
+    ],
   },
   {
     title: "Resources",
@@ -37,7 +47,7 @@ const Footer = () => (
             {group.links.map(([label, to]) => (
               <li key={label}>
                 <Link
-                  href={to}
+                  href={toPublicHref(to)}
                   className="inline-flex min-h-11 items-center transition-colors hover:text-gold"
                 >
                   {label}
@@ -60,7 +70,7 @@ const Footer = () => (
           {BRAND.presence.join(" · ")}
         </p>
         <Link
-          href="/contact"
+          href={toPublicHref("/contact")}
           className="mt-5 inline-flex min-h-11 items-center border-b border-gold/40 text-[.65rem] uppercase tracking-[.2em] text-gold hover:border-gold"
         >
           Request Access →
@@ -94,7 +104,7 @@ const Footer = () => (
           {LEGAL.map(({ label, to }) => (
             <Link
               key={to}
-              href={to}
+              href={toPublicHref(to)}
               className="inline-flex min-h-10 items-center text-[.65rem] uppercase tracking-[.18em] text-silver/40 transition-colors hover:text-gold"
             >
               {label}

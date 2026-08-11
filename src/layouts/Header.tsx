@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Logo from "../components/Logo";
 import Button from "../components/Button";
 import { cn } from "../lib/cn";
-import { isActivePath } from "../lib/routes";
+import { isActivePath, toPublicHref } from "../lib/routes";
 import { NAV } from "../content/site";
 import { EASE_LUX } from "../lib/motion";
 
@@ -52,7 +52,7 @@ const Header = () => {
             return (
               <Link
                 key={item.to}
-                href={item.to}
+                href={toPublicHref(item.to)}
                 className={cn(
                   "group relative text-[0.7rem] font-medium uppercase tracking-[0.2em] transition-colors duration-300",
                   isActive ? "text-ghost" : "text-silver/70 hover:text-ghost",
@@ -135,7 +135,7 @@ const Header = () => {
                   }}
                 >
                   <Link
-                    href={item.to}
+                    href={toPublicHref(item.to)}
                     onClick={() => setOpen(false)}
                     className={cn(
                       "block border-b border-gold/10 py-4 font-serif text-3xl text-ghost transition-colors sm:text-4xl",

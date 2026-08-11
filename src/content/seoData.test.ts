@@ -58,8 +58,9 @@ describe("seoData entries", () => {
     }
   });
 
-  it("indexes the public insights hub", () => {
-    expect(seoData.insights.noIndex ?? false).toBe(false);
+  it("noindexes the empty insights hub until articles ship", () => {
+    expect(seoData.insights.noIndex).toBe(true);
+    expect(seoFor("insights").robots).toMatchObject({ index: false, follow: false });
     expect(seoData.insights.path).toBe("/insights");
   });
 
@@ -70,7 +71,7 @@ describe("seoData entries", () => {
 
   it("leaves every other page indexable", () => {
     for (const [key, entry] of entries) {
-      if (key === "blog") continue;
+      if (key === "blog" || key === "insights") continue;
       expect(entry.noIndex ?? false, `${key} must stay indexable`).toBe(false);
     }
   });

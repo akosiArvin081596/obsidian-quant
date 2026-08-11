@@ -9,9 +9,27 @@ import { fileURLToPath } from "node:url";
 
 const BASE = process.argv[2] || process.env.BASE_URL || "http://localhost:3002";
 const ADMIN_EMAIL = process.env.ADMIN_SEED_EMAIL || "admin@obsidianquantgroup.com";
-const ADMIN_PASSWORD = process.env.ADMIN_SEED_PASSWORD || "ChangeMeNow!2026";
-const AUTHOR_EMAIL = "author-qa@obsidianquantgroup.com";
-const AUTHOR_PASSWORD = "AuthorQa!2026";
+
+/**
+ * Every credential below comes from the environment with NO fallback literal,
+ * on purpose. This suite does not merely read these accounts — it creates the
+ * Author user, PATCHes an existing one back to this password and `status:
+ * "active"`, and stands up a per-run manager account. A default baked in here
+ * would be a working password for a live, re-activated account, published in a
+ * public repo. Missing values abort the run (see the guard below) instead of
+ * letting a partial suite mutate real data under a guessable password.
+ */
+const REQUIRED_ENV = [
+  ["ADMIN_SEED_PASSWORD", "password of the seeded admin this suite signs in as"],
+  ["QA_AUTHOR_EMAIL", "address of the Author-role account this suite creates/resets"],
+  ["QA_AUTHOR_PASSWORD", "password this suite sets on that Author-role account"],
+  ["QA_MANAGER_PASSWORD", "password for the throwaway per-run qa-user-<runId> account"],
+];
+
+const ADMIN_PASSWORD = process.env.ADMIN_SEED_PASSWORD;
+const AUTHOR_EMAIL = process.env.QA_AUTHOR_EMAIL;
+const AUTHOR_PASSWORD = process.env.QA_AUTHOR_PASSWORD;
+const QA_MANAGER_PASSWORD = process.env.QA_MANAGER_PASSWORD;
 const RUN_ID = Date.now().toString(36);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = path.join(__dirname, "..", "tmp", "acceptance-qa");
@@ -24,6 +42,23 @@ function record(id, ok, detail = "") {
   results.push({ id, ok, detail });
   const mark = ok ? "PASS" : "FAIL";
   console.log(`[${mark}] ${id}${detail ? ` — ${detail}` : ""}`);
+}
+
+// Fail closed before the first request: a half-run suite leaves half-mutated
+// accounts behind, which is worse than not running at all.
+const missingEnv = REQUIRED_ENV.filter(([name]) => !process.env[name]?.trim());
+if (missingEnv.length) {
+  record("required-env", false, `missing: ${missingEnv.map(([name]) => name).join(", ")}`);
+  console.error(
+    "\nThis suite creates and resets the accounts it signs in as, so its credentials" +
+      "\nare environment-only and have no defaults. Set the following and re-run:\n",
+  );
+  for (const [name, why] of missingEnv) console.error(`  ${name}  — ${why}`);
+  console.error(
+    `\n  e.g.  ${REQUIRED_ENV.map(([name]) => `${name}='…'`).join(" \\\n        ")} \\\n` +
+      `        node scripts/acceptance-qa.mjs ${BASE}\n`,
+  );
+  process.exit(1);
 }
 
 function jarFromResponse(res, jar) {
@@ -499,11 +534,9 @@ async function main() {
 
   // --- 12. Audit log ---
   const audit = await api(admin, "GET", "/api/admin/audit/?pageSize=100");
-  const actions = new Set((audit.json.items || audit.json.logs || []).map((a) => a.action));
-  // Try alternate shape
+  // The endpoint has shipped under three payload shapes; accept any of them.
   const rows = audit.json.items || audit.json.logs || audit.json.audit || [];
   const actionList = rows.map((a) => a.action);
-  const need = ["auth.login", "post.publish", "post.unpublish"];
   // delete/restore may be named post.delete / post.trash / post.restore
   const hasDelete = actionList.some((a) => /delete|trash/i.test(a));
   const hasRestore = actionList.some((a) => /restore/i.test(a));
@@ -582,7 +615,6 @@ async function main() {
   const deadInternalFound = JSON.stringify(linkCheckPost.json).includes("/blog/missing-slug/");
   const pageLinkHealth = await context.newPage();
   await pageLinkHealth.goto(`${BASE}/admin/blog/links/`, { waitUntil: "networkidle", timeout: 120_000 });
-  const linkHealthUi = await pageLinkHealth.content();
   await pageLinkHealth.screenshot({ path: path.join(OUT_DIR, "link-health.png"), fullPage: true });
   // Trigger scan if button exists
   const scanBtn = pageLinkHealth.getByRole("button", { name: /check|scan|run/i });
@@ -608,7 +640,7 @@ async function main() {
   const createUserRes = await api(admin, "POST", "/api/admin/users/", {
     name: "QA Manager",
     email: qaUserEmail,
-    password: "QaManager!2026",
+    password: QA_MANAGER_PASSWORD,
     roleIds: [adminRoles.find((r) => r.name === "Viewer")?.id || adminRoles[0]?.id],
   });
   const createdUser = createUserRes.json.user;
@@ -617,7 +649,7 @@ async function main() {
     : { res: { ok: false, status: 0 }, json: null };
   const qaLogin = await api(new Map(), "POST", "/api/admin/auth/", {
     email: qaUserEmail,
-    password: "QaManager!2026",
+    password: QA_MANAGER_PASSWORD,
   });
   record(
     "users-ui-and-api",

@@ -68,7 +68,7 @@ Match those conventions exactly — the yahoo proxy is the pattern to mirror.
    Omit blank optionals (undefined -> JSON.stringify drops them; CRM treats as absent).
 
 2) TRANSPORT — default CRM_WEBHOOK_URL to the SAME-ORIGIN "/api/lead" (overridable
-   via VITE_CRM_WEBHOOK_URL for a different collector). Keep the CRM post
+   via NEXT_PUBLIC_CRM_WEBHOOK_URL for a different collector). Keep the CRM post
    BEST-EFFORT / fire-and-forget: a CRM failure must never gate the result or
    double-send the email. Do NOT send an Authorization header from the browser.
 
@@ -102,7 +102,8 @@ Match those conventions exactly — the yahoo proxy is the pattern to mirror.
 7) TESTS + GATE — vitest for toCrmPayload (asserts the exact contract fields +
    folded notes + omitted-when-blank) and that the default target is same-origin
    /api/lead with NO browser Authorization header. Run vitest + `eslint .` +
-   `tsc -b && vite build` — all green. Don't touch unrelated code.
+   `npm run build` (`prisma generate && next build`) — all green. Don't touch
+   unrelated code.
 
 HAND BACK
 Reply with: the final toCrmPayload field names, the default transport URL, the new
@@ -124,5 +125,5 @@ Authorization: Bearer $lead_intake_secret from a NON-committed root-only include
 never hardcode the secret. Add a lead_proxy rate-limit zone; CSP stays 'self'
 (same-origin). Update DEPLOY.md + .env.example. This may already exist on branch
 feat/lead-intake-proxy — verify it matches rather than duplicating. Run vitest +
-eslint + `tsc -b && vite build` before finishing.
+eslint + `npm run build` before finishing.
 ```

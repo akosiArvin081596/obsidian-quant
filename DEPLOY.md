@@ -41,16 +41,34 @@ Contributors cannot do these steps. Repo/VPS owner only. Prefer **preview**
 2. **App env** (PM2/systemd env or `/var/www/obsidian-quant/.env`, never commit):
    - `DATABASE_URL=postgresql://…`
    - `UPLOADS_DIR=/var/www/obsidian-quant/uploads` (or another writable path)
-   - Optional: `ADMIN_SEED_EMAIL` / `ADMIN_SEED_PASSWORD` for first seed
+   - `ADMIN_SEED_PASSWORD` — **required** to run the seed (min 8 chars, no
+     default; the seed refuses to run without it). Seed-time only, so it can live
+     in your shell for step 5 rather than in the app env. `ADMIN_SEED_EMAIL` is
+     optional (defaults to `admin@obsidianquantgroup.com`).
 3. **Uploads dir** — `mkdir -p` the uploads path; chown so the Node process can write.
 4. **Deploy script** — update `/usr/local/bin/deploy-obsidian.sh` so a main deploy:
    - `npm ci`
    - `npx prisma migrate deploy`
    - `npm run build` (no more `out/` → `dist/` sync)
+   - `bash deploy/prune-next-cache.sh` after the build — the deploy script never
+     cleans `.next/cache`, which grows to ~480MB of stale webpack artifacts on the VPS disk
    - `pm2 restart obsidian-quant` (or equivalent) running `next start` on `127.0.0.1:3006`
 5. **First boot after this PR merges** — once code is on the VPS:
    - `npx prisma migrate deploy`
-   - `npm run db:seed` (creates admin + roles; change the default password immediately)
+   - `ADMIN_SEED_PASSWORD='…' npm run db:seed` — creates the roles and the admin
+     user with the password you supply. The seed **fails closed**: no variable, no
+     write (it throws and exits non-zero), so there is no default credential and
+     no "change it immediately" window to forget about. Set the real password here.
+     The seed is a separate step in production because `prisma migrate deploy`
+     does **not** fire the `prisma.seed` hook — only the local `prisma migrate dev`
+     path (`npm run db:migrate`) does, which is why the local guide exports the
+     password before migrating.
+   - Re-running the seed later is safe but will **not** reset an existing admin's
+     password or re-activate a suspended account. It does resync every
+     role→permission mapping from code (`prisma/seed.ts` deletes and recreates the
+     `role_permissions` rows for each role), so any mapping edited outside the
+     source is overwritten. Recover a lost admin password through the UI, not the
+     seed — and if nobody can sign in at all, see break-glass below.
 6. **nginx (both vhosts)** — keep existing Yahoo + lead includes, then add after them:
    ```nginx
    include /var/www/obsidian-quant/deploy/nginx-next-proxy.conf;
@@ -69,11 +87,28 @@ Rollback: keep `dist/` as an artifact, point the vhost back at static root, and
 restart the previous deploy SHA only if Node is unhealthy — Blog CMS will not
 work in static mode.
 
+### Break-glass — locked out of `/admin/`
+
+Repeated failed logins lock an account (`failed_login_attempts` / `locked_until`
+on `users`) and there is no self-serve unlock, so "reset it in the admin UI"
+assumes you can still sign in as *someone*. When nobody can, go straight to the
+database on the VPS — re-running the seed will **not** rescue you (it never
+touches an existing admin's password or status):
+
+```bash
+psql "$DATABASE_URL" -c "UPDATE users SET failed_login_attempts = 0, \
+  locked_until = NULL, status = 'active' WHERE email = 'admin@obsidianquantgroup.com';"
+```
+
+That clears the lock only. To reset the password too, overwrite `password_hash`
+with a bcrypt hash produced by the app's own helper (`hashPassword` in
+`src/lib/auth/password.ts`) — never write a plaintext value into that column.
+
 ## Facts
 
 | Item | Value |
 |------|-------|
-| Repo | `akosiArvin081596/obsidian-quant` (private) |
+| Repo | `akosiArvin081596/obsidian-quant` (**public**) |
 | VPS | `76.13.22.110` (root) |
 | App dir | `/var/www/obsidian-quant` (built output in `dist/`) |
 | Domains | **prod** `obsidianquantgroup.com` + `www.obsidianquantgroup.com`; **preview** `obsidian.abedubas.dev` — all → `76.13.22.110`, same `dist/` |
@@ -87,6 +122,18 @@ work in static mode.
 `VPS_KNOWN_HOSTS` must contain the VPS host key captured through a trusted
 channel. The workflow requires an exact match and will not trust a key learned
 during deployment.
+
+> **The repo is public — assume everything in this table is read by strangers.**
+> That is fine as written: it discloses hostnames, paths and the *names* of GitHub
+> secrets, never their values. What keeps the box safe is that the VPS accepts
+> keys only (`gha-obsidian-deploy` is pinned to a forced command with no shell)
+> and that every actual secret lives outside git — GH Actions secrets
+> (`VPS_SSH_KEY`), root-only files on the VPS
+> (`/etc/nginx/snippets/obsidian-lead-secret.conf`, `/root/.ssh/obsidian_deploy`),
+> and the un-committed `/var/www/obsidian-quant/.env` (`DATABASE_URL`,
+> `LEAD_INTAKE_SECRET`, `GROQ_API_KEY`). Keep it that way: never paste a value
+> into this file, and treat anything that *was* committed here as burned and in
+> need of rotation, not deletion.
 
 ## ⚠️ One-time DNS (manual)
 

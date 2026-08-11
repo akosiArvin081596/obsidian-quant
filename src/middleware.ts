@@ -20,6 +20,9 @@ const skipTrailingSlash = (pathname: string) =>
   pathname.startsWith("/api") ||
   pathname.startsWith("/_next") ||
   pathname.startsWith("/uploads") ||
+  // Every /blog* route is a legacy permanentRedirect into /insights. Adding a
+  // slash first would make each one a two-hop chain for no gain.
+  pathname.startsWith("/blog") ||
   pathname.includes(".");
 
 export function middleware(req: NextRequest) {

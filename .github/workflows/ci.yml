@@ -1,0 +1,73 @@
+name: CI
+
+# Runs on every pull request, and is called by deploy.yml as the gate in front
+# of the VPS. Deliberately NOT triggered by `push: main` on its own — that path
+# goes through deploy.yml's `verify` job, so main is checked exactly once.
+
+on:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # Superseded PR pushes can be dropped; a run gating a deploy never can.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      # `prisma generate` (via postinstall) wants the datasource variable to
+      # exist. Nothing here opens a connection: the smoke test sticks to routes
+      # that render without the database.
+      DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci?schema=public
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Matches the Node the VPS container runs, so CI cannot pass on a
+          # runtime production never sees.
+          node-version: "22"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Start production server
+        run: |
+          npx next start -p 4399 > /tmp/next-start.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -sf -o /dev/null http://127.0.0.1:4399/; then
+              echo "server ready after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::production server never became ready"
+          cat /tmp/next-start.log
+          exit 1
+
+      - name: Smoke-test routes
+        env:
+          SMOKE_BASE_URL: http://127.0.0.1:4399
+        run: npm run qa:smoke
+
+      - name: Server log (on failure)
+        if: failure()
+        run: cat /tmp/next-start.log || true

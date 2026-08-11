@@ -2,6 +2,7 @@
 
 import { FormEvent, useState, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { safeAdminNext } from "@/lib/routes";
 
 function subscribe() {
   return () => undefined;
@@ -35,7 +36,7 @@ export default function AdminLoginForm() {
       if (!res.ok) {
         throw new Error(data?.error?.message || "Login failed");
       }
-      router.replace(search.get("next") || "/admin/blog/");
+      router.replace(safeAdminNext(search.get("next")));
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");

@@ -13,12 +13,23 @@ concurrency:
   group: deploy-obsidian
   cancel-in-progress: false
 
-# The job only opens an outbound SSH connection; it never reads the repo or the
-# GITHUB_TOKEN, so it is granted no permissions at all.
+# Default to nothing; `verify` re-grants itself the read access a checkout needs.
+# The deploy job only opens an outbound SSH connection — it never reads the repo
+# or the GITHUB_TOKEN — so it keeps this empty default.
 permissions: {}
 
 jobs:
+  # Nothing reaches the VPS unless lint, typecheck, the unit suite, the
+  # production build and the route smoke test all pass. A green build alone was
+  # not enough once: a middleware change that compiled cleanly served every
+  # public URL a 308 back to itself, which only a real request could catch.
+  verify:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci.yml
+
   deploy:
+    needs: verify
     runs-on: ubuntu-latest
     steps:
       - name: Trigger VPS deploy over SSH

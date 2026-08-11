@@ -1,5 +1,36 @@
 import { describe, expect, it } from "vitest";
-import { isActivePath, normalizePathname, toPublicHref } from "./routes";
+import {
+  ADMIN_HOME,
+  isActivePath,
+  normalizePathname,
+  safeAdminNext,
+  toPublicHref,
+} from "./routes";
+
+describe("safeAdminNext", () => {
+  it("keeps a same-origin admin path", () => {
+    expect(safeAdminNext("/admin/blog/123/")).toBe("/admin/blog/123/");
+    expect(safeAdminNext("/admin")).toBe("/admin");
+  });
+
+  it("refuses destinations that leave the origin", () => {
+    for (const hostile of [
+      "https://evil.com",
+      "http://evil.com",
+      "//evil.com",
+      "/\\evil.com",
+      "javascript:alert(1)",
+    ]) {
+      expect(safeAdminNext(hostile), `${hostile} must not be honoured`).toBe(ADMIN_HOME);
+    }
+  });
+
+  it("refuses same-origin paths outside the admin area, and empty input", () => {
+    expect(safeAdminNext("/contact/")).toBe(ADMIN_HOME);
+    expect(safeAdminNext(null)).toBe(ADMIN_HOME);
+    expect(safeAdminNext("")).toBe(ADMIN_HOME);
+  });
+});
 
 describe("toPublicHref", () => {
   it("adds a trailing slash to public page paths", () => {

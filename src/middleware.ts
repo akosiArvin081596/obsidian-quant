@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { INSIGHTS_VISIBLE } from "./content/site";
+import { isInsightsRoute } from "./lib/routes";
 
 /** Paths that must not receive a trailing-slash redirect (APIs, Next internals, files). */
 const skipTrailingSlash = (pathname: string) =>
@@ -20,6 +22,14 @@ export function middleware(req: NextRequest) {
       url.searchParams.set("next", pathname);
       return NextResponse.redirect(url);
     }
+  }
+
+  // Insights hub is paused — send visitors home before trailing-slash canonicalization.
+  if (!INSIGHTS_VISIBLE && isInsightsRoute(pathname)) {
+    const url = req.nextUrl.clone();
+    url.pathname = "/";
+    url.search = "";
+    return NextResponse.redirect(url, 307);
   }
 
   // Canonicalize public pages to trailing-slash URLs (matches next.config + sitemap).

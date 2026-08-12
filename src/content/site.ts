@@ -49,12 +49,18 @@ export const TAGLINES = {
   campaign: ["Beyond the Market. Within the Model.", "Precision, Systematized."],
 } as const;
 
-export const NAV = [
+/** Public /insights and /blog routes. CMS stays available when false. */
+export const INSIGHTS_VISIBLE = false;
+
+const NAV_CORE = [
   { to: "/firm", label: "The Firm" },
   { to: "/strategy", label: "Strategy" },
   { to: "/architecture", label: "Architecture" },
-  { to: "/insights", label: "Insights" },
 ] as const;
+
+const NAV_INSIGHTS = { to: "/insights", label: "Insights" } as const;
+
+export const NAV = INSIGHTS_VISIBLE ? ([...NAV_CORE, NAV_INSIGHTS] as const) : NAV_CORE;
 
 export const LEGAL = [
   {

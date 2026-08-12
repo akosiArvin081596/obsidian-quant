@@ -7,6 +7,16 @@
 export const normalizePathname = (pathname: string) =>
   pathname.length > 1 && pathname.endsWith("/") ? pathname.replace(/\/+$/, "") : pathname;
 
+/** True for public /insights and legacy /blog paths (slash form notwithstanding). */
+export const isInsightsRoute = (pathname: string) => {
+  const bare = normalizePathname(pathname);
+  return (
+    bare === "/insights" ||
+    bare.startsWith("/insights/") ||
+    bare === "/blog" ||
+    bare.startsWith("/blog/")
+  );
+};
 /** True when `pathname` addresses the route `to`, slash form notwithstanding. */
 export const isActivePath = (pathname: string, to: string) =>
   normalizePathname(pathname) === normalizePathname(to);

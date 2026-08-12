@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Section from "@/components/Section";
+import { INSIGHTS_VISIBLE } from "@/content/site";
 import BlogPostCard from "@/components/blog/BlogPostCard";
 import type { BlogCardPost } from "@/lib/blog/public";
 
@@ -51,7 +52,7 @@ export function BlogCategoryNav({
   categories: { name: string; slug: string }[];
   activeSlug?: string;
 }) {
-  if (!categories.length) return null;
+  if (!INSIGHTS_VISIBLE || !categories.length) return null;
 
   return (
     <Section className="border-b border-gold/10 bg-obsidian" spacing="py-8 lg:py-10">

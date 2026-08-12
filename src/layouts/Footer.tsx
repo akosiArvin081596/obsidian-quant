@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Logo from "../components/Logo";
 import NewsletterSignup from "../components/NewsletterSignup";
-import { BRAND, LEGAL } from "../content/site";
+import { BRAND, INSIGHTS_VISIBLE, LEGAL } from "../content/site";
 import { toPublicHref } from "../lib/routes";
 
 const groups = [
@@ -25,7 +25,7 @@ const groups = [
   {
     title: "Resources",
     links: [
-      ["Insights", "/insights"],
+      ...(INSIGHTS_VISIBLE ? ([["Insights", "/insights"]] as const) : []),
       ["Member Area", "/investor"],
     ],
   },

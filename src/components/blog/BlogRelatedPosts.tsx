@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Section from "@/components/Section";
+import { INSIGHTS_VISIBLE } from "@/content/site";
 import type { BlogCardPost } from "@/lib/blog/public";
 import { formatBlogDate } from "@/lib/blog/public";
 
@@ -15,12 +16,14 @@ export default function BlogRelatedPosts({ posts, title = "Continue reading" }: 
     <Section className="border-t border-gold/10 bg-obsidian" spacing="py-16 lg:py-24">
       <div className="mb-8 flex items-end justify-between gap-4">
         <h2 className="font-serif text-2xl text-ghost lg:text-3xl">{title}</h2>
-        <Link
-          href="/insights/"
-          className="text-[.65rem] uppercase tracking-[0.18em] text-gold hover:underline"
-        >
-          All posts
-        </Link>
+        {INSIGHTS_VISIBLE ? (
+          <Link
+            href="/insights/"
+            className="text-[.65rem] uppercase tracking-[0.18em] text-gold hover:underline"
+          >
+            All posts
+          </Link>
+        ) : null}
       </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {posts.map((post) => (

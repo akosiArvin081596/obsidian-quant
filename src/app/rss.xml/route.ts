@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { SITE_URL } from "@/lib/seo";
 import { blogPostPath } from "@/lib/blog/slug";
-import { BRAND } from "@/content/site";
+import { BRAND, INSIGHTS_VISIBLE } from "@/content/site";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +15,10 @@ function escapeXml(value: string): string {
 }
 
 export async function GET() {
+  if (!INSIGHTS_VISIBLE) {
+    return new Response("Not found", { status: 404 });
+  }
+
   let items: {
     title: string;
     slug: string;

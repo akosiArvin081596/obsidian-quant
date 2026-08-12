@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { INSIGHTS_VISIBLE } from "@/content/site";
 import Logo from "@/components/Logo";
 import AdminLogoutButton from "@/components/admin/LogoutButton";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -43,9 +44,11 @@ export default async function AdminShell({ children }: { children: React.ReactNo
             <span>{user.name}</span>
             <span className="hidden text-silver/35 sm:inline">{user.roles.join(", ")}</span>
             <AdminLogoutButton />
-            <Link href="/insights/" className="text-gold hover:underline">
-              View blog
-            </Link>
+            {INSIGHTS_VISIBLE ? (
+              <Link href="/insights/" className="text-gold hover:underline">
+                View blog
+              </Link>
+            ) : null}
           </div>
         </div>
       </header>

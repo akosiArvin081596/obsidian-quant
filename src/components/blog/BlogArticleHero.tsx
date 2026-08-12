@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
+import { INSIGHTS_VISIBLE } from "@/content/site";
 import { formatBlogDate } from "@/lib/blog/public";
 
 function MetaIcon({ children }: { children: ReactNode }) {
@@ -46,20 +47,21 @@ export default function BlogArticleHero({
   return (
     <header className={cn("relative border-b border-gold/10 bg-obsidian", className)}>
       <div className="relative z-10 mx-auto max-w-3xl px-5 pb-10 pt-24 sm:px-6 sm:pt-28 lg:px-8">
-        {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[.62rem] uppercase tracking-[.2em] text-silver/35">
-          <Link href="/insights/" className="transition-colors hover:text-gold">
-            Insights
-          </Link>
-          {category ? (
-            <>
-              <span>/</span>
-              <Link href={`/insights/category/${category.slug}/`} className="transition-colors hover:text-gold">
-                {category.name}
-              </Link>
-            </>
-          ) : null}
-        </nav>
+        {INSIGHTS_VISIBLE ? (
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[.62rem] uppercase tracking-[.2em] text-silver/35">
+            <Link href="/insights/" className="transition-colors hover:text-gold">
+              Insights
+            </Link>
+            {category ? (
+              <>
+                <span>/</span>
+                <Link href={`/insights/category/${category.slug}/`} className="transition-colors hover:text-gold">
+                  {category.name}
+                </Link>
+              </>
+            ) : null}
+          </nav>
+        ) : null}
 
         {/* Title */}
         <h1 className="mt-5 font-serif text-3xl leading-[1.1] text-ghost sm:text-4xl lg:text-5xl">
